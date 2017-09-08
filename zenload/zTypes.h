@@ -32,7 +32,10 @@ namespace ZenLoad
         SVT_ELLIPSOID
     };
 
-    /**
+    using SectorIndex = uint32_t;
+    enum : uint32_t { SECTOR_INDEX_INVALID = uint32_t(-1) };
+
+  /**
 	 * @brief Maximum amount of nodes a skeletal mesh can render
 	 */
     const size_t MAX_NUM_SKELETAL_NODES = 96;
@@ -111,8 +114,8 @@ namespace ZenLoad
     };
 
     /**
-	* @brief All kinds of information found in a zCMaterial
-	*/
+     * @brief All kinds of information found in a zCMaterial
+     */
     struct zCMaterialData : public ParsedZenObject
     {
         std::string matName;
@@ -161,8 +164,8 @@ namespace ZenLoad
 
     //#pragma pack(push, 1)
     /**
-	 * @brief Data of zCVob
-	 */
+     * @brief Data of zCVob
+     */
     struct zCVobData : public ParsedZenObject
     {
         enum EVobType
@@ -338,6 +341,32 @@ namespace ZenLoad
         std::vector<zCVobData> childVobs;
     };
 
+    struct zCPortal
+    {
+      /**
+       * Names of the sectors facing front/back.
+       * An empty string means that there is no sector. (ie. at the border from an inside-room to the outside world)
+       *
+       */
+      std::string frontSectorName;
+      std::string backSectorName;
+
+      SectorIndex frontSectorIndex=SECTOR_INDEX_INVALID; // Index to zCBspTreeData::sectors. Can be SECTOR_INDEX_INVALID.
+      SectorIndex backSectorIndex =SECTOR_INDEX_INVALID;  // Index to zCBspTreeData::sectors. Can be SECTOR_INDEX_INVALID.
+    };
+
+    /**
+     * A Sector defines inside-regions in an outdoor world. Using sectors, you can check if the player
+     * entered the house of an other person, for example.
+     */
+    struct zCSector
+    {
+      uint32_t              thisIndex=SECTOR_INDEX_INVALID; // Index of this sector inside zCBspTreeData::sectors
+      std::string           name;
+      std::vector<uint32_t> bspNodeIndices;         // Indices to zCBspTreeData::nodes
+      std::vector<uint32_t> portalPolygonIndices;   // Indices to polygons of the worldmesh
+    };
+
     struct zCBspNode
     {
         enum : size_t
@@ -374,8 +403,12 @@ namespace ZenLoad
         TreeMode mode;
 
         std::vector<zCBspNode> nodes;
-        std::vector<uint32_t> leafIndices;
+        std::vector<uint32_t > leafIndices;
         std::vector<uint32_t> treePolyIndices;
+        std::vector<uint32_t> portalPolyIndices;
+
+        std::vector<zCSector> sectors;
+        std::vector<zCPortal> portals;
     };
 
     struct zCBspTreeData2
