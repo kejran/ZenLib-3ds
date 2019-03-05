@@ -311,7 +311,8 @@ namespace ZenLoad
                 parser.getImpl()->readEntry("stayOpenTimeSec",   &info.zCMover.stayOpenTimeSec);
                 parser.getImpl()->readEntry("moverLocked",       &info.zCMover.moverLocked);
                 parser.getImpl()->readEntry("autoLinkEnable",    &info.zCMover.autoLinkEnable);
-                parser.getImpl()->readEntry("autoRotate",        &info.zCMover.autoRotate);
+                if(version != WorldVersion::VERSION_G1_08k)
+                  parser.getImpl()->readEntry("autoRotate",        &info.zCMover.autoRotate);
                 parser.getImpl()->readEntry("numKeyframes",      &numKeyframes,ZenLoad::ParserImpl::ZVT_WORD);
                 if(numKeyframes>0)
                 {
