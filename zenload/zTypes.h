@@ -153,6 +153,12 @@ namespace ZenLoad
     {
     };
 
+    struct zKeyFrame final
+    {
+      ZMath::float3 pos={};
+      ZMath::float4 rotation={};  // Quaternion
+    };
+
     //#pragma pack(push, 1)
     /**
 	 * @brief Data of zCVob
@@ -170,6 +176,9 @@ namespace ZenLoad
             VT_zCVobSound,
             VT_oCZoneMusic,
             VT_oCZoneMusicDefault,
+            VT_zCTrigger,
+            VT_oCTriggerChangeLevel,
+            VT_zCMover
         };
 
         EVobType vobType;
@@ -277,6 +286,46 @@ namespace ZenLoad
             float volumeLevel;
             bool loop;
         } oCZoneMusic;
+
+        struct
+        {
+            std::string triggerTarget;
+            uint8_t     unknown0         =0;
+            uint8_t     unknown1         =0;
+            std::string respondToVobName;
+            int32_t     numCanBeActivated=0;
+            float       retriggerWaitSec =0;
+            float       damageThreshold  =0;
+            float       fireDelaySec     =0;
+        } zCTrigger;
+
+        struct
+        {
+            uint8_t     moverBehavior=0;
+            float       touchBlockerDamage=0;
+            float       stayOpenTimeSec=0;
+            bool        moverLocked=false;
+            bool        autoLinkEnable=false;
+            bool        autoRotate=false;
+            float       moveSpeed=0;
+            uint8_t     posLerpType=0;
+            uint8_t     speedType=0;
+            std::vector<zKeyFrame> keyframes;
+            std::string sfxOpenStart;
+            std::string sfxOpenEnd;
+            std::string sfxMoving;
+            std::string sfxCloseStart;
+            std::string sfxCloseEnd;
+            std::string sfxLock;
+            std::string sfxUnlock;
+            std::string sfxUseLocked;
+        } zCMover;
+
+        struct
+        {
+            std::string levelName;
+            std::string startVobName;
+        } oCTriggerChangeLevel;
 
         std::vector<zCVobData> childVobs;
     };

@@ -2,6 +2,7 @@
 #include "zTypes.h"
 #include "zenParser.h"
 #include "zenParserPropRead.h"
+#include "utils/logger.h"
 
 namespace ZenLoad
 {
@@ -194,6 +195,18 @@ namespace ZenLoad
                 info.vobType = zCVobData::VT_oCItem;
                 parser.getImpl()->readEntry("itemInstance", &info.oCItem.instanceName);
             }
+            if (header.classname.find("zCTrigger:zCVob")!=std::string::npos)
+            {
+              info.vobType = zCVobData::VT_zCTrigger;
+              parser.getImpl()->readEntry("triggerEvent",      &info.zCTrigger.triggerTarget);
+              parser.getImpl()->readEntry("unknown0",          &info.zCTrigger.unknown0, ZenLoad::ParserImpl::ZVT_RAW);
+              parser.getImpl()->readEntry("unknown1",          &info.zCTrigger.unknown1, ZenLoad::ParserImpl::ZVT_RAW);
+              parser.getImpl()->readEntry("respondToVobName",  &info.zCTrigger.respondToVobName);
+              parser.getImpl()->readEntry("numCanBeActivated", &info.zCTrigger.numCanBeActivated);
+              parser.getImpl()->readEntry("retriggerWaitSec",  &info.zCTrigger.retriggerWaitSec);
+              parser.getImpl()->readEntry("damageThreshold",   &info.zCTrigger.damageThreshold);
+              parser.getImpl()->readEntry("fireDelaySec",      &info.zCTrigger.fireDelaySec);
+            }
 
             if (header.classname.find("oCMOB:") != std::string::npos)
             {
@@ -288,6 +301,45 @@ namespace ZenLoad
                 parser.getImpl()->readEntry("reverbLevel", &info.oCZoneMusic.reverbLevel);
                 parser.getImpl()->readEntry("volumeLevel", &info.oCZoneMusic.volumeLevel);
                 parser.getImpl()->readEntry("loop", &info.oCZoneMusic.loop);
+            }
+            else if (header.classname=="zCMover:zCTrigger:zCVob")
+            {
+                uint32_t numKeyframes=0;
+                info.vobType = zCVobData::VT_zCMover;
+                parser.getImpl()->readEntry("moverBehavior",     &info.zCMover.moverBehavior);
+                parser.getImpl()->readEntry("touchBlockerDamage",&info.zCMover.touchBlockerDamage);
+                parser.getImpl()->readEntry("stayOpenTimeSec",   &info.zCMover.stayOpenTimeSec);
+                parser.getImpl()->readEntry("moverLocked",       &info.zCMover.moverLocked);
+                parser.getImpl()->readEntry("autoLinkEnable",    &info.zCMover.autoLinkEnable);
+                parser.getImpl()->readEntry("autoRotate",        &info.zCMover.autoRotate);
+                parser.getImpl()->readEntry("numKeyframes",      &numKeyframes,ZenLoad::ParserImpl::ZVT_WORD);
+                if(numKeyframes>0)
+                {
+                    parser.getImpl()->readEntry("moveSpeed",     &info.zCMover.moveSpeed);
+                    parser.getImpl()->readEntry("posLerpType",   &info.zCMover.posLerpType);
+                    parser.getImpl()->readEntry("speedType",     &info.zCMover.speedType);
+                    std::vector<zKeyFrame> fr(numKeyframes);
+                    parser.getImpl()->readEntry("keyframe",&fr[0],sizeof(zKeyFrame)*numKeyframes,ZenLoad::ParserImpl::ZVT_RAW);
+                    info.zCMover.keyframes = std::move(fr);
+                }
+                parser.getImpl()->readEntry("sfxOpenStart",      &info.zCMover.sfxOpenStart);
+                parser.getImpl()->readEntry("sfxOpenEnd",        &info.zCMover.sfxOpenEnd);
+                parser.getImpl()->readEntry("sfxMoving",         &info.zCMover.sfxMoving);
+                parser.getImpl()->readEntry("sfxCloseStart",     &info.zCMover.sfxCloseStart);
+                parser.getImpl()->readEntry("sfxCloseEnd",       &info.zCMover.sfxCloseEnd);
+                parser.getImpl()->readEntry("sfxLock",           &info.zCMover.sfxLock);
+                parser.getImpl()->readEntry("sfxUnlock",         &info.zCMover.sfxUnlock);
+                parser.getImpl()->readEntry("sfxUseLocked",      &info.zCMover.sfxUseLocked);
+            }
+            else if (header.classname=="oCTriggerChangeLevel:zCTrigger:zCVob")
+            {
+                info.vobType = zCVobData::VT_oCTriggerChangeLevel;
+                parser.getImpl()->readEntry("levelName",    &info.oCTriggerChangeLevel.levelName);
+                parser.getImpl()->readEntry("startVobName", &info.oCTriggerChangeLevel.startVobName);
+            }
+            else
+            {
+              //LogInfo() << "skip: \"" << header.classname << "\"";
             }
 
             parser.skipChunk();
