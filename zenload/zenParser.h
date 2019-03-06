@@ -118,7 +118,7 @@ namespace ZenLoad
         /**
 		 * @brief reads the main oCWorld-Object, found in the level-zens
 		 */
-        void readWorld(oCWorldData& info);
+        void readWorld(oCWorldData& info, bool forceG2);
 
         /****************************************************************************************************************/
         /* ############### Note: Rest of the methods are to be used only if you know what you are doing ############### */

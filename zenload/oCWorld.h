@@ -60,10 +60,10 @@ namespace ZenLoad
         /**
 		* Reads this object from an internal zen
 		*/
-        static void readObjectData(oCWorldData& info, ZenParser& parser, uint32_t versionInternal)
+        static void readObjectData(oCWorldData& info, ZenParser& parser, uint32_t versionInternal, bool forceG2)
         {
             WorldVersion version;
-            if (versionInternal == static_cast<uint32_t>(WorldVersionInternal::VERSION_G1_08k))
+            if (versionInternal == static_cast<uint32_t>(WorldVersionInternal::VERSION_G1_08k) && !forceG2)
                 version = WorldVersion::VERSION_G1_08k;
             else
                 version = WorldVersion::VERSION_G26fix;
