@@ -643,21 +643,16 @@ namespace Daedalus
         {
             // important, permanent and nr are optional in scripts, so we must to set a default value
             C_Info()
-                : nr(0)
-                , important(0)
-                , condition(0)
-                , permanent(0)
-                , npc(0)
             {
             }
-            int32_t npc;
-            int32_t nr;
-            int32_t important;  //	Wichtig Flag -> ansprechen
-            uint32_t condition;
-            uint32_t information;
+            int32_t     npc=0;
+            int32_t     nr=0;
+            int32_t     important=0;  //	Wichtig Flag -> ansprechen
+            uint32_t    condition=0;
+            uint32_t    information;
             std::string description;
-            int32_t trade;
-            int32_t permanent;
+            int32_t     trade=0;
+            int32_t     permanent=0;
             std::vector<SubChoice> subChoices;
             void addChoice(const SubChoice& subChoice)
             {
