@@ -24,6 +24,7 @@ namespace Daedalus
         constexpr int MAX_NUM_SFX = 4096;  // G2 has 1700
         constexpr int MAX_NUM_PFX = 1024;
         constexpr int MAX_NUM_MUSICTHEME = 512;
+        constexpr int MAX_NUM_GILVALUES  = 1;
 
         template <class T>
         constexpr size_t MAX_NUM();
@@ -83,6 +84,11 @@ namespace Daedalus
         {
             return MAX_NUM_MUSICTHEME;
         }
+        template <>
+        constexpr size_t MAX_NUM<Daedalus::GEngineClasses::C_GilValues>()
+        {
+            return MAX_NUM_GILVALUES;
+        }
 
         template <typename C_Class>
         using CHandle = typename ZMemory::StaticReferencedAllocator<C_Class, MAX_NUM<C_Class>()>::Handle;
@@ -98,6 +104,7 @@ namespace Daedalus
         typedef CHandle<Daedalus::GEngineClasses::C_SFX> SfxHandle;
         typedef CHandle<Daedalus::GEngineClasses::C_ParticleFX> PfxHandle;
         typedef CHandle<Daedalus::GEngineClasses::C_MusicTheme> MusicThemeHandle;
+        typedef CHandle<Daedalus::GEngineClasses::C_GilValues> GilValuesHandle;
 
         struct LogTopic
         {
@@ -139,6 +146,7 @@ namespace Daedalus
             CAllocator<GEngineClasses::C_SFX> sfx;
             CAllocator<GEngineClasses::C_ParticleFX> pfx;
             CAllocator<GEngineClasses::C_MusicTheme> musicThemes;
+            CAllocator<GEngineClasses::C_GilValues> gilValues;
 
             /**
              * generic getter for the Engine containers NPCs, items, ...
@@ -148,7 +156,7 @@ namespace Daedalus
             CAllocator<C_Class, n>& get()
             {
                 C_Class::missing_template_function_spezialization;
-            };
+            }
         };
 
         /**
@@ -219,6 +227,12 @@ namespace Daedalus
         RegisteredObjects::get<GEngineClasses::C_MusicTheme, MAX_NUM<GEngineClasses::C_MusicTheme>()>()
         {
             return musicThemes;
+        };
+        template <>
+        inline RegisteredObjects::CAllocator<GEngineClasses::C_GilValues>&
+        RegisteredObjects::get<GEngineClasses::C_GilValues, MAX_NUM<GEngineClasses::C_GilValues>()>()
+        {
+            return gilValues;
         };
 
         /**
@@ -324,6 +338,7 @@ namespace Daedalus
             SfxHandle createSfx();
             PfxHandle createPfx();
             MusicThemeHandle createMusicTheme();
+            GilValuesHandle createGilValues();
 
             /**
              * Accessors
@@ -388,6 +403,11 @@ namespace Daedalus
             {
                 return get<Daedalus::GEngineClasses::C_MusicTheme>(h);
             };
+
+            Daedalus::GEngineClasses::C_GilValues& getGilValues(GilValuesHandle h)
+            {
+                return get<Daedalus::GEngineClasses::C_GilValues>(h);
+            }
 
             Daedalus::GEngineClasses::Instance* getByClass(ZMemory::BigHandle h, EInstanceClass instClass);
 

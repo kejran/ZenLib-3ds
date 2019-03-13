@@ -146,6 +146,9 @@ Daedalus::GEngineClasses::Instance* DaedalusGameState::getByClass(ZMemory::BigHa
         case IC_MusicTheme:
             return &getMusicTheme(ZMemory::handleCast<MusicThemeHandle>(h));
 
+        case IC_GilValues:
+            return &getGilValues(ZMemory::handleCast<GilValuesHandle>(h));
+
         default:
             return nullptr;
     }
@@ -216,7 +219,12 @@ FocusHandle DaedalusGameState::createMenuItem()
 
 MusicThemeHandle DaedalusGameState::createMusicTheme()
 {
-    return create<GEngineClasses::C_MusicTheme>();
+  return create<GEngineClasses::C_MusicTheme>();
+}
+
+GilValuesHandle DaedalusGameState::createGilValues()
+{
+  return create<GEngineClasses::C_GilValues>();
 }
 
 ItemHandle DaedalusGameState::createInventoryItem(size_t itemSymbol, NpcHandle npc, unsigned int count)

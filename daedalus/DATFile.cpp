@@ -399,6 +399,11 @@ namespace Daedalus
     {
         return IC_MusicTheme;
     };
+    template <>
+    EInstanceClass enumFromClass<Daedalus::GEngineClasses::C_GilValues>()
+    {
+        return IC_GilValues;
+    };
 }  // namespace Daedalus
 
 PARSymbol& DATFile::getSymbolByName(const std::string& symName)

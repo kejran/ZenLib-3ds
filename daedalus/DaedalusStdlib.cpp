@@ -69,6 +69,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm)
     GEngineClasses::C_SFX sfx;
     GEngineClasses::C_ParticleFX pfx;
     GEngineClasses::C_MusicTheme musicTheme;
+    GEngineClasses::C_GilValues  gilValues;
     auto& datFile = vm.getDATFile();
 
     // the vm of the GOTHIC.DAT does not contain C_Menu and MENU.DAT's vm does not contain C_NPC
@@ -371,5 +372,40 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm)
         REGISTER("C_MUSICTHEME", musicTheme, reverbTime);
         REGISTER("C_MUSICTHEME", musicTheme, transType);
         REGISTER("C_MUSICTHEME", musicTheme, transSubType);
+    }
+
+    if (classExists("C_GILVALUES"))
+    {
+      REGISTER("C_GILVALUES", gilValues, water_depth_knee);
+      REGISTER("C_GILVALUES", gilValues, water_depth_chest);
+      REGISTER("C_GILVALUES", gilValues, jumpup_height);
+      REGISTER("C_GILVALUES", gilValues, swim_time);
+      REGISTER("C_GILVALUES", gilValues, dive_time);
+      REGISTER("C_GILVALUES", gilValues, step_height);
+      REGISTER("C_GILVALUES", gilValues, jumplow_height);
+      REGISTER("C_GILVALUES", gilValues, jumpmid_height);
+      REGISTER("C_GILVALUES", gilValues, slide_angle);
+      REGISTER("C_GILVALUES", gilValues, slide_angle2);
+      REGISTER("C_GILVALUES", gilValues, disable_autoroll);
+      REGISTER("C_GILVALUES", gilValues, surface_align);
+      REGISTER("C_GILVALUES", gilValues, climb_heading_angle);
+      REGISTER("C_GILVALUES", gilValues, climb_horiz_angle);
+      REGISTER("C_GILVALUES", gilValues, climb_ground_angle);
+      REGISTER("C_GILVALUES", gilValues, fight_range_base);
+      REGISTER("C_GILVALUES", gilValues, fight_range_fist);
+      REGISTER("C_GILVALUES", gilValues, fight_range_g);
+      REGISTER("C_GILVALUES", gilValues, fight_range_1hs);
+      REGISTER("C_GILVALUES", gilValues, fight_range_1ha);
+      REGISTER("C_GILVALUES", gilValues, fight_range_2hs);
+      REGISTER("C_GILVALUES", gilValues, fight_range_2ha);
+      REGISTER("C_GILVALUES", gilValues, falldown_height);
+      REGISTER("C_GILVALUES", gilValues, falldown_damage);
+      REGISTER("C_GILVALUES", gilValues, blood_disabled);
+      REGISTER("C_GILVALUES", gilValues, blood_max_distance);
+      REGISTER("C_GILVALUES", gilValues, blood_amount);
+      REGISTER("C_GILVALUES", gilValues, blood_flow);
+      REGISTER("C_GILVALUES", gilValues, blood_emitter);
+      REGISTER("C_GILVALUES", gilValues, blood_texture);
+      REGISTER("C_GILVALUES", gilValues, turn_speed);
     }
 }

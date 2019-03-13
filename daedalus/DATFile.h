@@ -21,7 +21,8 @@ namespace Daedalus
         IC_MenuItem,
         IC_Sfx,
         IC_Pfx,
-        IC_MusicTheme
+        IC_MusicTheme,
+        IC_GilValues
     };
 
     template <class C_Class>

@@ -25,6 +25,7 @@ namespace Daedalus
         const int MAX_HITCHANCE = 5;
         const int ATR_INDEX_MAX = 8;
         const int ITM_TEXT_MAX = 6;
+        const int GIL_MAX = 66;
 
         const int DAM_INDEX_BARRIER = 0;  //				 nur der Vollstandigkeit und Transparenz wegen hier definiert ( _NICHT_ verwenden )
         const int DAM_INDEX_BLUNT = DAM_INDEX_BARRIER + 1;
@@ -714,6 +715,48 @@ namespace Daedalus
             int32_t transType;
             int32_t transSubType;
         };
+
+        struct C_GilValues : Instance
+        {
+          C_GilValues(){
+            for(auto& i:jumpup_height)      i = 200;
+            for(auto& i:blood_max_distance) i = 1000;
+            for(auto& i:blood_amount)       i = 10;
+            for(auto& i:turn_speed)         i = 150;
+            }
+          int32_t      water_depth_knee   [GIL_MAX]={};
+          int32_t      water_depth_chest  [GIL_MAX]={};
+          int32_t      jumpup_height      [GIL_MAX]={};		//	DEFAULT = 200;
+          // int32_t      JUMPUP_FORCE       [GIL_MAX]={};
+          int32_t      swim_time          [GIL_MAX]={};
+          int32_t      dive_time          [GIL_MAX]={};
+          int32_t      step_height			  [GIL_MAX]={};
+          int32_t      jumplow_height     [GIL_MAX]={};
+          int32_t      jumpmid_height     [GIL_MAX]={};
+          int32_t      slide_angle        [GIL_MAX]={};
+          int32_t      slide_angle2       [GIL_MAX]={};
+          int32_t      disable_autoroll   [GIL_MAX]={}; //	DEFAULT = 0					;  0 = Autoroll  enabled	/ 1 = Autoroll  disabled
+          int32_t      surface_align      [GIL_MAX]={}; //	DEFAULT = 0					;  0 = Alignment disabled	/ 1 = Alignment enabled
+          int32_t      climb_heading_angle[GIL_MAX]={};
+          int32_t      climb_horiz_angle  [GIL_MAX]={};
+          int32_t      climb_ground_angle [GIL_MAX]={};
+          int32_t      fight_range_base   [GIL_MAX]={};
+          int32_t      fight_range_fist   [GIL_MAX]={};
+          int32_t      fight_range_g      [GIL_MAX]={};
+          int32_t      fight_range_1hs    [GIL_MAX]={};
+          int32_t      fight_range_1ha    [GIL_MAX]={};
+          int32_t      fight_range_2hs    [GIL_MAX]={};
+          int32_t      fight_range_2ha    [GIL_MAX]={};
+          int32_t      falldown_height    [GIL_MAX]={}; //									Wie tief Fallen ohne Schaden ?
+          int32_t      falldown_damage    [GIL_MAX]={}; //									Schaden für jeden weiteren angefangenen Meter.
+          int32_t      blood_disabled     [GIL_MAX]={}; //	DEFAULT = 0					;	Blut ganz ausschalten (z.B. bei Sekletten) ?
+          int32_t      blood_max_distance [GIL_MAX]={}; //	DEFAULT = 1000				;	Wie weit spritzt das Blut (in cm) ?
+          int32_t      blood_amount       [GIL_MAX]={}; //	DEFAULT = 10				;	Wie viel Blut ?
+          int32_t      blood_flow         [GIL_MAX]={}; //	DEFAULT = 0					;	Soll es sich langsam ausbreiten ?
+          std::string  blood_emitter      [GIL_MAX]={}; //	DEFAULT = "PFX_BLOOD"		;	Welcher Partikel-Emitter ?
+          std::string  blood_texture      [GIL_MAX]={}; //	DEFAULT = "ZBLOODSPLAT2.TGA";	Welche Textur ?
+          int32_t      turn_speed         [GIL_MAX]={}; //	DEFAULT = 150				;
+          };
     }  // namespace GEngineClasses
 
     /**
