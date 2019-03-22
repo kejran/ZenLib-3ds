@@ -7,10 +7,8 @@
 #include <utils/staticReferencedAllocator.h>
 #include <zenload/zenParser.h>
 
-namespace Daedalus
-{
-enum EInstanceClass
-  {
+namespace Daedalus {
+enum EInstanceClass {
   IC_Npc,
   IC_Mission,
   IC_Info,
@@ -121,7 +119,6 @@ struct PARSymbol {
   PARSymbol() {
     classMemberOffset = -1;
     classMemberArraySize = 0;
-    instanceDataHandle.invalidate();
     instanceDataClass = IC_Npc;
     memset(&properties, 0, sizeof(properties));
     /*classOffset = 0;
@@ -197,9 +194,9 @@ struct PARSymbol {
   // Store array size of the class member var. 1 for scalar members. Useful for bounds checking.
   uint32_t classMemberArraySize;  // Not stored in files, only valid for classes to directly write to engine memory
 
-  void* instanceData;  // Not stored in files, only valid for classes to directly write to engine memory
-  ZMemory::BigHandle instanceDataHandle;
-  EInstanceClass instanceDataClass;
+  void*              instanceData;  // Not stored in files, only valid for classes to directly write to engine memory
+  void*              instanceDataHandle=nullptr;
+  EInstanceClass     instanceDataClass;
 
   uint32_t parent;  // 0xFFFFFFFF (-1) = none
 

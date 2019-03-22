@@ -16,7 +16,6 @@ DaedalusDialogManager::DaedalusDialogManager(Daedalus::DaedalusVM& vm,
     , m_MessageLib(ou_bin, vdfsFileIndex)
     , m_KnownNpcInfoSymbolsByNpcSymbols(knownInfos)
 {
-    gatherNpcInformation();
 }
 
 DaedalusDialogManager::DaedalusDialogManager(Daedalus::DaedalusVM& vm,
@@ -26,41 +25,12 @@ DaedalusDialogManager::DaedalusDialogManager(Daedalus::DaedalusVM& vm,
     , m_MessageLib(ou_bin)
     , m_KnownNpcInfoSymbolsByNpcSymbols(knownInfos)
 {
-    gatherNpcInformation();
-}
-
-void DaedalusDialogManager::gatherNpcInformation()
-{
-    m_VM.getDATFile().iterateSymbolsOfClass("C_Info", [&](size_t i, Daedalus::PARSymbol& s) {
-        // Create new info-object
-        InfoHandle h = m_VM.getGameState().createInfo();
-        Daedalus::GEngineClasses::C_Info& info = m_VM.getGameState().getInfo(h);
-        m_VM.initializeInstance(ZMemory::toBigHandle(h), i, Daedalus::IC_Info);
-
-        // Add to vector
-        m_NpcInfos.push_back(h);
-    });
 }
 
 void DaedalusDialogManager::setNpcInfoKnown(size_t npcInstance, size_t infoInstance)
 {
     //LogInfo() << "He knows! (" << m_VM.getDATFile().getSymbolByIndex(npcInstance).name << " -> " << m_VM.getDATFile().getSymbolByIndex(infoInstance).name << ")!";
     m_KnownNpcInfoSymbolsByNpcSymbols[npcInstance].insert(infoInstance);
-}
-
-std::vector<InfoHandle> DaedalusDialogManager::getInfos(NpcHandle hnpc)
-{
-    Daedalus::GEngineClasses::C_Npc& npc = m_VM.getGameState().getNpc(hnpc);
-    std::vector<InfoHandle> result;
-    for (auto& infoHandle : m_NpcInfos)
-    {
-        Daedalus::GEngineClasses::C_Info& info = m_VM.getGameState().getInfo(infoHandle);
-        if (static_cast<size_t>(info.npc) == npc.instanceSymbol)
-        {
-            result.push_back(infoHandle);
-        }
-    }
-    return result;
 }
 
 bool DaedalusDialogManager::doesNpcKnowInfo(size_t npcInstance, size_t infoInstance)

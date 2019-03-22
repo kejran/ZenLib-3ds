@@ -226,28 +226,18 @@ namespace Daedalus
                 MENU_SHOW_INFO = 64,
             };
 
-            C_Menu()
-            {
-                posx = 0;
-                posy = 0;
-                alpha = 0;
-                eventTimerMSec = 0;
-                flags = 0;
-                defaultOutGame = 0;
-                defaultInGame = 0;
-            }
-
+            C_Menu() = default;
             std::string backPic;
             std::string backWorld;
-            int32_t posx, posy;
-            int32_t dimx, dimy;
-            int32_t alpha;
+            int32_t posx=0, posy=0;
+            int32_t dimx=0, dimy=0;
+            int32_t alpha=0;
             std::string musicTheme;
-            int32_t eventTimerMSec;
+            int32_t eventTimerMSec=0;
             std::string items[MenuConstants::MAX_ITEMS];
-            int32_t flags;
-            int32_t defaultOutGame;
-            int32_t defaultInGame;
+            int32_t flags=0;
+            int32_t defaultOutGame=0;
+            int32_t defaultInGame=0;
         };
 
         struct C_Menu_Item : Instance
@@ -283,51 +273,32 @@ namespace Daedalus
                 MENU_ITEM_LISTBOX = 7,
             };
 
-            C_Menu_Item()
-            {
-                alpha = 0;
-                type = 0;
-                memset(onSelAction, 0, sizeof(onSelAction));
-                memset(onEventAction, 0, sizeof(onEventAction));
-                posx = 0;
-                posy = 0;
-                dimx = 0;
-                dimy = 0;
-                sizeStartScale = 0.0f;
-                flags = 0;
-                openDelayTime = 0;
-                openDuration = 0;
-                memset(userfloat, 0, sizeof(userfloat));
-                frameSizeX = 0;
-                frameSizeY = 0;
-                hideOnValue = 0;
-            }
-
+            C_Menu_Item() = default;
             std::string fontName;
             std::string text[MenuConstants::MAX_USERSTRINGS];
             std::string backPic;
             std::string alphaMode;
-            int32_t alpha;
-            int32_t type;
-            int32_t onSelAction[MenuConstants::MAX_SEL_ACTIONS];
+            int32_t     alpha=0;
+            int32_t     type =0;
+            int32_t     onSelAction[MenuConstants::MAX_SEL_ACTIONS]={};
             std::string onSelAction_S[MenuConstants::MAX_SEL_ACTIONS];
             std::string onChgSetOption;
             std::string onChgSetOptionSection;
 
-            int32_t onEventAction[MenuConstants::MAX_EVENTS];
-            int32_t posx, posy;
-            int32_t dimx, dimy;  // -1 = AUTODETECT (FONTWISE)
-            float sizeStartScale;
-            int32_t flags;
-            float openDelayTime;
-            float openDuration;
-            float userfloat[MenuConstants::MAX_USERVARS];
+            int32_t onEventAction[MenuConstants::MAX_EVENTS]={};
+            int32_t posx=0, posy=0;
+            int32_t dimx=0, dimy=0;  // -1 = AUTODETECT (FONTWISE)
+            float sizeStartScale=0.f;
+            int32_t flags=0;
+            float openDelayTime=0;
+            float openDuration=0;
+            float userfloat[MenuConstants::MAX_USERVARS]={};
             std::string userString[MenuConstants::MAX_USERVARS];
-            int32_t frameSizeX;
-            int32_t frameSizeY;
+            int32_t frameSizeX=0;
+            int32_t frameSizeY=0;
             std::string hideIfOptionSectionSet;
             std::string hideIfOptionSet;
-            int32_t hideOnValue;
+            int32_t hideOnValue=0;
         };
 
         struct C_Npc : Instance

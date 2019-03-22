@@ -18,11 +18,10 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
   // so we need to register only class members of existing classes
   auto classExists = [&vm](const std::string& className) {
     bool exists = vm.getDATFile().hasSymbolName(className);
-    return exists && (vm.getDATFile().getSymbolByName(className).properties.elemProps.type == EParType_Class);
+    return exists && (vm.getDATFile().getSymbolByName(className).properties.elemProps.type==EParType_Class);
     };
 
-  if (classExists("C_Npc"))
-    {
+  if(classExists("C_Npc")) {
     REGISTER(C_Npc, id);
     REGISTER(C_Npc, name);
     REGISTER(C_Npc, slot);
@@ -57,8 +56,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER_IF_EXISTS(C_Npc, noFocus);
     }
 
-  if (classExists("C_Focus"))
-    {
+  if(classExists("C_Focus")) {
     REGISTER(C_Focus, npc_longrange);
     REGISTER(C_Focus, npc_range1);
     REGISTER(C_Focus, npc_range2);
@@ -80,8 +78,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER(C_Focus, mob_prio);
     }
 
-  if (classExists("C_Info"))
-    {
+  if(classExists("C_Info")) {
     REGISTER(C_Info, npc);
     REGISTER(C_Info, nr);
     REGISTER(C_Info, important);
@@ -92,8 +89,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER(C_Info, permanent);
     }
 
-  if (classExists("C_ItemReact"))
-    {
+  if(classExists("C_ItemReact")) {
     REGISTER(C_ItemReact, npc);
     REGISTER(C_ItemReact, trade_item);
     REGISTER(C_ItemReact, trade_amount);
@@ -103,8 +99,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER(C_ItemReact, reaction);
     }
 
-  if (classExists("C_Item"))
-    {
+  if(classExists("C_Item")) {
     REGISTER(C_Item, id);
     REGISTER(C_Item, name);
     REGISTER(C_Item, nameID);
@@ -151,8 +146,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER_IF_EXISTS(C_Item, inv_animate);
     }
 
-  if (classExists("C_Spell"))
-    {
+  if(classExists("C_Spell")) {
     REGISTER_IF_EXISTS(C_Spell, time_per_mana);
     REGISTER_IF_EXISTS(C_Spell, damage_per_level);
     REGISTER_IF_EXISTS(C_Spell, damageType);
@@ -167,8 +161,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER_IF_EXISTS(C_Spell, targetCollectElev);
     };
 
-  if (classExists("C_Mission"))
-    {
+  if(classExists("C_Mission")) {
     REGISTER(C_Mission, name);
     REGISTER(C_Mission, description);
     REGISTER(C_Mission, duration);
@@ -184,8 +177,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER(C_Mission, running);
     }
 
-  if (classExists("C_Menu"))
-    {
+  if(classExists("C_Menu")) {
     REGISTER(C_Menu, backPic);
     REGISTER(C_Menu, backWorld);
     REGISTER(C_Menu, posx);
@@ -201,8 +193,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER(C_Menu, defaultInGame);
     }
 
-  if (classExists("C_Menu_Item"))
-    {
+  if(classExists("C_Menu_Item")) {
     REGISTER(C_Menu_Item, fontName);
     REGISTER(C_Menu_Item, text);
     REGISTER(C_Menu_Item, backPic);
@@ -231,8 +222,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER_IF_EXISTS(C_Menu_Item, hideOnValue);
     }
 
-  if (classExists("C_SFX"))
-    {
+  if(classExists("C_SFX")) {
     REGISTER(C_SFX, file);
     REGISTER(C_SFX, pitchOff);
     REGISTER(C_SFX, pitchVar);
@@ -244,8 +234,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER(C_SFX, pfxName);
     }
 
-  if (classExists("C_ParticleFX"))
-    {
+  if(classExists("C_ParticleFX")) {
     REGISTER(C_ParticleFX, ppsValue);
     REGISTER(C_ParticleFX, ppsScaleKeys_S);
     REGISTER(C_ParticleFX, ppsIsLooping);
@@ -305,8 +294,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER_IF_EXISTS(C_ParticleFX, m_bIsAmbientPFX);
     }
 
-  if (classExists("C_MusicTheme"))
-    {
+  if(classExists("C_MusicTheme")) {
     REGISTER(C_MusicTheme, file);
     REGISTER(C_MusicTheme, vol);
     REGISTER(C_MusicTheme, loop);
@@ -316,8 +304,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER(C_MusicTheme, transSubType);
     }
 
-  if (classExists("C_GILVALUES"))
-    {
+  if(classExists("C_GILVALUES")) {
     REGISTER(C_GilValues, water_depth_knee);
     REGISTER(C_GilValues, water_depth_chest);
     REGISTER(C_GilValues, jumpup_height);

@@ -47,12 +47,6 @@ namespace Daedalus
             bool doesNpcKnowInfo(size_t npcInstance, size_t infoInstance);
 
             /**
-             * get vector of InfoHandles for this npc
-             * @param npc NPC to process infos for
-             */
-            std::vector<InfoHandle> getInfos(NpcHandle npc);
-
-            /**
              * @return Map of NPC-Symbols -> All info they know
              */
             const std::map<size_t, std::set<size_t>>& getKnownNPCInformation() { return m_KnownNpcInfoSymbolsByNpcSymbols; };
@@ -63,10 +57,6 @@ namespace Daedalus
             ZenLoad::zCCSLib& getMessageLib() { return m_MessageLib; }
 
         private:
-            /**
-			 * Gathers all C_Info-Instances and puts them into m_NpcInfosByNpcSymbols
-			 */
-            void gatherNpcInformation();
 
             /**
 			 * Message library
@@ -77,12 +67,6 @@ namespace Daedalus
 			 * Current daedalus VM
 			 */
             Daedalus::DaedalusVM& m_VM;
-
-            /**
-			 * vector of all C_Info handles, can't use map here (infos by npc)
-             * since the VM changes C_Info.npc before talking to an ambient npc
-			 */
-            std::vector<InfoHandle> m_NpcInfos;
 
             /**
 			 * map of all known infoInstances by npcInstance

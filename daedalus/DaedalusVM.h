@@ -11,11 +11,16 @@
 namespace Daedalus {
 class DaedalusVM {
   public:
+    struct Instance final {
+      size_t         id=0;
+      void*          handle=nullptr;
+      EInstanceClass cls=EInstanceClass::IC_Npc;
+      };
+
     DaedalusVM(const std::vector<uint8_t> data);
     DaedalusVM(const uint8_t* pDATFileData, size_t numBytes);
 
-    void eval(uint32_t pcInit);
-
+    void    eval(uint32_t pcInit);
     int32_t runFunctionBySymIndex(size_t symIdx, bool clearDataStack = true);
 
     void registerExternalFunction(const std::string& symName, const std::function<void(DaedalusVM&)>& fn);
@@ -38,13 +43,17 @@ class DaedalusVM {
     uint32_t    popVar(uint32_t& arrIdx);
     std::string popString(bool toUpper = false);
 
-    void setInstance(const std::string& instSymbol, ZMemory::BigHandle h, EInstanceClass instanceClass);
-    void setCurrentInstance(size_t symIdx);
-    void initializeInstance(ZMemory::BigHandle instance, size_t symIdx, EInstanceClass classIdx);
+    void setInstance(const std::string& instSymbol, void *h, EInstanceClass instanceClass);
+    void initializeInstance(void* instance, size_t symIdx, EInstanceClass classIdx);
+
+    template<class T>
+    void initializeInstance(T& instance, size_t symIdx) {
+      //initializeInstance(&instance,symIdx,DaedalusVM::enumFromClass<T>());
+      }
 
     void*                         getCurrentInstanceDataPtr();
-    EInstanceClass                getCurrentInstanceClass() { return m_CurrentInstanceClass; }
-    ZMemory::BigHandle            getCurrentInstanceHandle() { return m_CurrentInstanceHandle; }
+    EInstanceClass                getCurrentInstanceClass()  { return m_CurrentInstanceClass; }
+    void*                         getCurrentInstanceHandle() { return m_CurrentInstanceHandle; }
     DATFile&                      getDATFile() { return m_DATFile; }
     GameState::DaedalusGameState& getGameState() { return m_GameState; }
     std::vector<std::string>      getCallStack();
@@ -56,6 +65,7 @@ class DaedalusVM {
     float       popFloatValue();
 
     const PARStackOpCode &nextInstruction(size_t& pc);
+    void setCurrentInstance(size_t symIdx);
 
     class CallStackFrame {
     public:
@@ -100,8 +110,9 @@ class DaedalusVM {
     CallStackFrame*                                              m_CallStack=nullptr;
     std::unordered_map<size_t, std::function<void(DaedalusVM&)>> m_ExternalsByIndex;
     std::function<void(DaedalusVM&)>                             m_OnUnsatisfiedCall;
+
     size_t                                                       m_CurrentInstance;
-    ZMemory::BigHandle                                           m_CurrentInstanceHandle;
+    void*                                                        m_CurrentInstanceHandle;
     EInstanceClass                                               m_CurrentInstanceClass;
 
     size_t                                                       m_SelfId=size_t(-1);
