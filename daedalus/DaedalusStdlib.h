@@ -760,11 +760,6 @@ namespace Daedalus
     }  // namespace GEngineClasses
 
     /**
-     * @brief Implements some generic script-externals
-     */
-    void registerDaedalusStdLib(DaedalusVM& vm, bool enableVerboseLogging = false);
-
-    /**
      * @brief Links the classes known to the engine to the VM.
      */
     void registerGothicEngineClasses(DaedalusVM& vm);
