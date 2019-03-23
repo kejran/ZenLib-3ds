@@ -271,10 +271,10 @@ struct PARSymbol {
   };
 
 struct PARSymTable {
-  std::vector<uint32_t> sortTable;
-  std::vector<PARSymbol> symbols;
-  std::unordered_map<std::string, size_t> symbolsByName;
-  std::unordered_map<size_t, size_t> functionsByAddress;
+  std::vector<uint32_t>                       sortTable;
+  std::vector<PARSymbol>                      symbols;
+  std::vector<std::pair<std::string, size_t>> symbolsByName;
+  std::unordered_map<size_t, size_t>          functionsByAddress;
   };
 
 struct PARStack {
@@ -306,14 +306,13 @@ class DATFile {
     DATFile()=default;
     DATFile(const uint8_t* pData, size_t numBytes);
 
-    bool           hasSymbolName(const std::string& symName);
-
-    PARSymbol&     getSymbolByName(const std::string& symName);
-    size_t         getSymbolIndexByName(const std::string& symName);
-    PARSymbol&     getSymbolByIndex(size_t idx);
+    bool           hasSymbolName       (const char* symName);
+    PARSymbol&     getSymbolByName     (const char* symName);
+    size_t         getSymbolIndexByName(const char* symName);
+    PARSymbol&     getSymbolByIndex    (size_t idx);
 
     size_t         getFunctionIndexByAddress(size_t address);
-    void           iterateSymbolsOfClass(const std::string& className, std::function<void(size_t, PARSymbol&)> callback);
+    void           iterateSymbolsOfClass(const char *className, std::function<void(size_t, PARSymbol&)> callback);
     const PARStackOpCode &getStackOpCode(size_t pc);
     size_t         addSymbol();
 
@@ -338,6 +337,8 @@ class DATFile {
       const char* f   = reinterpret_cast<const char*>(&(reinterpret_cast<M*>(&tmp)->*field));
       return reinterpret_cast<ptrdiff_t>(f-&tmp);
       }
+
+    static int compareNoCase(const char* a,const char* b);
 
     PARSymTable                  m_SymTable;
 

@@ -23,13 +23,13 @@ class DaedalusVM {
     void    eval(uint32_t pcInit);
     int32_t runFunctionBySymIndex(size_t symIdx, bool clearDataStack = true);
 
-    void registerExternalFunction(const std::string& symName, const std::function<void(DaedalusVM&)>& fn);
+    void registerExternalFunction(const char *symName, const std::function<void(DaedalusVM&)>& fn);
     void registerUnsatisfiedLink (const std::function<void(DaedalusVM&)> &fn);
 
     void pushInt(uint32_t value);
     void pushInt(int32_t value);
     void pushVar(size_t index, uint32_t arrIdx = 0);
-    void pushVar(const std::string& symName);
+    void pushVar(const char *symName);
     void pushString(const std::string& str);
 
     void setReturn(int32_t v);
@@ -43,7 +43,7 @@ class DaedalusVM {
     uint32_t    popVar(uint32_t& arrIdx);
     std::string popString(bool toUpper = false);
 
-    void setInstance(const std::string& instSymbol, void *h, EInstanceClass instanceClass);
+    void setInstance(const char *instSymbol, void *h, EInstanceClass instanceClass);
     void initializeInstance(void* instance, size_t symIdx, EInstanceClass classIdx);
 
     template<class T>
@@ -99,6 +99,13 @@ class DaedalusVM {
         };
       EParOp   tag=EParOp_PushInt;
       uint32_t id =0;
+      };
+
+    struct Stack {
+      Stack(std::vector<Stk>& s):storage(s),zero(s.size()){}
+
+      std::vector<Stk> storage;
+      size_t           zero=0;
       };
 
     const std::string &nameFromFunctionInfo(CallStackFrame::FunctionInfo functionInfo);

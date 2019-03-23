@@ -92,7 +92,7 @@ GEngineClasses::C_Npc* DaedalusGameState::insertNPC(size_t instance, const std::
   return npc;
   }
 
-GEngineClasses::C_Npc* DaedalusGameState::insertNPC(const std::string& instance, const std::string& waypoint) {
+GEngineClasses::C_Npc* DaedalusGameState::insertNPC(const char* instance, const std::string& waypoint) {
   return insertNPC(m_VM.getDATFile().getSymbolIndexByName(instance), waypoint);
   }
 
@@ -102,7 +102,7 @@ GEngineClasses::C_Item* DaedalusGameState::insertItem(size_t instance) {
   return h;
   }
 
-GEngineClasses::C_Item *DaedalusGameState::insertItem(const std::string& instance) {
+GEngineClasses::C_Item *DaedalusGameState::insertItem(const char* instance) {
   return insertItem(m_VM.getDATFile().getSymbolIndexByName(instance));
   }
 
@@ -112,7 +112,7 @@ GEngineClasses::C_SFX* DaedalusGameState::insertSFX(size_t instance) {
   return h;
   }
 
-GEngineClasses::C_SFX *DaedalusGameState::insertSFX(const std::string& instance) {
+GEngineClasses::C_SFX *DaedalusGameState::insertSFX(const char* instance) {
   return insertSFX(m_VM.getDATFile().getSymbolIndexByName(instance));
   }
 
@@ -124,7 +124,7 @@ GEngineClasses::C_MusicTheme* DaedalusGameState::insertMusicTheme(size_t instanc
   return h;
   }
 
-GEngineClasses::C_MusicTheme *DaedalusGameState::insertMusicTheme(const std::string& instance) {
+GEngineClasses::C_MusicTheme *DaedalusGameState::insertMusicTheme(const char* instance) {
   return insertMusicTheme(m_VM.getDATFile().getSymbolIndexByName(instance));
   }
 

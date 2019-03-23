@@ -62,7 +62,7 @@ namespace Daedalus {
              * @return Handle to the script-instance created
              */
             GEngineClasses::C_Npc* insertNPC(size_t instance, const std::string& waypoint);
-            GEngineClasses::C_Npc* insertNPC(const std::string& instance, const std::string& waypoint);
+            GEngineClasses::C_Npc* insertNPC(const char *instance, const std::string& waypoint);
 
             /**
              * Creates a new item instance and initializes it (does not position it)
@@ -70,13 +70,13 @@ namespace Daedalus {
              * @return Handle to the created instance
              */
             GEngineClasses::C_Item*       insertItem(size_t instance);
-            GEngineClasses::C_Item*       insertItem(const std::string& instance);
+            GEngineClasses::C_Item*       insertItem(const char *instance);
 
             GEngineClasses::C_SFX*        insertSFX(size_t instance);
-            GEngineClasses::C_SFX*        insertSFX(const std::string& instance);
+            GEngineClasses::C_SFX*        insertSFX(const char *instance);
 
             GEngineClasses::C_MusicTheme* insertMusicTheme(size_t instance);
-            GEngineClasses::C_MusicTheme* insertMusicTheme(const std::string& instance);
+            GEngineClasses::C_MusicTheme* insertMusicTheme(const char *instance);
 
             /**
              * Creates scripting relevant objects

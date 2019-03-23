@@ -20,11 +20,11 @@ DATFile::DATFile(const uint8_t* pData, size_t numBytes){
 void DATFile::readSymTable(ZenLoad::ZenParser& input) {
   uint32_t count = input.readBinaryDWord();
   m_SymTable.symbolsByName.reserve(count);
-  m_SymTable.symbols.resize(count);
+  m_SymTable.symbols  .resize(count);
   m_SymTable.sortTable.resize(count);
   input.readBinaryRaw(m_SymTable.sortTable.data(), sizeof(uint32_t) * count);
 
-  // Read symbols
+  // Read symbols; m_SymTable.symbols[0] is null symbol
   for(uint32_t i=0; i<count; i++) {
     PARSymbol s;
     uint32_t named = input.readBinaryDWord();
@@ -90,8 +90,8 @@ void DATFile::readSymTable(ZenLoad::ZenParser& input) {
 
     s.parent = static_cast<int32_t>(input.readBinaryDWord());
 
-    if (!s.name.empty())
-      m_SymTable.symbolsByName.emplace(s.name, i);
+    if(!s.name.empty())
+      m_SymTable.symbolsByName.emplace_back(s.name, i);
 
     // check for callable object
     if(s.isEParType(EParType_Prototype) ||    // is a Prototype
@@ -105,6 +105,9 @@ void DATFile::readSymTable(ZenLoad::ZenParser& input) {
     m_SymTable.symbols[i] = std::move(s);
     }
 
+  std::sort(m_SymTable.symbolsByName.begin(),m_SymTable.symbolsByName.end(),[](auto& l,auto& r){
+    return compareNoCase(l.first.c_str(),r.first.c_str())<0;
+    });
   readStack(input);
   }
 
@@ -183,6 +186,22 @@ void DATFile::readStack(ZenLoad::ZenParser& input) {
     }
   }
 
+int DATFile::compareNoCase(const char *a, const char *b) {
+  for(;*a;++a,++b) {
+    auto aa = std::toupper(*a);
+    auto bb = std::toupper(*b);
+    if(aa<bb)
+      return -1;
+    if(aa>bb)
+      return 1;
+    }
+  if(0<*b)
+    return -1;
+  if(0>*b)
+    return 1;
+  return 0;
+  }
+
 namespace Daedalus
 {
     template <>
@@ -247,28 +266,29 @@ namespace Daedalus
     };
 }  // namespace Daedalus
 
-PARSymbol& DATFile::getSymbolByName(const std::string& symName) {
-  std::string n = std::string(symName);
-  std::transform(n.begin(), n.end(), n.begin(), ::toupper);
-  //assert(hasSymbolName(n));
-  if(!hasSymbolName(n)) {
+PARSymbol& DATFile::getSymbolByName(const char *symName) {
+  size_t id=getSymbolIndexByName(symName);
+  if(id==0) {
     LogWarn() << "symbol " << symName << " not found";
     }
-  return m_SymTable.symbols[m_SymTable.symbolsByName[n]];
+  return m_SymTable.symbols[id];
   }
 
-bool DATFile::hasSymbolName(const std::string& symName) {
-  std::string n = std::string(symName);
-  std::transform(n.begin(), n.end(), n.begin(), ::toupper);
-
-  return m_SymTable.symbolsByName.find(n) != m_SymTable.symbolsByName.end();
+bool DATFile::hasSymbolName(const char* symName) {
+  return getSymbolIndexByName(symName)!=size_t(-1);
   }
 
-size_t DATFile::getSymbolIndexByName(const std::string& symName) {
-  std::string n = std::string(symName);
-  std::transform(n.begin(), n.end(), n.begin(), ::toupper);
-
-  return m_SymTable.symbolsByName[n];
+size_t DATFile::getSymbolIndexByName(const char* symName) {
+  if(symName==nullptr)
+    return size_t(-1);
+  auto it = std::lower_bound(m_SymTable.symbolsByName.begin(),m_SymTable.symbolsByName.end(),symName,[](auto& l,const char* r){
+    return compareNoCase(l.first.c_str(),r)<0;
+    });
+  if(it==m_SymTable.symbolsByName.end())
+    return size_t(-1);
+  if(compareNoCase(it->first.c_str(),symName)!=0)
+    return size_t(-1);
+  return it->second;
   }
 
 PARSymbol& DATFile::getSymbolByIndex(size_t idx) {
@@ -296,29 +316,29 @@ size_t DATFile::addSymbol() {
   return m_SymTable.symbols.size() - 1;
   }
 
-void DATFile::iterateSymbolsOfClass(const std::string& className, std::function<void(size_t, PARSymbol&)> callback) {
+void DATFile::iterateSymbolsOfClass(const char* className, std::function<void(size_t, PARSymbol&)> callback) {
   constexpr auto none = uint32_t{0xFFFFFFFF};
   // First, find the parent-symbol
   size_t baseSym = getSymbolIndexByName(className);
 
-  for(size_t i = 0; i < m_SymTable.symbols.size(); i++) {
+  for(size_t i=0; i<m_SymTable.symbols.size(); i++) {
     PARSymbol& s = getSymbolByIndex(i);
-    if(s.parent == none || s.properties.elemProps.type != EParType_Instance)
+    if(s.parent==none || s.properties.elemProps.type!=EParType_Instance)
       continue;
 
-    if((s.properties.elemProps.flags & Daedalus::EParFlag::EParFlag_Const) == 0)
+    if((s.properties.elemProps.flags & Daedalus::EParFlag::EParFlag_Const)==0)
       continue;  // filters out variables of type C_NPC or C_ITEM
 
     PARSymbol& p = getSymbolByIndex(s.parent);
     uint32_t pBase = s.parent;
 
     // In case this is also just a prototype, go deeper one more level
-    if(p.properties.elemProps.type == EParType_Prototype && p.parent != none) {
+    if(p.properties.elemProps.type==EParType_Prototype && p.parent!=none) {
       pBase = p.parent;
       }
 
     // If the parent-classes match, we found an instance of our class
-    if (baseSym == pBase)
+    if(baseSym==pBase)
       callback(i, s);
     }
   }

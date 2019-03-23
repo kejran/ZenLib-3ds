@@ -16,7 +16,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
 
   // the vm of the GOTHIC.DAT does not contain C_Menu and MENU.DAT's vm does not contain C_NPC
   // so we need to register only class members of existing classes
-  auto classExists = [&vm](const std::string& className) {
+  auto classExists = [&vm](const char* className) {
     bool exists = vm.getDATFile().hasSymbolName(className);
     return exists && (vm.getDATFile().getSymbolByName(className).properties.elemProps.type==EParType_Class);
     };

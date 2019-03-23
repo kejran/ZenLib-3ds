@@ -293,7 +293,7 @@ const PARStackOpCode& DaedalusVM::nextInstruction(size_t& pc) {
   return op;
   }
 
-void DaedalusVM::registerExternalFunction(const std::string& symName, const std::function<void(DaedalusVM&)>& fn) {
+void DaedalusVM::registerExternalFunction(const char* symName, const std::function<void(DaedalusVM&)>& fn) {
   if(m_DATFile.hasSymbolName(symName)) {
     size_t s = m_DATFile.getSymbolIndexByName(symName);
     m_ExternalsByIndex[s] = fn;
@@ -405,7 +405,7 @@ uint32_t DaedalusVM::popVar() {
   return popVar(arr);
   }
 
-void DaedalusVM::pushVar(const std::string& symName) {
+void DaedalusVM::pushVar(const char* symName) {
   size_t idx = m_DATFile.getSymbolIndexByName(symName);
   pushVar(idx);
   }
@@ -421,7 +421,7 @@ void DaedalusVM::pushString(const std::string& str) {
   pushVar(symIdx, 0);
   }
 
-void DaedalusVM::setInstance(const std::string& instSymbol, void* h, EInstanceClass instanceClass) {
+void DaedalusVM::setInstance(const char* instSymbol, void* h, EInstanceClass instanceClass) {
   PARSymbol& s = m_DATFile.getSymbolByName(instSymbol);
   s.instanceDataHandle = h;
   s.instanceDataClass  = instanceClass;
