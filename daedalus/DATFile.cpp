@@ -268,8 +268,10 @@ namespace Daedalus
 
 PARSymbol& DATFile::getSymbolByName(const char *symName) {
   size_t id=getSymbolIndexByName(symName);
-  if(id==0) {
+  if(id==size_t(-1)) {
     LogWarn() << "symbol " << symName << " not found";
+    static PARSymbol ps;
+    return ps;
     }
   return m_SymTable.symbols[id];
   }

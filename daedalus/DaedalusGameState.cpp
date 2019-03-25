@@ -128,10 +128,6 @@ GEngineClasses::C_MusicTheme *DaedalusGameState::insertMusicTheme(const char* in
   return insertMusicTheme(m_VM.getDATFile().getSymbolIndexByName(instance));
   }
 
-void DaedalusGameState::removeItem(GEngineClasses::C_Item *item) {
-  delete item;
-  }
-
 void DaedalusGameState::removeNPC(GEngineClasses::C_Npc *npc) {
   delete npc;
   }

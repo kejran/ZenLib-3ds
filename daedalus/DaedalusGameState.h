@@ -52,7 +52,6 @@ namespace Daedalus {
              */
             template <typename C_Class>
             void remove        (C_Class* h) { delete h; }
-            void removeItem    (GEngineClasses::C_Item* item);
             void removeNPC     (GEngineClasses::C_Npc*  npc);
 
             /**
