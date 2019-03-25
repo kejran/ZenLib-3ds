@@ -304,7 +304,7 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER(C_MusicTheme, transSubType);
     }
 
-  if(classExists("C_GILVALUES")) {
+  if(classExists("C_GilValues")) {
     REGISTER(C_GilValues, water_depth_knee);
     REGISTER(C_GilValues, water_depth_chest);
     REGISTER(C_GilValues, jumpup_height);
@@ -336,5 +336,9 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER(C_GilValues, blood_emitter);
     REGISTER(C_GilValues, blood_texture);
     REGISTER(C_GilValues, turn_speed);
+    }
+
+  if(classExists("C_FightAI")) {
+    REGISTER(C_FightAI, move);
     }
   }

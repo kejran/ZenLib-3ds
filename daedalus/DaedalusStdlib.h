@@ -48,6 +48,29 @@ namespace Daedalus
         const int PROT_FALL = DAM_INDEX_FALL;
         const int PROT_INDEX_MAX = DAM_INDEX_MAX;
 
+        enum Move : int32_t {
+          MOVE_RUN          = 1,  // Opponents in my focus + who stands in between? (G)
+          MOVE_RUNBACK      = 2, 	// Opponents in my focus
+          MOVE_JUMPBACK     = 3,
+          MOVE_TURN         = 4,  // Always up to opponents in focus (never interrupted by new action, at most by enemy attack)
+          MOVE_STRAFE       = 5,  // (Direction is decided by the native-code)
+          MOVE_ATTACK       = 6,  // in ComboZone = combo / in the run = storm attack?
+          MOVE_SIDEATTACK   = 7,
+          MOVE_FRONTATTACK  = 8,
+          MOVE_TRIPLEATTACK = 9,
+          MOVE_WHIRLATTACK  = 10,
+          MOVE_MASTERATTACK = 11,
+          MOVE_TURNTOHIT    = 15,	// Version > 0.92 => No Effect
+          MOVE_PARADE       = 17,	// (keine Attacke = oben)
+          MOVE_STANDUP      = 18,
+          MOVE_WAIT         = 19,
+          MOVE_WAIT_LONGER  = 23,	// Achtung: Muss 23 sein, da im Programm noch einige unbenutze Moves zwischen 19 und 22 gibt
+          MOVE_WAIT_EXT     = 24,	// Achtung: Muss 24 sein, da im Programm noch einige unbenutze Moves zwischen 19 und 22 gibt
+
+          MAX_MOVE          = 6,
+          MAX_FIGHTAI       = 50, // Number of existing Fight-AIs // Constant NOT redundant in the native-code, can be changed in scripts as required
+          };
+
         // Music transition types
         enum ETransitionType
         {
@@ -676,19 +699,17 @@ namespace Daedalus
             std::string pfxName;
         };
 
-        struct C_MusicTheme : Instance
-        {
-            std::string file;
-            float vol;
-            int32_t loop;
-            float reverbMix;
-            float reverbTime;
-            int32_t transType;
-            int32_t transSubType;
-        };
+        struct C_MusicTheme : Instance {
+          std::string file;
+          float       vol=0.f;
+          int32_t     loop=0;
+          float       reverbMix=0;
+          float       reverbTime=0;
+          int32_t     transType=0;
+          int32_t     transSubType=0;
+          };
 
-        struct C_GilValues : Instance
-        {
+        struct C_GilValues : Instance {
           C_GilValues(){
             for(auto& i:jumpup_height)      i = 200;
             for(auto& i:blood_max_distance) i = 1000;
@@ -727,6 +748,10 @@ namespace Daedalus
           std::string  blood_emitter      [GIL_MAX]={}; //	DEFAULT = "PFX_BLOOD"		;	Welcher Partikel-Emitter ?
           std::string  blood_texture      [GIL_MAX]={}; //	DEFAULT = "ZBLOODSPLAT2.TGA";	Welche Textur ?
           int32_t      turn_speed         [GIL_MAX]={}; //	DEFAULT = 150				;
+          };
+
+        struct C_FightAI : Instance {
+          Move move[MAX_MOVE]={};
           };
     }  // namespace GEngineClasses
 
