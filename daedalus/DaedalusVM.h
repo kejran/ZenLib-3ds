@@ -115,7 +115,7 @@ class DaedalusVM {
 
     // contains pairs of FunctionInfo, Debugging only
     CallStackFrame*                                              m_CallStack=nullptr;
-    std::unordered_map<size_t, std::function<void(DaedalusVM&)>> m_ExternalsByIndex;
+    std::vector<std::function<void(DaedalusVM&)>>                m_ExternalsByIndex;
     std::function<void(DaedalusVM&)>                             m_OnUnsatisfiedCall;
 
     size_t                                                       m_CurrentInstance;
@@ -124,7 +124,6 @@ class DaedalusVM {
 
     size_t                                                       m_SelfId=size_t(-1);
     std::queue<size_t>                                           m_FakeStringSymbols;
-    std::map<EInstanceClass, std::set<void*>>                    m_RegisteredInstances;
     GameState::DaedalusGameState                                 m_GameState;
   };
 }  // namespace Daedalus

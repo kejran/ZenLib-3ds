@@ -208,14 +208,18 @@ void DaedalusVM::eval(uint32_t PC) {
         }
 
       case EParOp_CallExternal: {
-        auto it = m_ExternalsByIndex.find(size_t(op.symbol));
+        std::function<void(DaedalusVM&)>* f=nullptr;
+        if(size_t(op.symbol)<m_ExternalsByIndex.size()){
+          f = &m_ExternalsByIndex[size_t(op.symbol)];
+          }
+        //auto it = m_ExternalsByIndex.find(size_t(op.symbol));
 
         void*          currentInstanceHandle = m_CurrentInstanceHandle;
         EInstanceClass currentInstanceClass  = m_CurrentInstanceClass;
 
-        if(it != m_ExternalsByIndex.end()) {
+        if(f!=nullptr && *f) {
           CallStackFrame frame(*this, op.symbol, CallStackFrame::SymbolIndex);
-          (*it).second(*this);
+          (*f)(*this);
           } else {
           CallStackFrame frame(*this, op.symbol, CallStackFrame::SymbolIndex);
           m_OnUnsatisfiedCall(*this);
@@ -296,6 +300,8 @@ const PARStackOpCode& DaedalusVM::nextInstruction(size_t& pc) {
 void DaedalusVM::registerExternalFunction(const char* symName, const std::function<void(DaedalusVM&)>& fn) {
   if(m_DATFile.hasSymbolName(symName)) {
     size_t s = m_DATFile.getSymbolIndexByName(symName);
+    if(m_ExternalsByIndex.size()<=s)
+      m_ExternalsByIndex.resize(s+1);
     m_ExternalsByIndex[s] = fn;
     }
   }
