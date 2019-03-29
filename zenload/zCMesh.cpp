@@ -299,7 +299,7 @@ void zCMesh::readObjectData(ZenParser& parser, const std::vector<size_t>& skipPo
                 //parser.readBinaryRaw(dataBlock.data(), chunkInfo.length);
 
                 // Fake a read here, to get around an additional copy of the data
-                const uint8_t* blockPtr = &parser.getData()[parser.getSeek()];
+                const uint8_t* blockPtr = parser.getDataPtr();
                 parser.setSeek(parser.getSeek() + chunkInfo.length);
 
                 size_t blockSize = version == EVersion::G2_2_6fix

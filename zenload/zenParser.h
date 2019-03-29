@@ -4,6 +4,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <memory>
+
 #include "zTypes.h"
 #include "utils/mathlib.h"
 #include "utils/split.h"
@@ -98,7 +100,7 @@ namespace ZenLoad
         /**
 		 * @brief returns the total size of the loaded file
 		 */
-        size_t getFileSize() { return m_Data.size(); }
+        size_t getFileSize() { return m_DataSize; }
 
         /**
 		 * @brief Reads the main ZEN-Header
@@ -197,8 +199,9 @@ namespace ZenLoad
 
         /**
 		 * @brief Returns the data-array
-		 */
-        const std::vector<uint8_t>& getData() { return m_Data; }
+     */
+        const uint8_t* getDataPtr()     const { return m_Data+m_Seek; }
+        size_t         getRamainBytes() const { return m_DataSize-m_Seek; }
 
         /**
 		* @brief Reads one structure of type T. Watch for alignment!
@@ -206,7 +209,7 @@ namespace ZenLoad
         template <typename T>
         void readStructure(T& s)
         {
-            if (m_Seek + sizeof(T) <= m_Data.size())
+            if (m_Seek + sizeof(T) <= m_DataSize)
             {
                 void* _s = (void*)&s;
                 memcpy(_s, &m_Data[m_Seek], sizeof(T));
@@ -255,8 +258,10 @@ namespace ZenLoad
         /**
 		 * @brief Data currently loaded and the current stream position
 		 */
-        std::vector<uint8_t> m_Data;
-        size_t m_Seek;
+        std::vector<uint8_t>     m_DataStorage;
+        const uint8_t*           m_Data=nullptr;
+        size_t                   m_DataSize=0;
+        size_t                   m_Seek=0;
 
         /**
 		 * @brief ZEN-Header of the loaded file
@@ -266,7 +271,7 @@ namespace ZenLoad
         /**
 		* @brief The world mesh. Only non-null if the ZEN had one. (BinSave don't have a worldmesh)
 		*/
-        zCMesh* m_pWorldMesh;
+        zCMesh* m_pWorldMesh=nullptr;
     };
 
 }  // namespace ZenLoad

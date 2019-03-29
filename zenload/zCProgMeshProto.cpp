@@ -118,7 +118,7 @@ void zCProgMeshProto::readObjectData(ZenParser& parser)
                 //  - String - Name
                 //  - zCMaterial-Chunk
 
-                ZenParser p2(&parser.getData()[parser.getSeek()], parser.getData().size() - parser.getSeek());
+                ZenParser p2(parser.getDataPtr(), parser.getRamainBytes());
                 p2.readHeader();
 
                 // Read every stored material

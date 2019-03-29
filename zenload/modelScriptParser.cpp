@@ -243,7 +243,7 @@ namespace ZenLoad
 
                 continue;
             }
-            else if (ch == '/' && (!m_Strict || ((m_Zen.getSeek() < m_Zen.getFileSize() - 1) && (m_Zen.getData()[m_Zen.getSeek()] == '/'))))  // Single / were supported by the original parser as well
+            else if (ch == '/' && (!m_Strict || ((m_Zen.getSeek() < m_Zen.getFileSize() - 1) && (*m_Zen.getDataPtr() == '/'))))  // Single / were supported by the original parser as well
             {
                 while (m_Zen.readBinaryByte() != '\n')
                 {
@@ -283,7 +283,7 @@ namespace ZenLoad
             if (isEof())
                 return End;
 
-            auto& zd = m_Zen.getData()[m_Zen.getSeek()];
+            auto& zd = *m_Zen.getDataPtr();
             if (!isspace(zd) && zd != '\n')
                 break;
 

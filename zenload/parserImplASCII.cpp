@@ -47,7 +47,7 @@ bool ParserImplASCII::readChunkStart(ZenParser::ChunkHeader& header)
         header.startPosition = m_pParser->m_Seek;
 
         // Parse chunk-header
-        std::string vobDescriptor(reinterpret_cast<char*>(&m_pParser->m_Data[m_pParser->m_Seek]), tmpSeek - m_pParser->m_Seek);
+        std::string vobDescriptor(reinterpret_cast<const char*>(&m_pParser->m_Data[m_pParser->m_Seek]), tmpSeek - m_pParser->m_Seek);
         std::vector<std::string> vec = Utils::split(vobDescriptor, ' ');
         m_pParser->m_Seek = tmpSeek + 1;
 

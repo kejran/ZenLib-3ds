@@ -30,38 +30,33 @@ using namespace ZenLoad;
 /**
  * @brief reads a zen from a file
  */
-ZenParser::ZenParser(const std::string& file)
-    : m_Seek(0)
-    , m_pWorldMesh(0)
-{
-    // Get data from zenfile
-    readFile(file, m_Data);
-}
+ZenParser::ZenParser(const std::string& file) {
+  // Get data from zenfile
+  readFile(file, m_DataStorage);
+  m_Data     = m_DataStorage.data();
+  m_DataSize = m_DataStorage.size();
+  }
 
 /**
  * @brief reads a zen from a vdf
  */
-ZenParser::ZenParser(const std::string& file, const VDFS::FileIndex& vdfs)
-    : m_Seek(0)
-    , m_pWorldMesh(0)
-{
-    vdfs.getFileData(file, m_Data);
-}
+ZenParser::ZenParser(const std::string& file, const VDFS::FileIndex& vdfs) {
+  vdfs.getFileData(file, m_DataStorage);
+  m_Data     = m_DataStorage.data();
+  m_DataSize = m_DataStorage.size();
+  }
 
 /**
  * @brief reads a zen from memory
  */
-ZenParser::ZenParser(const uint8_t* data, size_t size)
-    : m_Seek(0)
-    , m_pWorldMesh(0)
-{
-    m_Data.assign(data, data + size);
-}
+ZenParser::ZenParser(const uint8_t* data, size_t size) {
+  m_Data     = data;
+  m_DataSize = size;
+  }
 
-ZenLoad::ZenParser::~ZenParser()
-{
-    delete m_pWorldMesh;
-}
+ZenParser::~ZenParser() {
+  delete m_pWorldMesh;
+  }
 
 /**
 * @brief Read the given file and places the data in the given vector
@@ -421,7 +416,7 @@ bool ZenParser::skipString(const std::string& pattern)
 void ZenParser::skipSpaces()
 {
     bool search = true;
-    while (search && m_Seek < m_Data.size())
+    while (search && m_Seek < m_DataSize)
     {
         switch (m_Data[m_Seek])
         {
@@ -443,7 +438,7 @@ void ZenParser::skipSpaces()
  */
 void ZenParser::skipNewLines()
 {
-    while (m_Seek < m_Data.size() && m_Data[m_Seek] == '\n')
+    while (m_Seek < m_DataSize && m_Data[m_Seek] == '\n')
         ++m_Seek;
 }
 
@@ -452,7 +447,7 @@ void ZenParser::skipNewLines()
 */
 void ZenParser::checkArraySize()
 {
-    if (m_Seek >= m_Data.size())
+    if (m_Seek >= m_DataSize)
         throw std::logic_error("Out of range");
 }
 
@@ -477,7 +472,7 @@ uint16_t ZenParser::readBinaryWord()
 
 uint8_t ZenParser::readBinaryByte()
 {
-    uint8_t retVal = *reinterpret_cast<uint8_t*>(&m_Data[m_Seek]);
+    uint8_t retVal = *reinterpret_cast<const uint8_t*>(m_Data+m_Seek);
     m_Seek += sizeof(uint8_t);
     return retVal;
 }
