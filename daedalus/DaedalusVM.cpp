@@ -395,7 +395,7 @@ float DaedalusVM::popFloat() {
   auto top = m_Stack.back();
   m_Stack.pop_back();
   if(top.tag==EParOp_PushVar){
-    return m_DATFile.getSymbolByIndex(size_t(top.i32)).getInt(top.id, getCurrentInstanceDataPtr());
+    return m_DATFile.getSymbolByIndex(size_t(top.i32)).getFloat(top.id, getCurrentInstanceDataPtr());
     }
   return top.f;
   }
@@ -496,6 +496,9 @@ const std::string &DaedalusVM::currentCall() {
   }
 
 int32_t DaedalusVM::runFunctionBySymIndex(size_t symIdx, bool clearDataStack) {
+  if(symIdx==size_t(-1))
+    return 0;
+
   if(clearDataStack)
     m_Stack.clear();
 
