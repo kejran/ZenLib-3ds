@@ -47,4 +47,25 @@ std::vector<std::string> Utils::split(const std::string& _s, const std::string& 
     }
 
     return parts;
+  }
+
+std::vector<const char*> Utils::splitDestructive(std::string &s, const char delim)
+{
+  std::vector<const char*> ret;
+
+  const char* v = s.data();
+  for(char& c:s)
+  {
+    if(c==delim)
+    {
+      c = '\0';
+      if(*v!='\0')
+        ret.push_back(v);
+      v=&c+1;
+    }
+  }
+
+  if(*v!='\0')
+    ret.push_back(v);
+  return ret;
 }

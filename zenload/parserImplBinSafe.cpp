@@ -30,17 +30,17 @@ bool ParserImplBinSafe::readChunkStart(ZenParser::ChunkHeader& header)
         std::string vobDescriptor = readString();
 
         // Early exit if this is a chunk-end or not a chunk header
-        if (vobDescriptor.empty() || (vobDescriptor.front() != '[' && vobDescriptor.back() != ']') || vobDescriptor.size() <= 2)
+        if (vobDescriptor.size()<=2 || (vobDescriptor.front() != '[' && vobDescriptor.back() != ']'))
         {
             m_pParser->setSeek(seek);
             return false;
         }
 
-        vobDescriptor = vobDescriptor.substr(1, vobDescriptor.size() - 2);
 
         // Special case for camera keyframes
         if (vobDescriptor.find('%') != std::string::npos && vobDescriptor.find('\xA7') != std::string::npos)
         {
+            vobDescriptor = vobDescriptor.substr(1, vobDescriptor.size() - 2);
             // Make a header with createObject = true and ref as classname
             auto parts = Utils::split(vobDescriptor, ' ');
             header.createObject = true;
@@ -55,8 +55,9 @@ bool ParserImplBinSafe::readChunkStart(ZenParser::ChunkHeader& header)
         // Save chunks starting-position (right after chunk-header)
         header.startPosition = m_pParser->m_Seek;
 
+        vobDescriptor = vobDescriptor.substr(1, vobDescriptor.size() - 2);
         // Parse chunk-header
-        std::vector<std::string> vec = Utils::split(vobDescriptor, ' ');
+        std::vector<const char*> vec = Utils::splitDestructive(vobDescriptor, ' ');
 
         std::string name;
         std::string className;
@@ -78,7 +79,7 @@ bool ParserImplBinSafe::readChunkStart(ZenParser::ChunkHeader& header)
             switch (state)
             {
                 case S_OBJECT_NAME:
-                    if (arg != "%")
+                    if (std::strcmp(arg,"%")!=0)
                     {
                         name = arg;
                         state = S_REFERENCE;
@@ -86,13 +87,13 @@ bool ParserImplBinSafe::readChunkStart(ZenParser::ChunkHeader& header)
                     }
                     //@fallthrough@
                 case S_REFERENCE:
-                    if (arg == "%")
+                    if (std::strcmp(arg,"%")==0)
                     {
                         createObject = true;
                         state = S_CLASS_NAME;
                         break;
                     }
-                    else if (arg == "\xA7")
+                    else if (std::strcmp(arg,"\xA7")==0)
                     {
                         createObject = false;
                         state = S_CLASS_NAME;
@@ -110,11 +111,11 @@ bool ParserImplBinSafe::readChunkStart(ZenParser::ChunkHeader& header)
                     }
                     //@fallthrough@
                 case S_CLASS_VERSION:
-                    classVersion = std::atoi(arg.c_str());
+                    classVersion = std::atoi(arg);
                     state = S_OBJECT_ID;
                     break;
                 case S_OBJECT_ID:
-                    objectID = std::atoi(arg.c_str());
+                    objectID = std::atoi(arg);
                     state = S_FINISHED;
                     break;
                 default:

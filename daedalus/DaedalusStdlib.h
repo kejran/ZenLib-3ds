@@ -27,26 +27,29 @@ namespace Daedalus
         const int ITM_TEXT_MAX = 6;
         const int GIL_MAX = 66;
 
-        const int DAM_INDEX_BARRIER = 0;  //				 nur der Vollstandigkeit und Transparenz wegen hier definiert ( _NICHT_ verwenden )
-        const int DAM_INDEX_BLUNT = DAM_INDEX_BARRIER + 1;
-        const int DAM_INDEX_EDGE = DAM_INDEX_BLUNT + 1;
-        const int DAM_INDEX_FIRE = DAM_INDEX_EDGE + 1;
-        const int DAM_INDEX_FLY = DAM_INDEX_FIRE + 1;
-        const int DAM_INDEX_MAGIC = DAM_INDEX_FLY + 1;
-        const int DAM_INDEX_POINT = DAM_INDEX_MAGIC + 1;
-        const int DAM_INDEX_FALL = DAM_INDEX_POINT +
-                                   1;  //				 nur der Vollstandigkeit und Transparenz wegen hier definiert ( _NICHT_ verwenden )
-        const int DAM_INDEX_MAX = DAM_INDEX_FALL + 1;
+        enum {
+          DAM_INDEX_BARRIER = 0,  //				 nur der Vollstandigkeit und Transparenz wegen hier definiert ( _NICHT_ verwenden )
+          DAM_INDEX_BLUNT   = 1,
+          DAM_INDEX_EDGE,
+          DAM_INDEX_FIRE,
+          DAM_INDEX_FLY,
+          DAM_INDEX_MAGIC,
+          DAM_INDEX_POINT,
+          DAM_INDEX_FALL,//				 nur der Vollstandigkeit und Transparenz wegen hier definiert ( _NICHT_ verwenden )
+          DAM_INDEX_MAX
+          };
 
-        const int PROT_BARRIER = DAM_INDEX_BARRIER;
-        const int PROT_BLUNT = DAM_INDEX_BLUNT;
-        const int PROT_EDGE = DAM_INDEX_EDGE;
-        const int PROT_FIRE = DAM_INDEX_FIRE;
-        const int PROT_FLY = DAM_INDEX_FLY;
-        const int PROT_MAGIC = DAM_INDEX_MAGIC;
-        const int PROT_POINT = DAM_INDEX_POINT;
-        const int PROT_FALL = DAM_INDEX_FALL;
-        const int PROT_INDEX_MAX = DAM_INDEX_MAX;
+        enum {
+          PROT_BARRIER   = DAM_INDEX_BARRIER,
+          PROT_BLUNT     = DAM_INDEX_BLUNT,
+          PROT_EDGE      = DAM_INDEX_EDGE,
+          PROT_FIRE      = DAM_INDEX_FIRE,
+          PROT_FLY       = DAM_INDEX_FLY,
+          PROT_MAGIC     = DAM_INDEX_MAGIC,
+          PROT_POINT     = DAM_INDEX_POINT,
+          PROT_FALL      = DAM_INDEX_FALL,
+          PROT_INDEX_MAX = DAM_INDEX_MAX
+          };
 
         enum Move : int32_t {
           MOVE_RUN          = 1,  // Opponents in my focus + who stands in between? (G)

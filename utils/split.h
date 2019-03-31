@@ -17,6 +17,14 @@ namespace Utils
     std::vector<std::string> split(const std::string& s, const char delim);
 
     /**
+     * @brief split string function
+     * @param string
+     * @param delimitor
+     * @return splitted string in a std::vector<const char*>
+     */
+    std::vector<const char*> splitDestructive(std::string& s, const char delim);
+
+    /**
 	 * @brief Splits a string on every occasion of one of the input-chars, in the given order
 	 *		  Undefined behavior if the chars occur multiple times.
 	 */

@@ -52,7 +52,6 @@ namespace Daedalus {
              */
             template <typename C_Class>
             void remove        (C_Class* h) { delete h; }
-            void removeNPC     (GEngineClasses::C_Npc*  npc);
 
             /**
              * Creates a new NPC-Instance, just as Wld_InsertNPC was called from script
