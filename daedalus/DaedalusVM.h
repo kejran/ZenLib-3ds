@@ -37,11 +37,12 @@ class DaedalusVM {
     void setReturn(float f);
     void setReturnVar(int32_t v);
 
-    int32_t     popInt();
-    float       popFloat();
-    uint32_t    popVar();
-    uint32_t    popVar(uint32_t& arrIdx);
-    std::string popString(bool toUpper = false);
+    int32_t      popInt();
+    float        popFloat();
+    std::string& popString();
+    uint32_t     popVar();
+    uint32_t     popVar(uint32_t& arrIdx);
+    std::string  popString(bool toUpper);
 
     void setInstance(const char *instSymbol, void *h, EInstanceClass instanceClass);
     void initializeInstance(void* instance, size_t symIdx, EInstanceClass classIdx);
@@ -58,6 +59,11 @@ class DaedalusVM {
     GameState::DaedalusGameState& getGameState() { return m_GameState; }
     std::vector<std::string>      getCallStack();
     const std::string&            currentCall();
+
+    PARSymbol&                    globalSelf();
+    PARSymbol&                    globalOther();
+    PARSymbol&                    globalVictim();
+    PARSymbol&                    globalItem();
 
   private:
     template <typename T = int32_t>
@@ -123,7 +129,11 @@ class DaedalusVM {
     void*                                                        m_CurrentInstanceHandle;
     EInstanceClass                                               m_CurrentInstanceClass;
 
-    size_t                                                       m_SelfId=size_t(-1);
+    size_t                                                       m_SelfId   = size_t(-1);
+    size_t                                                       m_OtherId  = size_t(-1);
+    size_t                                                       m_VictimId = size_t(-1);
+    size_t                                                       m_ItemId   = size_t(-1);
+
     std::queue<size_t>                                           m_FakeStringSymbols;
     GameState::DaedalusGameState                                 m_GameState;
   };

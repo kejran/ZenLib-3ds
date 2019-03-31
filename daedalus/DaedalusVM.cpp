@@ -26,8 +26,10 @@ DaedalusVM::DaedalusVM(const uint8_t* pDATFileData, size_t numBytes)
     m_FakeStringSymbols.push(symIndex);
     }
 
-  if(m_DATFile.hasSymbolName("self"))
-    m_SelfId = m_DATFile.getSymbolIndexByName("self");
+  m_SelfId   = m_DATFile.getSymbolIndexByName("self");
+  m_OtherId  = m_DATFile.getSymbolIndexByName("other");
+  m_VictimId = m_DATFile.getSymbolIndexByName("victim");
+  m_ItemId   = m_DATFile.getSymbolIndexByName("item");
   m_CurrentInstanceHandle=nullptr;
   }
 
@@ -406,6 +408,23 @@ float DaedalusVM::popFloat() {
   return top.f;
   }
 
+std::string& DaedalusVM::popString() {
+  if(m_Stack.empty()){
+    static std::string err;
+    return err;
+    }
+
+  auto top = m_Stack.back();
+  m_Stack.pop_back();
+  if(top.tag==EParOp_PushVar){
+    auto& sym = m_DATFile.getSymbolByIndex(size_t(top.i32));
+    return sym.getString(top.id,top.inst);
+    }
+
+  static std::string err;
+  return err;
+  }
+
 float DaedalusVM::popFloatValue() {
   auto top = m_Stack.back();
   m_Stack.pop_back();
@@ -454,7 +473,7 @@ void DaedalusVM::initializeInstance(void *instance, size_t symIdx, EInstanceClas
   PARSymbol selfCpy;
   // Particle and Menu VM do not have a self symbol
   if(m_SelfId!=size_t(-1)) {
-    selfCpy = m_DATFile.getSymbolByIndex(m_SelfId);  // Copy of "self"-symbol
+    selfCpy = globalSelf();  // Copy of "self"-symbol
     // Set self
     setInstance("self", instance, classIdx);
     }
@@ -467,7 +486,7 @@ void DaedalusVM::initializeInstance(void *instance, size_t symIdx, EInstanceClas
   runFunctionBySymIndex(symIdx);
 
   if(m_SelfId!=size_t(-1))
-    m_DATFile.getSymbolByIndex(m_SelfId) = selfCpy;
+    globalSelf() = selfCpy;
 
   m_CurrentInstanceHandle = currentInstanceHandle;
   m_CurrentInstanceClass  = currentInstanceClass;
@@ -499,6 +518,22 @@ const std::string &DaedalusVM::currentCall() {
 
   static std::string n = "<no function>";
   return n;
+  }
+
+PARSymbol &DaedalusVM::globalSelf() {
+  return m_DATFile.getSymbolByIndex(m_SelfId);
+  }
+
+PARSymbol &DaedalusVM::globalOther() {
+  return m_DATFile.getSymbolByIndex(m_OtherId);
+  }
+
+PARSymbol &DaedalusVM::globalVictim() {
+  return m_DATFile.getSymbolByIndex(m_VictimId);
+  }
+
+PARSymbol &DaedalusVM::globalItem() {
+  return m_DATFile.getSymbolByIndex(m_ItemId);
   }
 
 int32_t DaedalusVM::runFunctionBySymIndex(size_t symIdx, bool clearDataStack) {
