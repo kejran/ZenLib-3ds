@@ -91,7 +91,7 @@ class DaedalusVM {
     struct Stk {
       Stk(int32_t i):i32(i){}
       Stk(float   f):f(f){}
-      Stk(int32_t i,size_t id):i32(i),tag(EParOp_PushVar),id(id){}
+      Stk(void* inst,int32_t i,size_t id):i32(i),tag(EParOp_PushVar),id(id),inst(inst){}
 
       union {
         int32_t i32;
@@ -99,6 +99,7 @@ class DaedalusVM {
         };
       EParOp   tag=EParOp_PushInt;
       uint32_t id =0;
+      void*    inst=nullptr;
       };
 
     struct Stack {

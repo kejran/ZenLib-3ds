@@ -327,13 +327,17 @@ T DaedalusVM::popDataValue() {
   auto top = m_Stack.back();
   m_Stack.pop_back();
   if(top.tag==EParOp_PushVar){
-    return m_DATFile.getSymbolByIndex(size_t(top.i32)).getValue<T>(top.id, getCurrentInstanceDataPtr());
+    auto& sym = m_DATFile.getSymbolByIndex(size_t(top.i32));
+    return sym.getValue<T>(top.id,top.inst);
     }
   return top.i32;
   }
 
 void DaedalusVM::pushVar(size_t index, uint32_t arrIdx) {
-  m_Stack.emplace_back(index,arrIdx);
+  auto& sym = m_DATFile.getSymbolByIndex(index);
+  //int32_t val = sym.getValue<int>(arrIdx, getCurrentInstanceDataPtr());
+  auto ptr = getCurrentInstanceDataPtr();
+  m_Stack.emplace_back(ptr,index,arrIdx);
   }
 
 uint32_t DaedalusVM::popVar(uint32_t& arrIdx) {
@@ -383,7 +387,8 @@ int32_t DaedalusVM::popInt() {
   auto top = m_Stack.back();
   m_Stack.pop_back();
   if(top.tag==EParOp_PushVar){
-    return m_DATFile.getSymbolByIndex(size_t(top.i32)).getInt(top.id, getCurrentInstanceDataPtr());
+    auto& sym = m_DATFile.getSymbolByIndex(size_t(top.i32));
+    return sym.getValue<int32_t>(top.id,top.inst);
     }
   return top.i32;
   }
@@ -395,7 +400,8 @@ float DaedalusVM::popFloat() {
   auto top = m_Stack.back();
   m_Stack.pop_back();
   if(top.tag==EParOp_PushVar){
-    return m_DATFile.getSymbolByIndex(size_t(top.i32)).getFloat(top.id, getCurrentInstanceDataPtr());
+    auto& sym = m_DATFile.getSymbolByIndex(size_t(top.i32));
+    return sym.getFloat(top.id,top.inst);
     }
   return top.f;
   }
