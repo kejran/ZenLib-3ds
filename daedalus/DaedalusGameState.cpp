@@ -3,7 +3,6 @@
 //
 
 #include "DaedalusGameState.h"
-#include "DaedalusDialogManager.h"
 #include "DaedalusVM.h"
 #include <utils/logger.h>
 
@@ -21,10 +20,6 @@ Daedalus::GEngineClasses::Instance* DaedalusGameState::getByClass(void* h,EInsta
 template <typename C_Class>
 C_Class *DaedalusGameState::create() {
   return new C_Class();
-  }
-
-GEngineClasses::C_Npc *DaedalusGameState::createNPC() {
-  return create<GEngineClasses::C_Npc>();
   }
 
 GEngineClasses::C_Item* DaedalusGameState::createItem() {
@@ -72,7 +67,7 @@ GEngineClasses::C_GilValues *DaedalusGameState::createGilValues() {
   }
 
 GEngineClasses::C_Npc* DaedalusGameState::insertNPC(size_t instance, const std::string& waypoint) {
-  auto npc = createNPC();
+  auto npc = new GEngineClasses::C_Npc();
 
   GEngineClasses::C_Npc& npcData = *npc;
   npcData.wp = waypoint;
@@ -84,10 +79,6 @@ GEngineClasses::C_Npc* DaedalusGameState::insertNPC(size_t instance, const std::
   PARSymbol& s         = m_VM.getDATFile().getSymbolByIndex(instance);
   s.instanceDataHandle = npc;
   s.instanceDataClass  = IC_Npc;
-
-  if(m_GameExternals.wld_insertnpc)
-    m_GameExternals.wld_insertnpc(npc, waypoint);
-
   m_VM.initializeInstance(npc, instance, IC_Npc);
   return npc;
   }

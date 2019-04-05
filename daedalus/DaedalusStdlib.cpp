@@ -341,4 +341,30 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
   if(classExists("C_FightAI")) {
     REGISTER(C_FightAI, move);
     }
+
+  if(classExists("CCamSys")) {
+    REGISTER(CCamSys, bestRange);
+    REGISTER(CCamSys, minRange);
+    REGISTER(CCamSys, maxRange);
+    REGISTER(CCamSys, bestElevation);
+    REGISTER(CCamSys, minElevation);
+    REGISTER(CCamSys, maxElevation);
+    REGISTER(CCamSys, bestAzimuth);
+    REGISTER(CCamSys, minAzimuth);
+    REGISTER(CCamSys, maxAzimuth);
+    REGISTER(CCamSys, bestRotZ);
+    REGISTER(CCamSys, minRotZ);
+    REGISTER(CCamSys, maxRotZ);
+    REGISTER(CCamSys, rotOffsetX);
+    REGISTER(CCamSys, rotOffsetY);
+    REGISTER(CCamSys, rotOffsetZ);
+    REGISTER(CCamSys, targetOffsetX);
+    REGISTER(CCamSys, targetOffsetY);
+    REGISTER(CCamSys, targetOffsetZ);
+    REGISTER(CCamSys, veloTrans);
+    REGISTER(CCamSys, veloRot);
+    REGISTER(CCamSys, translate);
+    REGISTER(CCamSys, rotate);
+    REGISTER(CCamSys, collision);
+    }
   }

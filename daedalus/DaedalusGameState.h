@@ -37,15 +37,6 @@ namespace Daedalus {
           public:
             DaedalusGameState(Daedalus::DaedalusVM& vm);
 
-            struct GameExternals {
-              // These will all be executed with the content already created
-              std::function<void(GEngineClasses::C_Npc*, std::string)> wld_insertnpc;
-              };
-
-            void setGameExternals(const GameExternals& ext) {
-              m_GameExternals = ext;
-              }
-
             /**
              * Removes the data behind the given item handle
              * @param item Item to remove
@@ -81,7 +72,6 @@ namespace Daedalus {
              */
             template <typename C_Class>
             C_Class*                      create();
-            GEngineClasses::C_Npc*        createNPC();
             GEngineClasses::C_Item*       createItem();
             GEngineClasses::C_ItemReact*  createItemReact();
             GEngineClasses::C_Mission*    createMission();
@@ -98,7 +88,6 @@ namespace Daedalus {
 
         private:
             Daedalus::DaedalusVM& m_VM;
-            GameExternals         m_GameExternals;
         };
     }  // namespace GameState
 }  // namespace Daedalus

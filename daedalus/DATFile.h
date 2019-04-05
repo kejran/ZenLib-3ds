@@ -9,6 +9,7 @@
 
 namespace Daedalus {
 enum EInstanceClass {
+  IC_None,
   IC_Npc,
   IC_Mission,
   IC_Info,
@@ -21,31 +22,30 @@ enum EInstanceClass {
   IC_Pfx,
   IC_MusicTheme,
   IC_GilValues,
-  IC_FightAi
+  IC_FightAi,
+  IC_CamSys
   };
 
 template <class C_Class>
 EInstanceClass enumFromClass();
 
-enum EParFlag
-  {
-  EParFlag_Const = 1 << 0,
-  EParFlag_Return = 1 << 1,
+enum EParFlag {
+  EParFlag_Const    = 1 << 0,
+  EParFlag_Return   = 1 << 1,
   EParFlag_ClassVar = 1 << 2,
   EParFlag_External = 1 << 3,
-  EParFlag_Merged = 1 << 4
+  EParFlag_Merged   = 1 << 4
   };
 
-enum EParType
-  {
-  EParType_Void = 0,
-  EParType_Float = 1,
-  EParType_Int = 2,
-  EParType_String = 3,
-  EParType_Class = 4,
-  EParType_Func = 5,
+enum EParType {
+  EParType_Void      = 0,
+  EParType_Float     = 1,
+  EParType_Int       = 2,
+  EParType_String    = 3,
+  EParType_Class     = 4,
+  EParType_Func      = 5,
   EParType_Prototype = 6,
-  EParType_Instance = 7
+  EParType_Instance  = 7
   };
 
 enum EParOp : uint8_t
@@ -117,21 +117,9 @@ enum EParOp : uint8_t
   };
 
 struct PARSymbol {
-  PARSymbol() {
-    classMemberOffset = -1;
-    classMemberArraySize = 0;
-    instanceDataClass = IC_Npc;
-    memset(&properties, 0, sizeof(properties));
-    /*classOffset = 0;
-            address = 0;
-            classMemberOffset = 0;*/
-    parent = 0xFFFFFFFF;
-    }
+  PARSymbol() = default;
 
-  std::string name;
-
-  struct Properties
-    {
+  struct Properties {
     int32_t offClsRet;  // Offset (ClassVar) | Size (Class) | ReturnType (Func)
     struct
       {
@@ -171,50 +159,48 @@ struct PARSymbol {
       uint32_t value : 24;  // Value:24, Reserved:8
       uint32_t reserved : 8;
       } charCount;
+    };
 
-    } properties;
-
-  bool hasEParFlag(EParFlag eParFlag)
-    {
+  bool hasEParFlag(EParFlag eParFlag) const {
     return static_cast<bool>(properties.elemProps.flags & eParFlag);
     }
 
-  bool isEParType(EParType eParType)
-    {
+  bool isEParType(EParType eParType) const {
     return properties.elemProps.type == eParType;
     }
 
+  Properties               properties={};
+  std::string              name;
   std::vector<float>       floatData;
   std::vector<int32_t>     intData;
   std::vector<std::string> strData;
-  int32_t classOffset;
-  uint32_t address;
+  int32_t                  classOffset=0;
+  uint32_t                 address=0;
 
   // Defacto reflections. Offset of the class member to be able to access class members via name
-  int32_t classMemberOffset;  // Not stored in files, only valid for classes to directly write to engine memory
+  // Not stored in files, only valid for classes to directly write to engine memory
+  int32_t                  classMemberOffset=-1;
   // Store array size of the class member var. 1 for scalar members. Useful for bounds checking.
-  uint32_t classMemberArraySize;  // Not stored in files, only valid for classes to directly write to engine memory
+  // Not stored in files, only valid for classes to directly write to engine memory
+  uint32_t                 classMemberArraySize=0;
 
-  void*              instanceData;  // Not stored in files, only valid for classes to directly write to engine memory
-  void*              instanceDataHandle=nullptr;
-  EInstanceClass     instanceDataClass;
+  // Not stored in files, only valid for classes to directly write to engine memory
+  void*                    instanceDataHandle = nullptr;
+  EInstanceClass           instanceDataClass  = IC_None;
+  uint32_t                 parent             = 0xFFFFFFFF;  // 0xFFFFFFFF (-1) = none
 
-  uint32_t parent;  // 0xFFFFFFFF (-1) = none
-
-  void warnIndexOutOfBounds(size_t index, size_t size)
-    {
+  void warnIndexOutOfBounds(size_t index, size_t size) {
     LogWarn() << "DaedalusVM: index out of range for: " << name << "[" << size << "], index = " << index;
     }
 
   template <class T>
-  T* getClassMember(void* baseAddr)
-    {
+  T* getClassMember(void* baseAddr) {
     return reinterpret_cast<T*>(reinterpret_cast<char*>(baseAddr) + classMemberOffset);
     }
 
-  int32_t& getInt(size_t idx = 0, void* baseAddr = nullptr);
+  int32_t&     getInt(size_t idx = 0, void* baseAddr = nullptr);
   std::string& getString(size_t idx = 0, void* baseAddr = nullptr);
-  float& getFloat(size_t idx = 0, void* baseAddr = nullptr);
+  float&       getFloat(size_t idx = 0, void* baseAddr = nullptr);
 
   template <typename T>
   std::vector<T>& getDataContainer();
@@ -241,9 +227,8 @@ struct PARSymbol {
 
     std::vector<T>& data = getDataContainer<T>();
     // read from symbol's data if not isClassVar or the above failed. (the latter should not happen)
-    if (data.size() <= idx)
-      {
-      if (!isClassVar)  // only print error message if we did not fall through from above
+    if(data.size()<=idx) {
+      if(!isClassVar)  // only print error message if we did not fall through from above
         warnIndexOutOfBounds(idx, data.size());
       data.resize(idx + 1);
       }

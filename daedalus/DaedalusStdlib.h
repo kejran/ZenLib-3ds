@@ -127,22 +127,16 @@ namespace Daedalus
             };
         }  // namespace MenuConstants
 
-        struct Instance
-        {
-            Instance()
-            {
-                userPtr = nullptr;
-                instanceSymbol = 0;
-            }
+        struct Instance {
+          Instance() = default;
+          size_t instanceSymbol=0;
 
-            size_t instanceSymbol;
-
-            /**
+          /**
              * Space for the user to save something. Will not be touched at all by ZenLib.
              * Note: This is set to nullptr after creation.
              */
-            void* userPtr;
-        };
+          void* userPtr=nullptr;
+          };
 
         struct C_ParticleFX : Instance
         {
@@ -755,6 +749,35 @@ namespace Daedalus
 
         struct C_FightAI : Instance {
           Move move[MAX_MOVE]={};
+          };
+
+        struct CCamSys : Instance {
+          // angles -180 to 180
+          float bestRange     = 2.f;
+          float minRange      = 1.99f;
+          float maxRange      = 4.1f;
+          float bestElevation = 0.f;
+          float minElevation  = 0.f;
+          float maxElevation  = 89.f;
+          float bestAzimuth   = 0.f;
+          float minAzimuth    = -90.f;
+          float maxAzimuth    = 90.f;
+          float bestRotZ      = 0.f;
+          float minRotZ       = 0.f;
+          float maxRotZ       = 0.f;
+          float rotOffsetX    = 20.f;
+          float rotOffsetY    = 0.f;
+          float rotOffsetZ    = 0.f;
+          float targetOffsetX = 0.f;
+          float targetOffsetY = 0.f;
+          float targetOffsetZ = 0.f;
+          // dynamic
+          float veloTrans     = 40.f; // velocity while easing   to best position
+          float veloRot       = 2.f;  // velocity while rotating to best orientation
+          // bool32 options
+          int32_t  translate  = 1; // rotate around target, 1: on, 0:off
+          int32_t  rotate     = 1; // rotate around target, 1: on, 0:off
+          int32_t  collision  = 1; // disable collision for this mode (ideal pos must be near player)
           };
     }  // namespace GEngineClasses
 

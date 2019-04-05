@@ -76,9 +76,8 @@ namespace ZenLoad
 
                         LogInfo() << "numPolys: " << numPolys;
 
-                        // Convert these to size_t
-                        for (volatile uint32_t i = 0; i < numPolys; i++)
-                            info.treePolyIndices[i] = static_cast<size_t>(parser.readBinaryDWord());
+                        if(numPolys>0)
+                          parser.readBinaryRaw(&info.treePolyIndices[0],numPolys*sizeof(uint32_t));
                     }
                     break;
 
@@ -101,102 +100,7 @@ namespace ZenLoad
                         info.nodes.emplace_back();
                         info.nodes[0].parent = zCBspNode::INVALID_NODE;
 
-                        std::function<void(bool)> loadRec = [&](bool isNode) {
-                            size_t idx = info.nodes.size() - 1;
-                            //LogInfo() << " - Reading node " << idx;
-
-                            zCBspNode& n = info.nodes[idx];
-
-                            parser.readStructure(n.bbox3dMin);
-                            parser.readStructure(n.bbox3dMax);
-
-                            n.bbox3dMin *= 0.01f;  // Convert to meters
-                            n.bbox3dMax *= 0.01f;
-
-                            // Read indices to the polys this contains
-                            n.treePolyIndex = static_cast<size_t>(parser.readBinaryDWord());
-                            n.numPolys = static_cast<size_t>(parser.readBinaryDWord());
-
-                            n.front = zCBspNode::INVALID_NODE;
-                            n.back = zCBspNode::INVALID_NODE;
-                            n.parent = zCBspNode::INVALID_NODE;
-
-                            // Only need to load data if this isn't a leaf
-                            if (isNode)
-                            {
-                                /**
-                                 * Flags:
-                                 * 1: front
-                                 * 2: back
-                                 * 4: front is leaf
-                                 * 8: back is leaf
-                                 */
-                                const int FLAG_FRONT = 1;
-                                const int FLAG_BACK = 2;
-                                const int FLAG_FRONT_IS_LEAF = 4;
-                                const int FLAG_BACK_IS_LEAF = 8;
-
-                                // flags tell if this node got children and whether they are leafs
-                                uint8_t flags = parser.readBinaryByte();
-
-                                parser.readStructure(n.plane.w);
-                                parser.readStructure(n.plane.x);
-                                parser.readStructure(n.plane.y);
-                                parser.readStructure(n.plane.z);
-
-                                n.plane.w *= 0.01f;  // Convert to meters
-
-                                // G1 has an extra byte here
-                                if (fileInfo.version == Gothic_18k)
-                                    parser.readBinaryByte();  // Lod-flag
-
-                                // Read front node
-                                if ((flags & FLAG_FRONT) != 0)
-                                {
-                                    // Assign index and add actual node
-                                    n.front = info.nodes.size();
-                                    info.nodes.emplace_back();
-
-                                    zCBspNode& front = info.nodes[n.front];
-
-                                    // Set new nodes parent
-                                    front.parent = idx;
-
-                                    // If this is a leaf, add it to the leaf-list
-                                    if ((flags & FLAG_FRONT_IS_LEAF) != 0)
-                                        info.leafIndices.push_back(n.front);
-
-                                    // Continue to load the tree
-                                    loadRec((flags & FLAG_FRONT_IS_LEAF) == 0);
-                                }
-
-                                // Read back node
-                                if ((flags & FLAG_BACK) != 0)
-                                {
-                                    // Assign index and add actual node
-                                    n.back = info.nodes.size();
-                                    info.nodes.emplace_back();
-
-                                    zCBspNode& back = info.nodes[n.back];
-
-                                    // Set new nodes parent
-                                    back.parent = idx;
-
-                                    // If this is a leaf, add it to the leaf-list
-                                    if ((flags & FLAG_BACK_IS_LEAF) != 0)
-                                        info.leafIndices.push_back(n.back);
-
-                                    // Continue to load the tree
-                                    loadRec((flags & FLAG_BACK_IS_LEAF) == 0);
-                                }
-                            }
-                            else
-                            {
-                                //LogInfo() << idx << " Leaf!";
-                            }
-                        };
-
-                        loadRec(true);
+                        loadRec(parser,fileInfo,info,true);
                     }
                     break;
 
@@ -258,5 +162,102 @@ namespace ZenLoad
         }
 
     private:
+        static void loadRec(ZenParser& parser,const BinaryFileInfo& fileInfo,zCBspTreeData& info,bool isNode)
+        {
+          size_t idx = info.nodes.size() - 1;
+          //LogInfo() << " - Reading node " << idx;
+
+          zCBspNode& n = info.nodes[idx];
+
+          parser.readStructure(n.bbox3dMin);
+          parser.readStructure(n.bbox3dMax);
+
+          n.bbox3dMin *= 0.01f;  // Convert to meters
+          n.bbox3dMax *= 0.01f;
+
+          // Read indices to the polys this contains
+          n.treePolyIndex = static_cast<size_t>(parser.readBinaryDWord());
+          n.numPolys      = static_cast<size_t>(parser.readBinaryDWord());
+
+          n.front  = zCBspNode::INVALID_NODE;
+          n.back   = zCBspNode::INVALID_NODE;
+          n.parent = zCBspNode::INVALID_NODE;
+
+          // Only need to load data if this isn't a leaf
+          if (isNode)
+          {
+              /**
+               * Flags:
+               * 1: front
+               * 2: back
+               * 4: front is leaf
+               * 8: back is leaf
+               */
+              enum {
+                FLAG_FRONT         = 1,
+                FLAG_BACK          = 2,
+                FLAG_FRONT_IS_LEAF = 4,
+                FLAG_BACK_IS_LEAF  = 8,
+                };
+
+              // flags tell if this node got children and whether they are leafs
+              uint8_t flags = parser.readBinaryByte();
+
+              parser.readStructure(n.plane.w);
+              parser.readStructure(n.plane.x);
+              parser.readStructure(n.plane.y);
+              parser.readStructure(n.plane.z);
+
+              n.plane.w *= 0.01f;  // Convert to meters
+
+              // G1 has an extra byte here
+              if (fileInfo.version == Gothic_18k)
+                  parser.readBinaryByte();  // Lod-flag
+
+              // Read front node
+              if ((flags & FLAG_FRONT) != 0)
+              {
+                  // Assign index and add actual node
+                  n.front = info.nodes.size();
+                  info.nodes.emplace_back();
+
+                  zCBspNode& front = info.nodes[n.front];
+
+                  // Set new nodes parent
+                  front.parent = idx;
+
+                  // If this is a leaf, add it to the leaf-list
+                  if ((flags & FLAG_FRONT_IS_LEAF) != 0)
+                      info.leafIndices.push_back(n.front);
+
+                  // Continue to load the tree
+                  loadRec(parser,fileInfo,info,(flags & FLAG_FRONT_IS_LEAF) == 0);
+              }
+
+              // Read back node
+              if ((flags & FLAG_BACK) != 0)
+              {
+                  // Assign index and add actual node
+                  n.back = info.nodes.size();
+                  info.nodes.emplace_back();
+
+                  zCBspNode& back = info.nodes[n.back];
+
+                  // Set new nodes parent
+                  back.parent = idx;
+
+                  // If this is a leaf, add it to the leaf-list
+                  if ((flags & FLAG_BACK_IS_LEAF) != 0)
+                      info.leafIndices.push_back(n.back);
+
+                  // Continue to load the tree
+                  loadRec(parser,fileInfo,info,(flags & FLAG_BACK_IS_LEAF) == 0);
+              }
+          }
+          else
+          {
+              //LogInfo() << idx << " Leaf!";
+          }
+        }
     };
 }  // namespace ZenLoad
