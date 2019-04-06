@@ -24,7 +24,7 @@ void DATFile::readSymTable(ZenLoad::ZenParser& input) {
   m_SymTable.sortTable.resize(count);
   input.readBinaryRaw(m_SymTable.sortTable.data(), sizeof(uint32_t) * count);
 
-  // Read symbols; m_SymTable.symbols[0] is null symbol
+  // Read symbols
   for(uint32_t i=0; i<count; i++) {
     PARSymbol s;
     uint32_t named = input.readBinaryDWord();
@@ -294,7 +294,10 @@ size_t DATFile::getSymbolIndexByName(const char* symName) {
   }
 
 PARSymbol& DATFile::getSymbolByIndex(size_t idx) {
-  return m_SymTable.symbols[idx];
+  if(idx<m_SymTable.symbols.size())
+    return m_SymTable.symbols[idx];
+  static PARSymbol err;
+  return err;
   }
 
 size_t DATFile::getFunctionIndexByAddress(size_t address) {

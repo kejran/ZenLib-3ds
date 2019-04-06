@@ -178,7 +178,10 @@ void DaedalusVM::eval(uint32_t PC) {
       case EParOp_AssignDivide: {
         size_t v = popVar(arr);
         addr = &m_DATFile.getSymbolByIndex(v).getInt(arr, getCurrentInstanceDataPtr());
-        *addr /= popDataValue();
+        b = popDataValue();
+        if(b==0)
+          terminateScript();
+        *addr /= b;
         break;
         }
       case EParOp_Plus:
@@ -267,8 +270,11 @@ void DaedalusVM::eval(uint32_t PC) {
         size_t a = popVar();
         size_t b = popVar();
 
-        m_DATFile.getSymbolByIndex(a).instanceDataHandle = m_DATFile.getSymbolByIndex(b).instanceDataHandle;
-        m_DATFile.getSymbolByIndex(a).instanceDataClass  = m_DATFile.getSymbolByIndex(b).instanceDataClass;
+        auto& sa = m_DATFile.getSymbolByIndex(a);
+        auto& sb = m_DATFile.getSymbolByIndex(b);
+
+        sa.instanceDataHandle = sb.instanceDataHandle;
+        sa.instanceDataClass  = sb.instanceDataClass;
         break;
         }
 
@@ -283,7 +289,6 @@ void DaedalusVM::eval(uint32_t PC) {
         break;
 
       case EParOp_SetInstance:
-        m_CurrentInstance = size_t(op.symbol);
         setCurrentInstance(size_t(op.symbol));
         break;
       case EParOp_PushArrayVar:
@@ -493,9 +498,10 @@ void DaedalusVM::initializeInstance(void *instance, size_t symIdx, EInstanceClas
   }
 
 void DaedalusVM::setCurrentInstance(size_t symIdx) {
+  auto& sym = m_DATFile.getSymbolByIndex(symIdx);
   m_CurrentInstance       = symIdx;
-  m_CurrentInstanceHandle = m_DATFile.getSymbolByIndex(symIdx).instanceDataHandle;
-  m_CurrentInstanceClass  = m_DATFile.getSymbolByIndex(symIdx).instanceDataClass;
+  m_CurrentInstanceHandle = sym.instanceDataHandle;
+  m_CurrentInstanceClass  = sym.instanceDataClass;
   }
 
 void* DaedalusVM::getCurrentInstanceDataPtr() {
