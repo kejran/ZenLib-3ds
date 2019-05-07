@@ -41,6 +41,11 @@ namespace VDFS
         bool getFileData(const std::string& file, std::vector<uint8_t>& data) const;
 
         /**
+         * @brief Fills a vector with the data of the given file
+         */
+        bool getFileData(const char* file, std::vector<uint8_t>& data) const;
+
+        /**
          * @brief Returnst the list of all known files
          */
         std::vector<std::string> getKnownFiles(const std::string& path = "/") const;
@@ -73,7 +78,7 @@ namespace VDFS
         /**
          * @return Case-sensitive version of the given case-insensitive filename. Empty string if not found.
          */
-        std::string findCaseSensitiveNameOf(const std::string& caseInsensitiveName) const;
+        const std::string &findCaseSensitiveNameOf(const char *caseInsensitiveName) const;
 
         std::map<std::string, std::string> m_FilenamesByUpperedFileNames;
     };

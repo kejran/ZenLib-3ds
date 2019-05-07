@@ -13,11 +13,11 @@ using namespace VDFS;
 namespace internal
 {
     // Must be initialized with the 0th argument passed to the executable for PhysFS.
-    std::string argv0;
+    static std::string argv0;
 
     // We need to do some poor-mans-refcounting to be able to know when we
     // need to init and deinit physfs.
-    size_t numAliveIndices = 0;
+    static size_t numAliveIndices = 0;
 }  // namespace internal
 
 FileIndex::FileIndex()
@@ -91,9 +91,17 @@ bool FileIndex::mountFolder(const std::string& path, const std::string& mountPoi
 */
 bool FileIndex::getFileData(const std::string& file, std::vector<uint8_t>& data) const
 {
+    return getFileData(file.c_str(),data);
+}
+
+/**
+* @brief Fills a vector with the data of the given file
+*/
+bool FileIndex::getFileData(const char* file, std::vector<uint8_t>& data) const
+{
     assert(isFinalized());
 
-    std::string caseSensitivePath = findCaseSensitiveNameOf(file);
+    const std::string& caseSensitivePath = findCaseSensitiveNameOf(file);
     bool exists = caseSensitivePath != "";
 
     if (!exists) return false;
@@ -119,9 +127,7 @@ bool FileIndex::getFileData(const std::string& file, std::vector<uint8_t>& data)
 
 bool FileIndex::hasFile(const std::string& name) const
 {
-    assert(isFinalized());
-
-    return findCaseSensitiveNameOf(name) != "";
+    return !findCaseSensitiveNameOf(name.c_str()).empty();
 }
 
 int64_t VDFS::FileIndex::getLastModTime(const std::string& name)
@@ -196,19 +202,38 @@ void FileIndex::updateUpperedFilenamesMap()
     }
 }
 
-std::string FileIndex::findCaseSensitiveNameOf(const std::string& caseInsensitiveName) const
+const std::string& FileIndex::findCaseSensitiveNameOf(const char* caseInsensitiveName) const
 {
     assert(isFinalized());
 
-    std::string uppered = caseInsensitiveName;
-    std::transform(caseInsensitiveName.begin(), caseInsensitiveName.end(), uppered.begin(), ::toupper);
+    auto it = m_FilenamesByUpperedFileNames.find(caseInsensitiveName);
+    if(it!=m_FilenamesByUpperedFileNames.end())
+      return it->second;
 
-    auto it = m_FilenamesByUpperedFileNames.find(uppered);
+    for(size_t i=0;caseInsensitiveName[i];++i){
+      auto c = caseInsensitiveName[i];
+      if(!(c=='.' || c=='_' || c=='-' || c==' ' || ('A'<=c && c<='Z') || ('0'<=c && c<='9'))){
+        std::string upperedStr;
+        char        upperedC[64] = {};
+        char*       uppered      = upperedC;
+        if(std::strlen(caseInsensitiveName)<64){
+          std::strcpy(upperedC,caseInsensitiveName); // cheap upper-case
+          } else {
+          upperedStr = caseInsensitiveName;
+          uppered    = &upperedStr[0];
+          }
+        for(size_t i=0;uppered[i];++i)
+          uppered[i] = char(::toupper(uppered[i]));
 
-    if (it == m_FilenamesByUpperedFileNames.end())
-        return "";
+        it = m_FilenamesByUpperedFileNames.find(uppered);
+        if(it!=m_FilenamesByUpperedFileNames.end())
+          return it->second;
+        break;
+        }
+      }
 
-    return it->second;
+    static const std::string nop;
+    return nop;
 }
 
 void FileIndex::finalizeLoad()
