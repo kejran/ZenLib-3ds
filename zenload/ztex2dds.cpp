@@ -96,7 +96,7 @@ namespace ZenLoad
     /**
 	 * @brief Utility function to write to the end of a vector
 	 */
-    static bool writeVectorData(void* data, size_t size, std::vector<uint8_t>& target)
+    static bool writeVectorData(const void* data, size_t size, std::vector<uint8_t>& target)
     {
         size_t sz=target.size();
         target.resize(target.size()+size);
@@ -119,9 +119,7 @@ namespace ZenLoad
         int i;
         ozRGBQUAD palentry;
         uint32_t BufferSize;
-        uint8_t* Buffer;
         uint32_t MipmapSize;
-        uint8_t* Mipmap;
         ozRGBQUAD* Pixel32;
         ozRGBTRIPLE* Pixel24;
         uint8_t ColorTemp;
@@ -334,19 +332,13 @@ namespace ZenLoad
             BufferSize += GetMipmapSize(ZTexHeader.TexInfo.Format,
                                         ZTexHeader.TexInfo.Width, ZTexHeader.TexInfo.Height, MipmapLevel);
 
-        Buffer = new uint8_t[BufferSize];
-        if (!Buffer)
-        {
-            return ZTEX2DDS_ERROR_READ;
-        }
+        if(BytesRead+BufferSize>ztexData.size())
+          return ZTEX2DDS_ERROR_READ;
 
-        if (!readVectorData(Buffer, BytesRead, BufferSize, ztexData))
-        {
-            return ZTEX2DDS_ERROR_READ;
-        }
+        const uint8_t* Buffer = reinterpret_cast<const uint8_t*>(&ztexData[BytesRead]);
         BytesRead += BufferSize;
 
-        Mipmap = Buffer + BufferSize;
+        const uint8_t* Mipmap = Buffer + BufferSize;
         for (MipmapLevel = 0; MipmapLevel < MipmapCount; MipmapLevel++)
         {
             MipmapSize = GetMipmapSize(ZTexHeader.TexInfo.Format,
@@ -406,12 +398,9 @@ namespace ZenLoad
 
             if (!writeVectorData(Mipmap, MipmapSize, ddsData))
             {
-                delete[] Buffer;
                 return ZTEX2DDS_ERROR_WRITE;
             }
         }
-        delete[] Buffer;
-
         return ZTEX2DDS_ERROR_NONE;
     }
 
