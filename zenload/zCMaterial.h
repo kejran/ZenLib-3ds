@@ -6,7 +6,7 @@
 
 namespace ZenLoad
 {
-    enum class MaterialGroup : int
+    enum MaterialGroup : uint8_t
     {
         UNDEF = 0,
         METAL,
@@ -18,7 +18,7 @@ namespace ZenLoad
         NUM_MAT_GROUPS
     };
 
-    static const std::string MaterialGroupNames[(int)MaterialGroup::NUM_MAT_GROUPS] = {
+    static const char* MaterialGroupNames[MaterialGroup::NUM_MAT_GROUPS] = {
         "UNDEF",
         "METAL",
         "STONE",
