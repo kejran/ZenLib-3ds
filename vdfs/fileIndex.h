@@ -21,7 +21,8 @@ namespace VDFS
         /**
          * @brief Loads a VDF-File and initializes everything
          */
-        bool loadVDF(const std::string& vdf, uint32_t priority = 0, const std::string& mountPoint = "/");
+        bool loadVDF(const std::u16string& vdf, const std::string& mountPoint = "/");
+        bool loadVDF(const std::string& vdf, const std::string& mountPoint = "/");
 
         /**
          * Mounts the given folder-structure into the file-index
@@ -62,6 +63,7 @@ namespace VDFS
          * the last modification time of the VDF-File will be returned as seconds since
          * the unix epoch 00:00, Jan 1 1970 UTC otherwise -1.
          */
+        static int64_t getLastModTime(const std::u16string& name);
         static int64_t getLastModTime(const std::string& name);
 
     private:

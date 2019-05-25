@@ -53,10 +53,17 @@ void FileIndex::initVDFS(const char* argv0)
     internal::argv0 = argv0;
 }
 
+bool FileIndex::loadVDF(const std::u16string &vdf, const std::string &mountPoint)
+{
+     std::string buf(vdf.size()*4,'\0');
+     PHYSFS_utf8FromUtf16(reinterpret_cast<const PHYSFS_uint16*>(vdf.c_str()),&buf[0],buf.size());
+     return loadVDF(buf,mountPoint);
+}
+
 /**
 * @brief Loads a VDF-File and initializes everything
 */
-bool FileIndex::loadVDF(const std::string& vdf, uint32_t priority, const std::string& mountPoint)
+bool FileIndex::loadVDF(const std::string& vdf, const std::string& mountPoint)
 {
     assert(!isFinalized());
 
@@ -128,6 +135,13 @@ bool FileIndex::getFileData(const char* file, std::vector<uint8_t>& data) const
 bool FileIndex::hasFile(const std::string& name) const
 {
     return !findCaseSensitiveNameOf(name.c_str()).empty();
+}
+
+int64_t FileIndex::getLastModTime(const std::u16string &vdf)
+{
+    std::string buf(vdf.size()*4,'\0');
+    PHYSFS_utf8FromUtf16(reinterpret_cast<const PHYSFS_uint16*>(vdf.c_str()),&buf[0],buf.size());
+    return getLastModTime(buf);
 }
 
 int64_t VDFS::FileIndex::getLastModTime(const std::string& name)
