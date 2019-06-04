@@ -23,7 +23,8 @@ enum EInstanceClass {
   IC_MusicTheme,
   IC_GilValues,
   IC_FightAi,
-  IC_CamSys
+  IC_CamSys,
+  IC_Spell
   };
 
 template <class C_Class>

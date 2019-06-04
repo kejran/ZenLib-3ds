@@ -655,7 +655,7 @@ namespace Daedalus
 
         struct C_Spell : Instance
         {
-            float time_per_mana;       // Zeit pro investierten Manapunkt (ms)
+            float   time_per_mana;       // Zeit pro investierten Manapunkt (ms)
             int32_t damage_per_level;  // Schaden pro Level
             int32_t damageType;        // CAN BE ONLY ONE DAMAGE TYPE
             int32_t spellType;         // Good, Neutral or Bad
