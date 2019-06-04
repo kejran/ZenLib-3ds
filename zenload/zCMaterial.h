@@ -34,14 +34,11 @@ namespace ZenLoad
         /**
          * Converts the given material-group enum value to the regarding string
          */
-        static std::string getMatGroupString(MaterialGroup group)
+        static const char* getMatGroupString(MaterialGroup group)
         {
-            if ((int)group >= (int)MaterialGroup::NUM_MAT_GROUPS)
-            {
-                return MaterialGroupNames[(int)MaterialGroup::UNDEF];
-            }
-
-            return MaterialGroupNames[(int)group];
+          if(group>=MaterialGroup::NUM_MAT_GROUPS)
+            return MaterialGroupNames[MaterialGroup::UNDEF];
+          return MaterialGroupNames[group];
         }
 
         /**
