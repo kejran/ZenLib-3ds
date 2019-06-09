@@ -55,73 +55,83 @@ bool ParserImplBinSafe::readChunkStart(ZenParser::ChunkHeader& header)
         // Save chunks starting-position (right after chunk-header)
         header.startPosition = m_pParser->m_Seek;
 
-        vobDescriptor = vobDescriptor.substr(1, vobDescriptor.size() - 2);
-        // Parse chunk-header
-        std::vector<const char*> vec = Utils::splitDestructive(vobDescriptor, ' ');
-
         std::string name;
         std::string className;
         int classVersion = 0;
         int objectID = 0;
         bool createObject = false;
-        enum State
-        {
-            S_OBJECT_NAME,
-            S_REFERENCE,
-            S_CLASS_NAME,
-            S_CLASS_VERSION,
-            S_OBJECT_ID,
-            S_FINISHED
-        } state = S_OBJECT_NAME;
+        enum State {
+          S_OBJECT_NAME,
+          S_REFERENCE,
+          S_CLASS_NAME,
+          S_CLASS_VERSION,
+          S_OBJECT_ID,
+          S_FINISHED
+          } state = S_OBJECT_NAME;
 
-        for (auto& arg : vec)
-        {
-            switch (state)
-            {
-                case S_OBJECT_NAME:
-                    if (std::strcmp(arg,"%")!=0)
-                    {
-                        name = arg;
-                        state = S_REFERENCE;
-                        break;
-                    }
-                    //@fallthrough@
-                case S_REFERENCE:
-                    if (std::strcmp(arg,"%")==0)
-                    {
-                        createObject = true;
-                        state = S_CLASS_NAME;
-                        break;
-                    }
-                    else if (std::strcmp(arg,"\xA7")==0)
-                    {
-                        createObject = false;
-                        state = S_CLASS_NAME;
-                        break;
-                    }
-                    else
-                        createObject = true;
-                    //@fallthrough@
-                case S_CLASS_NAME:
-                    if (!m_pParser->isNumber(arg))
-                    {
-                        className = arg;
-                        state = S_CLASS_VERSION;
-                        break;
-                    }
-                    //@fallthrough@
-                case S_CLASS_VERSION:
-                    classVersion = std::atoi(arg);
-                    state = S_OBJECT_ID;
-                    break;
-                case S_OBJECT_ID:
-                    objectID = std::atoi(arg);
-                    state = S_FINISHED;
-                    break;
-                default:
-                    throw std::runtime_error("Strange parser state");
+        vobDescriptor[0]     = ' ';
+        vobDescriptor.back() = ' ';
+
+        // Parse chunk-header
+        const char* parg=vobDescriptor.c_str();
+        for(char& c:vobDescriptor) {
+          const char* arg=parg;
+          if(c==' ') { // split by words
+            c = '\0';
+            if(*parg!='\0'){
+              arg=parg;
+              parg = &c+1;
+              } else {
+              parg = &c+1;
+              continue;
+              }
+            } else {
+            continue;
             }
-        }
+
+          switch(state) {
+            case S_OBJECT_NAME:
+              if(std::strcmp(arg,"%")!=0) {
+                name = arg;
+                state = S_REFERENCE;
+                break;
+                }
+              //@fallthrough@
+            case S_REFERENCE:
+              if(std::strcmp(arg,"%")==0) {
+                createObject = true;
+                state = S_CLASS_NAME;
+                break;
+                }
+              else if (std::strcmp(arg,"\xA7")==0)
+                {
+                createObject = false;
+                state = S_CLASS_NAME;
+                break;
+                }
+              else
+                createObject = true;
+              //@fallthrough@
+            case S_CLASS_NAME:
+              if (!m_pParser->isNumber(arg))
+                {
+                className = arg;
+                state = S_CLASS_VERSION;
+                break;
+                }
+              //@fallthrough@
+            case S_CLASS_VERSION:
+              classVersion = std::atoi(arg);
+              state = S_OBJECT_ID;
+              break;
+            case S_OBJECT_ID:
+              objectID = std::atoi(arg);
+              state = S_FINISHED;
+              break;
+            default:
+              throw std::runtime_error("Strange parser state");
+            }
+          }
 
         if (state != S_FINISHED)
             throw std::runtime_error("Parser did not finish");
