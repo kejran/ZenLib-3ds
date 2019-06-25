@@ -24,7 +24,8 @@ enum EInstanceClass {
   IC_GilValues,
   IC_FightAi,
   IC_CamSys,
-  IC_Spell
+  IC_Spell,
+  IC_Svm
   };
 
 template <class C_Class>

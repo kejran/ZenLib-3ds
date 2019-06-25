@@ -499,18 +499,20 @@ void ZenParser::readBinaryRaw(void* target, size_t numBytes)
 */
 std::string ZenParser::readLine(bool skip)
 {
-    std::string retVal;
-    while (m_Data[m_Seek] != '\r' && m_Data[m_Seek] != '\n' && m_Data[m_Seek] != '\0')
-    {
-        checkArraySize();
-        retVal += m_Data[m_Seek++];
-    }
+    const char* at = reinterpret_cast<const char*>(m_Data+m_Seek);
+    size_t      sz = 0;
+    while(m_Data[m_Seek]!='\r' && m_Data[m_Seek]!='\n' && m_Data[m_Seek]!='\0'){
+      checkArraySize();
+      sz++;
+      m_Seek++;
+      }
+    std::string retVal(at,sz);
 
     // Skip trailing \n\r\0
     //if(m_Header.fileType == FT_BINARY)
     m_Seek++;
 
-    if (skip)
-        skipSpaces();
+    if(skip)
+      skipSpaces();
     return retVal;
 }
