@@ -46,7 +46,7 @@ zCModelMeshLib::zCModelMeshLib(const std::string& fileName, const VDFS::FileInde
     try
     {
         // Create parser from memory
-        // FIXME: There is an internal copy of the data here. Optimize!
+
         ZenLoad::ZenParser parser(data.data(), data.size());
 
         if (fileName.find(".MDM") != std::string::npos)

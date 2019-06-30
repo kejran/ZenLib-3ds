@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace ZenLoad
 {
@@ -30,6 +31,37 @@ namespace ZenLoad
     {
         MSB_FORWARD,
         MSB_BACKWARD
+    };
+
+    // https://worldofplayers.ru/threads/37708/
+    enum EModelScriptAniDef : uint8_t
+    {
+      DEF_NULL,
+      DEF_CREATE_ITEM,
+      DEF_INSERT_ITEM,
+      DEF_REMOVE_ITEM,
+      DEF_DESTROY_ITEM,
+      DEF_PLACE_ITEM,
+      DEF_EXCHANGE_ITEM,
+
+      DEF_FIGHTMODE,
+      DEF_PLACE_MUNITION,
+      DEF_REMOVE_MUNITION,
+      DEF_DRAWSOUND,
+      DEF_UNDRAWSOUND,
+      DEF_SWAPMESH,
+
+      DEF_DRAWTORCH,
+      DEF_INV_TORCH,
+      DEF_DROP_TORCH,
+
+      DEF_HIT_LIMB,
+      DEF_HIT_DIR,
+      DEF_DAM_MULTIPLY,
+      DEF_PAR_FRAME,
+      DEF_OPT_FRAME,
+      DEF_HIT_END,
+      DEF_WINDOW
     };
 
     struct zCModelScriptAni
@@ -98,9 +130,16 @@ namespace ZenLoad
 
     struct zCModelScriptEventTag
     {
-        int32_t m_Frame;
+        int32_t     m_Frame;
         std::string m_Tag;
         std::string m_Argument;
+    };
+
+    struct zCModelEvent
+    {
+        int32_t              m_Frame=0;
+        EModelScriptAniDef   m_Def  =DEF_NULL;
+        std::vector<int32_t> m_Int;
     };
 
     struct zCModelScriptEventSfx

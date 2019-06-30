@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include <algorithm>
+#include <sstream>
 #include <utils/logger.h>
 
 #include "modelScriptParser.h"
@@ -39,12 +40,10 @@ namespace ZenLoad
                 readMeshAndTree();
                 m_Zen.setSeek(chunk_end);
                 return CHUNK_MESH_AND_TREE;
-                break;
             case CHUNK_REGISTER_MESH:
                 readRegisterMesh();
                 m_Zen.setSeek(chunk_end);
                 return CHUNK_REGISTER_MESH;
-                break;
             case CHUNK_ANI:
                 readAni();
                 m_Zen.setSeek(chunk_end);
@@ -69,6 +68,10 @@ namespace ZenLoad
                 readPfxStop();
                 m_Zen.setSeek(chunk_end);
                 return CHUNK_EVENT_PFX_STOP;
+            case CHUNK_EVENT_TAG:
+                readEvent();
+                m_Zen.setSeek(chunk_end);
+                return CHUNK_EVENT_TAG;
             default:
                 m_Zen.setSeek(chunk_end);
                 return parse();  // skip unknown chunk
@@ -171,6 +174,7 @@ namespace ZenLoad
         m_Sfx.back().m_Range = range / 100.0f;        // Convert to meters
         m_Sfx.back().m_EmptySlot = emptySlot > 0.0f;  // They encoded this as float for some reason...
     }
+
     void ModelScriptBinParser::readPfx()
     {
         m_Pfx.emplace_back();
@@ -189,6 +193,71 @@ namespace ZenLoad
         m_PfxStop.emplace_back();
         m_PfxStop.back().m_Frame = m_Zen.readBinaryDWord();
         m_PfxStop.back().m_Num = m_Zen.readBinaryDWord();
+    }
+
+    void ModelScriptBinParser::readEvent()
+    {
+      std::string str;
+      m_Event.emplace_back();
+
+      m_Event.back().m_Frame    = m_Zen.readBinaryFloat();
+      str = m_Zen.readLine(true);
+      if(str=="DEF_CREATE_ITEM")
+        m_Event.back().m_Def=DEF_CREATE_ITEM;
+      else if(str=="DEF_INSERT_ITEM")
+        m_Event.back().m_Def=DEF_INSERT_ITEM;
+      else if(str=="DEF_REMOVE_ITEM")
+        m_Event.back().m_Def=DEF_REMOVE_ITEM;
+      else if(str=="DEF_DESTROY_ITEM")
+        m_Event.back().m_Def=DEF_DESTROY_ITEM;
+      else if(str=="DEF_PLACE_ITEM")
+        m_Event.back().m_Def=DEF_PLACE_ITEM;
+      else if(str=="DEF_EXCHANGE_ITEM")
+        m_Event.back().m_Def=DEF_EXCHANGE_ITEM;
+      else if(str=="DEF_FIGHTMODE")
+        m_Event.back().m_Def=DEF_FIGHTMODE;
+      else if(str=="DEF_PLACE_MUNITION")
+        m_Event.back().m_Def=DEF_PLACE_MUNITION;
+      else if(str=="DEF_REMOVE_MUNITION")
+        m_Event.back().m_Def=DEF_REMOVE_MUNITION;
+      else if(str=="DEF_DRAWSOUND")
+        m_Event.back().m_Def=DEF_DRAWSOUND;
+      else if(str=="DEF_UNDRAWSOUND")
+        m_Event.back().m_Def=DEF_UNDRAWSOUND;
+      else if(str=="DEF_SWAPMESH")
+        m_Event.back().m_Def=DEF_SWAPMESH;
+      else if(str=="DEF_DRAWTORCH")
+        m_Event.back().m_Def=DEF_DRAWTORCH;
+      else if(str=="DEF_INV_TORCH")
+        m_Event.back().m_Def=DEF_INV_TORCH;
+      else if(str=="DEF_DROP_TORCH")
+        m_Event.back().m_Def=DEF_DROP_TORCH;
+      else if(str=="DEF_HIT_LIMB")
+        m_Event.back().m_Def=DEF_HIT_LIMB;
+      else if(str=="DEF_HIT_DIR")
+        m_Event.back().m_Def=DEF_HIT_DIR;
+      else if(str=="DEF_DAM_MULTIPLY")
+        m_Event.back().m_Def=DEF_DAM_MULTIPLY;
+      else if(str=="DEF_PAR_FRAME")
+        m_Event.back().m_Def=DEF_PAR_FRAME;
+      else if(str=="DEF_OPT_FRAME")
+        m_Event.back().m_Def=DEF_OPT_FRAME;
+      else if(str=="DEF_HIT_END")
+        m_Event.back().m_Def=DEF_HIT_END;
+      else if(str=="DEF_WINDOW")
+        m_Event.back().m_Def=DEF_WINDOW;
+      {
+        str = m_Zen.readLine(true);
+        std::stringstream ss(str);
+        while(!ss.eof())
+          {
+            int frame=0;
+            ss >> frame;
+            if(!ss.good() && !ss.eof())
+              break;
+            m_Event.back().m_Int.push_back(frame);
+          }
+      }
     }
 
     ModelScriptTextParser::ModelScriptTextParser(ZenParser& zen)
