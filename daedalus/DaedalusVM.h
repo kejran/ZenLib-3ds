@@ -11,12 +11,6 @@
 namespace Daedalus {
 class DaedalusVM {
   public:
-    struct Instance final {
-      size_t         id=0;
-      void*          handle=nullptr;
-      EInstanceClass cls=EInstanceClass::IC_Npc;
-      };
-
     DaedalusVM(const std::vector<uint8_t> data);
     DaedalusVM(const uint8_t* pDATFileData, size_t numBytes);
 
@@ -44,19 +38,13 @@ class DaedalusVM {
     uint32_t     popVar(uint32_t& arrIdx);
     std::string  popString(bool toUpper);
 
-    void setInstance(const char *instSymbol, void *h, EInstanceClass instanceClass);
-    void initializeInstance(void* instance, size_t symIdx, EInstanceClass classIdx);
+    void setInstance(const char *instSymbol, GEngineClasses::Instance *h, EInstanceClass instanceClass);
+    void initializeInstance(GEngineClasses::Instance& instance, size_t symIdx, EInstanceClass classIdx);
 
-    template<class T>
-    void initializeInstance(T& instance, size_t symIdx) {
-      //initializeInstance(&instance,symIdx,DaedalusVM::enumFromClass<T>());
-      }
-
-    void*                         getCurrentInstanceDataPtr();
+    GEngineClasses::Instance*     getCurrentInstanceDataPtr();
     EInstanceClass                getCurrentInstanceClass()  { return m_CurrentInstanceClass; }
     void*                         getCurrentInstanceHandle() { return m_CurrentInstanceHandle; }
     DATFile&                      getDATFile() { return m_DATFile; }
-    GameState::DaedalusGameState& getGameState() { return m_GameState; }
     std::vector<std::string>      getCallStack();
     const std::string&            currentCall();
 
@@ -126,7 +114,7 @@ class DaedalusVM {
     std::function<void(DaedalusVM&)>                             m_OnUnsatisfiedCall;
 
     size_t                                                       m_CurrentInstance;
-    void*                                                        m_CurrentInstanceHandle;
+    GEngineClasses::Instance*                                    m_CurrentInstanceHandle;
     EInstanceClass                                               m_CurrentInstanceClass;
 
     size_t                                                       m_SelfId   = size_t(-1);
@@ -135,6 +123,5 @@ class DaedalusVM {
     size_t                                                       m_ItemId   = size_t(-1);
 
     std::queue<size_t>                                           m_FakeStringSymbols;
-    GameState::DaedalusGameState                                 m_GameState;
   };
 }  // namespace Daedalus

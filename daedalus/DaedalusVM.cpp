@@ -16,7 +16,7 @@ DaedalusVM::DaedalusVM(const std::vector<uint8_t> data)
   }
 
 DaedalusVM::DaedalusVM(const uint8_t* pDATFileData, size_t numBytes)
-    : m_DATFile(pDATFileData, numBytes),m_GameState(*this) {
+    : m_DATFile(pDATFileData, numBytes) {
   m_Stack.reserve(1024);
   // Make fake-strings
   for(size_t i = 0; i<NUM_FAKE_STRING_SYMBOLS; i++) {
@@ -199,7 +199,7 @@ void DaedalusVM::eval(uint32_t PC) {
       case EParOp_Ret:
         return;
       case EParOp_Call: {
-        void*          currentInstanceHandle = m_CurrentInstanceHandle;
+        auto*          currentInstanceHandle = m_CurrentInstanceHandle;
         EInstanceClass currentInstanceClass  = m_CurrentInstanceClass;
 
         {
@@ -208,7 +208,7 @@ void DaedalusVM::eval(uint32_t PC) {
         }
 
         m_CurrentInstanceHandle = currentInstanceHandle;
-        m_CurrentInstanceClass = currentInstanceClass;
+        m_CurrentInstanceClass  = currentInstanceClass;
         break;
         }
 
@@ -219,7 +219,7 @@ void DaedalusVM::eval(uint32_t PC) {
           }
         //auto it = m_ExternalsByIndex.find(size_t(op.symbol));
 
-        void*          currentInstanceHandle = m_CurrentInstanceHandle;
+        auto*          currentInstanceHandle = m_CurrentInstanceHandle;
         EInstanceClass currentInstanceClass  = m_CurrentInstanceClass;
 
         if(f!=nullptr && *f) {
@@ -341,7 +341,7 @@ T DaedalusVM::popDataValue() {
   }
 
 void DaedalusVM::pushVar(size_t index, uint32_t arrIdx) {
-  auto& sym = m_DATFile.getSymbolByIndex(index);
+  auto& sym = m_DATFile.getSymbolByIndex(index);(void)sym;
   //int32_t val = sym.getValue<int>(arrIdx, getCurrentInstanceDataPtr());
   auto ptr = getCurrentInstanceDataPtr();
   m_Stack.emplace_back(ptr,index,arrIdx);
@@ -457,20 +457,20 @@ void DaedalusVM::pushString(const std::string& str) {
   pushVar(symIdx, 0);
   }
 
-void DaedalusVM::setInstance(const char* instSymbol, void* h, EInstanceClass instanceClass) {
+void DaedalusVM::setInstance(const char* instSymbol, GEngineClasses::Instance *h, EInstanceClass instanceClass) {
   PARSymbol& s = m_DATFile.getSymbolByName(instSymbol);
   s.instanceDataHandle = h;
   s.instanceDataClass  = instanceClass;
   }
 
-void DaedalusVM::initializeInstance(void *instance, size_t symIdx, EInstanceClass classIdx) {
+void DaedalusVM::initializeInstance(GEngineClasses::Instance &instance, size_t symIdx, EInstanceClass classIdx) {
   PARSymbol& s = m_DATFile.getSymbolByIndex(symIdx);
 
   // Enter address into instance-symbol
-  s.instanceDataHandle = instance;
+  s.instanceDataHandle = &instance;
   s.instanceDataClass  = classIdx;
 
-  void*          currentInstanceHandle = m_CurrentInstanceHandle;
+  auto*          currentInstanceHandle = m_CurrentInstanceHandle;
   EInstanceClass currentInstanceClass  = m_CurrentInstanceClass;
 
   setCurrentInstance(symIdx);
@@ -480,12 +480,11 @@ void DaedalusVM::initializeInstance(void *instance, size_t symIdx, EInstanceClas
   if(m_SelfId!=size_t(-1)) {
     selfCpy = globalSelf();  // Copy of "self"-symbol
     // Set self
-    setInstance("self", instance, classIdx);
+    setInstance("self", &instance, classIdx);
     }
 
   // Place the assigning symbol into the instance
-  GEngineClasses::Instance* instData = m_GameState.getByClass(instance, classIdx);
-  instData->instanceSymbol = symIdx;
+  instance.instanceSymbol = symIdx;
 
   // Run script code to initialize the object
   runFunctionBySymIndex(symIdx);
@@ -504,8 +503,8 @@ void DaedalusVM::setCurrentInstance(size_t symIdx) {
   m_CurrentInstanceClass  = sym.instanceDataClass;
   }
 
-void* DaedalusVM::getCurrentInstanceDataPtr() {
-  return m_GameState.getByClass(m_CurrentInstanceHandle, m_CurrentInstanceClass);
+GEngineClasses::Instance *DaedalusVM::getCurrentInstanceDataPtr() {
+  return m_CurrentInstanceHandle;
   }
 
 std::vector<std::string> DaedalusVM::getCallStack() {

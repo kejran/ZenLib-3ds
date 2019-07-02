@@ -187,7 +187,7 @@ struct PARSymbol {
   uint32_t                 classMemberArraySize=0;
 
   // Not stored in files, only valid for classes to directly write to engine memory
-  void*                    instanceDataHandle = nullptr;
+  GEngineClasses::Instance*instanceDataHandle = nullptr;
   EInstanceClass           instanceDataClass  = IC_None;
   uint32_t                 parent             = 0xFFFFFFFF;  // 0xFFFFFFFF (-1) = none
 

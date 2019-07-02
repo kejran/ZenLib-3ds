@@ -140,6 +140,7 @@ namespace Daedalus
 
         struct Instance {
           Instance() = default;
+          virtual ~Instance()=default;
           size_t instanceSymbol=0;
 
           /**
