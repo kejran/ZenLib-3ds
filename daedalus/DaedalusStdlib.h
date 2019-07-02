@@ -51,6 +51,17 @@ namespace Daedalus
           PROT_INDEX_MAX = DAM_INDEX_MAX
           };
 
+        enum ENPCType : int32_t {
+          NPCTYPE_AMBIENT     = 0,
+          NPCTYPE_MAIN        = 1,
+          NPCTYPE_FRIEND      = 2,
+          NPCTYPE_OCAMBIENT   = 3,
+          NPCTYPE_OCMAIN      = 4,
+          NPCTYPE_BL_AMBIENT  = 5,
+          NPCTYPE_TAL_AMBIENT = 6,
+          NPCTYPE_BL_MAIN     = 7
+          };
+
         enum Move : int32_t {
           MOVE_RUN          = 1,  // Opponents in my focus + who stands in between? (G)
           MOVE_RUNBACK      = 2, 	// Opponents in my focus
@@ -346,88 +357,60 @@ namespace Daedalus
                 EFLAG_PROTECTED = 1 << 10,
             };
 
-            C_Npc()
-            {
-                id = 0;
-                npcType = 0;
-                flags = EFLAG_NONE;
-                memset(attribute, 0, sizeof(attribute));
-                memset(hitChance, 0, sizeof(hitChance));
-                memset(protection, 0, sizeof(protection));
-                memset(damage, 0, sizeof(damage));
-                memset(mission, 0, sizeof(mission));
-                damagetype = 0;
-                guild = 0;
-                level = 0;
-                fight_tactic = 0;
-                weapon = 0;
-                voice = 0;
-                voicePitch = 0;
-                bodymass = 0;
-                daily_routine = 0;
-                start_aistate = 0;
-                spawnDelay = 0;
-                senses = 0;
-                senses_range = 0;
-                memset(aivar, 0, sizeof(aivar));
-                exp = 0;
-                exp_next = 0;
-                lp = 0;
-                bodyStateInterruptableOverride = 0;
-                noFocus = 0;
-            }
+            C_Npc() = default;
 
-            int32_t id;
+            int32_t     id=0;
             std::string name[5];
             std::string slot;
             std::string effect;
-            int32_t npcType;
-            ENPCFlag flags;
-            int32_t attribute[EATR_MAX];
-            int32_t hitChance[MAX_HITCHANCE];
-            int32_t protection[PROT_INDEX_MAX];
-            int32_t damage[DAM_INDEX_MAX];
-            int32_t damagetype;
-            int32_t guild, level;
-            uint32_t mission[MAX_MISSIONS];
-            int32_t fight_tactic;
-            int32_t weapon;
+            ENPCType    npcType = NPCTYPE_AMBIENT;
+            ENPCFlag    flags   = EFLAG_NONE;
+            int32_t     attribute[EATR_MAX]={};
+            int32_t     hitChance[MAX_HITCHANCE]={};
+            int32_t     protection[PROT_INDEX_MAX]={};
+            int32_t     damage[DAM_INDEX_MAX]={};
+            int32_t     damagetype=0;
+            int32_t     guild=0;
+            int32_t     level=0;
+            uint32_t    mission[MAX_MISSIONS]={};
+            int32_t     fight_tactic=0;
+            int32_t     weapon=0;
 
-            int32_t voice;
-            int32_t voicePitch;
-            int32_t bodymass;
-            uint32_t daily_routine;
-            uint32_t start_aistate;
+            int32_t     voice=0;
+            int32_t     voicePitch=0;
+            int32_t     bodymass=0;
+            uint32_t    daily_routine=0;
+            uint32_t    start_aistate=0;
 
             // **********************
             // Spawn
             // **********************
             std::string spawnPoint;
-            int32_t spawnDelay;
+            int32_t     spawnDelay=0;
 
             // **********************
             // SENSES
             // **********************
-            int32_t senses;
-            int32_t senses_range;
+            int32_t senses=0;
+            int32_t senses_range=0;
 
             // **********************
             // Feel free to use
             // **********************
-            int32_t aivar[100];
+            int32_t     aivar[100]={};
             std::string wp;
 
             // **********************
             // Experience dependant
             // **********************
-            int32_t exp;
-            int32_t exp_next;
-            int32_t lp;
+            int32_t exp=0;
+            int32_t exp_next=0;
+            int32_t lp=0;
 
             // If this is set to TRUE, the Npc can't be interrupted in any action (e.g. BS_FLAG_INTERRUPTABLE for anis is being ignored)
-            int32_t bodyStateInterruptableOverride;
+            int32_t bodyStateInterruptableOverride=0;
             // if "noFocus" is set to TRUE, the focus name and health bar will not be drawn of this nsc (hi, stefan!)
-            int32_t noFocus;
+            int32_t noFocus=0;
         };
 
         struct C_Mission : Instance
@@ -463,7 +446,7 @@ namespace Daedalus
                 ITM_CAT_POTION = 1 << 7,
                 ITM_CAT_LIGHT = 1 << 8,
                 ITM_CAT_RUNE = 1 << 9,
-                ITM_CAT_MAGIC = 1 << 31,
+                ITM_CAT_MAGIC = 1 << 31, //FIXME
                 ITM_CAT_EQUIPABLE = ITM_CAT_NF | ITM_CAT_FF | ITM_CAT_ARMOR | ITM_CAT_RUNE | ITM_CAT_MAGIC,
             };
 
