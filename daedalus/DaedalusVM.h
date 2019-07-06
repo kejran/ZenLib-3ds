@@ -61,23 +61,24 @@ class DaedalusVM {
     const PARStackOpCode &nextInstruction(size_t& pc);
     void setCurrentInstance(size_t symIdx);
 
-    class CallStackFrame {
-    public:
-      enum AddressType : uint8_t {
-        Address,
-        SymbolIndex
-        };
-      using FunctionInfo = std::pair<size_t, CallStackFrame::AddressType>;
+    class CallStackFrame final {
+      public:
+        enum AddressType : uint8_t {
+          Address,
+          SymbolIndex
+          };
+        using FunctionInfo = std::pair<size_t, CallStackFrame::AddressType>;
 
-      CallStackFrame(DaedalusVM& vm, int32_t addressOrIndex, AddressType addrType);
-      ~CallStackFrame();
+        CallStackFrame(DaedalusVM& vm, int32_t addressOrIndex, AddressType addrType);
+        ~CallStackFrame();
 
-      CallStackFrame* const calee         =nullptr;
-      const int32_t         addressOrIndex=0;
-      const AddressType     addrType      =SymbolIndex;
+        CallStackFrame* const calee         =nullptr;
+        size_t                address       =0;
+        size_t                prevStackGuard=0;
+        bool                  hasReturnVal  =false;
 
-    private:
-      DaedalusVM&     vm;
+      private:
+        DaedalusVM&           vm;
       };
 
     DATFile m_DATFile;
@@ -107,6 +108,7 @@ class DaedalusVM {
     [[noreturn]] void terminateScript();
 
     std::vector<Stk>                                             m_Stack;
+    size_t                                                       m_StackGuard=0;
 
     // contains pairs of FunctionInfo, Debugging only
     CallStackFrame*                                              m_CallStack=nullptr;

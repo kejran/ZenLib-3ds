@@ -205,6 +205,9 @@ void DaedalusVM::eval(uint32_t PC) {
         {
         CallStackFrame frame(*this, op.address, CallStackFrame::Address);
         eval(size_t(op.address));
+
+        if(frame.hasReturnVal && frame.prevStackGuard==m_Stack.size())
+          pushInt(0);
         }
 
         m_CurrentInstanceHandle = currentInstanceHandle;
@@ -231,7 +234,7 @@ void DaedalusVM::eval(uint32_t PC) {
           }
 
         m_CurrentInstanceHandle = currentInstanceHandle;
-        m_CurrentInstanceClass = currentInstanceClass;
+        m_CurrentInstanceClass  = currentInstanceClass;
         break;
         }
 
@@ -328,7 +331,7 @@ void DaedalusVM::pushInt(int32_t value) {
 template <typename T>
 T DaedalusVM::popDataValue() {
   // Default behavior of the ZenGin is to pop a 0, if nothing is on the stack.
-  if(m_Stack.empty())
+  if(m_Stack.size()<=m_StackGuard)
     return static_cast<T>(0);
 
   auto top = m_Stack.back();
@@ -511,7 +514,7 @@ std::vector<std::string> DaedalusVM::getCallStack() {
   std::vector<std::string> symbolNames;
   auto frame=m_CallStack;
   while(frame) {
-    symbolNames.push_back(nameFromFunctionInfo(std::make_pair(frame->addressOrIndex, frame->addrType)));
+    symbolNames.push_back(nameFromFunctionInfo(std::make_pair(frame->address, CallStackFrame::Address)));
     frame = frame->calee;
     }
   return symbolNames;
@@ -519,7 +522,7 @@ std::vector<std::string> DaedalusVM::getCallStack() {
 
 const std::string &DaedalusVM::currentCall() {
   if(m_CallStack)
-    return nameFromFunctionInfo(std::make_pair(m_CallStack->addressOrIndex, m_CallStack->addrType));
+    return nameFromFunctionInfo(std::make_pair(m_CallStack->address, CallStackFrame::Address));
 
   static std::string n = "<no function>";
   return n;
@@ -549,21 +552,15 @@ int32_t DaedalusVM::runFunctionBySymIndex(size_t symIdx, bool clearDataStack) {
     m_Stack.clear();
 
   CallStackFrame frame(*this, int32_t(symIdx), CallStackFrame::SymbolIndex);
-  auto& functionSymbol = getDATFile().getSymbolByIndex(symIdx);
-  auto& address = functionSymbol.address;
-  if(address == 0)
+  if(frame.address == 0)
     return -1;
 
   // Execute the instructions
-  eval(address);
+  eval(frame.address);
 
   int32_t ret = 0;
-
-  if(functionSymbol.hasEParFlag(EParFlag_Return)) {
-    // Only pop if the VM didn't mess up
-    if(m_Stack.size()>0)
-      ret = popDataValue();  // TODO handle vars?
-    }
+  if(frame.hasReturnVal)
+    ret = popDataValue();
   return ret;
   }
 
@@ -578,7 +575,7 @@ const std::string& DaedalusVM::nameFromFunctionInfo(DaedalusVM::CallStackFrame::
       auto functionSymbolIndex = getDATFile().getFunctionIndexByAddress(address);
       if (functionSymbolIndex != static_cast<size_t>(-1))
         return getDATFile().getSymbolByIndex(functionSymbolIndex).name;
-      }
+        }
       }
   static std::string err;
   err = "unknown function with address: " + std::to_string(functionInfo.first);
@@ -591,11 +588,23 @@ void DaedalusVM::terminateScript(){
   }
 
 DaedalusVM::CallStackFrame::CallStackFrame(DaedalusVM& vm, int32_t addressOrIndex, AddressType addrType)
-    : calee(vm.m_CallStack), addressOrIndex(addressOrIndex), addrType(addrType), vm(vm) {
+    : calee(vm.m_CallStack), prevStackGuard(vm.m_StackGuard), vm(vm) {
+  auto  symIdx         = addrType==SymbolIndex ? size_t(addressOrIndex) : vm.getDATFile().getFunctionIndexByAddress(address);
+  auto& functionSymbol = vm.getDATFile().getSymbolByIndex(symIdx);
+  address              = functionSymbol.address;
+  if(address == 0)
+    return;
+
+  if(vm.m_Stack.size()<functionSymbol.properties.elemProps.count)
+    vm.terminateScript();
+  vm.m_StackGuard = vm.m_Stack.size() - functionSymbol.properties.elemProps.count;
+  hasReturnVal    = functionSymbol.hasEParFlag(EParFlag_Return);
+
   // entering function
   vm.m_CallStack = this;
   }
 
 DaedalusVM::CallStackFrame::~CallStackFrame() {
-  vm.m_CallStack = calee;
+  vm.m_CallStack  = calee;
+  vm.m_StackGuard = prevStackGuard;
   }
