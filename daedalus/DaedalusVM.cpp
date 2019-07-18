@@ -384,6 +384,10 @@ void DaedalusVM::setReturn(const std::string& v) {
   pushString(v);
   }
 
+void DaedalusVM::setReturn(std::string &&v) {
+  pushString(std::move(v));
+  }
+
 void DaedalusVM::setReturn(float f) {
   m_Stack.emplace_back(f);
   }
@@ -458,6 +462,17 @@ void DaedalusVM::pushString(const std::string& str) {
   m_FakeStringSymbols.pop();
 
   s.getString(0) = str;
+
+  pushVar(symIdx, 0);
+  }
+
+void DaedalusVM::pushString(std::string &&str) {
+  size_t symIdx = m_FakeStringSymbols.front();
+  Daedalus::PARSymbol& s = m_DATFile.getSymbolByIndex(symIdx);
+  m_FakeStringSymbols.push(m_FakeStringSymbols.front());
+  m_FakeStringSymbols.pop();
+
+  s.getString(0) = std::move(str);
 
   pushVar(symIdx, 0);
   }

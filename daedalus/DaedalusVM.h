@@ -25,9 +25,11 @@ class DaedalusVM {
     void pushVar(size_t index, uint32_t arrIdx = 0);
     void pushVar(const char *symName);
     void pushString(const std::string& str);
+    void pushString(std::string&& str);
 
     void setReturn(int32_t v);
     void setReturn(const std::string& v);
+    void setReturn(std::string&&      v);
     void setReturn(float f);
     void setReturnVar(int32_t v);
 
