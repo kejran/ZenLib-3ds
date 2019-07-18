@@ -6,7 +6,9 @@
 #include <map>
 #include <assert.h>
 
-const int NUM_FAKE_STRING_SYMBOLS = 5;
+enum {
+  NUM_FAKE_STRING_SYMBOLS = 5
+  };
 
 using namespace ZenLoad;
 using namespace Daedalus;
@@ -501,7 +503,6 @@ void DaedalusVM::initializeInstance(GEngineClasses::Instance &instance, size_t s
 
 void DaedalusVM::setCurrentInstance(size_t symIdx) {
   auto& sym = m_DATFile.getSymbolByIndex(symIdx);
-  m_CurrentInstance       = symIdx;
   m_CurrentInstanceHandle = sym.instanceDataHandle;
   m_CurrentInstanceClass  = sym.instanceDataClass;
   }

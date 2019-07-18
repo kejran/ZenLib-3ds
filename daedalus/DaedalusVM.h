@@ -42,8 +42,6 @@ class DaedalusVM {
     void initializeInstance(GEngineClasses::Instance& instance, size_t symIdx, EInstanceClass classIdx);
 
     GEngineClasses::Instance*     getCurrentInstanceDataPtr();
-    EInstanceClass                getCurrentInstanceClass()  { return m_CurrentInstanceClass; }
-    void*                         getCurrentInstanceHandle() { return m_CurrentInstanceHandle; }
     DATFile&                      getDATFile() { return m_DATFile; }
     std::vector<std::string>      getCallStack();
     const std::string&            currentCall();
@@ -110,12 +108,11 @@ class DaedalusVM {
     std::vector<Stk>                                             m_Stack;
     size_t                                                       m_StackGuard=0;
 
-    // contains pairs of FunctionInfo, Debugging only
+    // contains linked list of stack frames
     CallStackFrame*                                              m_CallStack=nullptr;
     std::vector<std::function<void(DaedalusVM&)>>                m_ExternalsByIndex;
     std::function<void(DaedalusVM&)>                             m_OnUnsatisfiedCall;
 
-    size_t                                                       m_CurrentInstance;
     GEngineClasses::Instance*                                    m_CurrentInstanceHandle;
     EInstanceClass                                               m_CurrentInstanceClass;
 
