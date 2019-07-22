@@ -140,7 +140,8 @@ namespace Daedalus
 
         struct Instance {
           Instance() = default;
-          size_t instanceSymbol=0;
+          size_t  instanceSymbol=0;
+          int32_t useCount      =0;
 
           /**
              * Space for the user to save something. Will not be touched at all by ZenLib.

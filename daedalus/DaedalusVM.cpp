@@ -3,8 +3,10 @@
 //
 
 #include "DaedalusVM.h"
+
 #include <map>
-#include <assert.h>
+#include <cassert>
+#include <algorithm>
 
 enum {
   NUM_FAKE_STRING_SYMBOLS = 5
@@ -32,7 +34,6 @@ DaedalusVM::DaedalusVM(const uint8_t* pDATFileData, size_t numBytes)
   m_OtherId  = m_DATFile.getSymbolIndexByName("other");
   m_VictimId = m_DATFile.getSymbolIndexByName("victim");
   m_ItemId   = m_DATFile.getSymbolIndexByName("item");
-  m_CurrentInstanceHandle=nullptr;
   }
 
 void DaedalusVM::eval(uint32_t PC) {
@@ -201,8 +202,7 @@ void DaedalusVM::eval(uint32_t PC) {
       case EParOp_Ret:
         return;
       case EParOp_Call: {
-        auto*          currentInstanceHandle = m_CurrentInstanceHandle;
-        EInstanceClass currentInstanceClass  = m_CurrentInstanceClass;
+        auto currentInstance = m_Instance;
 
         {
         CallStackFrame frame(*this, op.address, CallStackFrame::Address);
@@ -212,8 +212,7 @@ void DaedalusVM::eval(uint32_t PC) {
           pushInt(0);
         }
 
-        m_CurrentInstanceHandle = currentInstanceHandle;
-        m_CurrentInstanceClass  = currentInstanceClass;
+        m_Instance = currentInstance;
         break;
         }
 
@@ -222,10 +221,8 @@ void DaedalusVM::eval(uint32_t PC) {
         if(size_t(op.symbol)<m_ExternalsByIndex.size()){
           f = &m_ExternalsByIndex[size_t(op.symbol)];
           }
-        //auto it = m_ExternalsByIndex.find(size_t(op.symbol));
 
-        auto*          currentInstanceHandle = m_CurrentInstanceHandle;
-        EInstanceClass currentInstanceClass  = m_CurrentInstanceClass;
+        auto currentInstance = m_Instance;
 
         if(f!=nullptr && *f) {
           CallStackFrame frame(*this, op.symbol, CallStackFrame::SymbolIndex);
@@ -235,8 +232,7 @@ void DaedalusVM::eval(uint32_t PC) {
           m_OnUnsatisfiedCall(*this);
           }
 
-        m_CurrentInstanceHandle = currentInstanceHandle;
-        m_CurrentInstanceClass  = currentInstanceClass;
+        m_Instance = currentInstance;
         break;
         }
 
@@ -278,8 +274,7 @@ void DaedalusVM::eval(uint32_t PC) {
         auto& sa = m_DATFile.getSymbolByIndex(a);
         auto& sb = m_DATFile.getSymbolByIndex(b);
 
-        sa.instanceDataHandle = sb.instanceDataHandle;
-        sa.instanceDataClass  = sb.instanceDataClass;
+        sa.instance = sb.instance;
         break;
         }
 
@@ -370,7 +365,7 @@ std::string DaedalusVM::popString(bool toUpper) {
 
   std::string s = m_DATFile.getSymbolByIndex(idx).getString(arr, getCurrentInstanceDataPtr());
 
-  if (toUpper)
+  if(toUpper)
     std::transform(s.begin(), s.end(), s.begin(), ::toupper);
 
   return s;
@@ -479,20 +474,50 @@ void DaedalusVM::pushString(std::string &&str) {
 
 void DaedalusVM::setInstance(const char* instSymbol, GEngineClasses::Instance *h, EInstanceClass instanceClass) {
   PARSymbol& s = m_DATFile.getSymbolByName(instSymbol);
-  s.instanceDataHandle = h;
-  s.instanceDataClass  = instanceClass;
+  s.instance.set(h,instanceClass);
+  }
+
+void DaedalusVM::setInstance(const size_t instSymbol, GEngineClasses::Instance *h, EInstanceClass instanceClass) {
+  PARSymbol& s = m_DATFile.getSymbolByIndex(instSymbol);
+  s.instance.set(h,instanceClass);
+  }
+
+void DaedalusVM::clearReferences(GEngineClasses::Instance &h) {
+  if(h.useCount==0)
+    return;
+
+  if(m_Instance.get()==&h)
+    m_Instance = nullptr;
+
+  for(size_t i=0;i<m_DATFile.getSymTable().symbols.size();++i){
+    auto& s = m_DATFile.getSymbolByIndex(i);
+    if(s.instance.get()==&h){
+      s.instance = nullptr;
+      if(h.useCount==0)
+        return;
+      }
+    }
+  }
+
+void DaedalusVM::clearReferences(EInstanceClass h) {
+  if(m_Instance.instanceOf(h))
+    m_Instance = nullptr;
+
+  for(size_t i=0;i<m_DATFile.getSymTable().symbols.size();++i){
+    auto& s = m_DATFile.getSymbolByIndex(i);
+    if(s.instance.instanceOf(h)){
+      s.instance = nullptr;
+      }
+    }
   }
 
 void DaedalusVM::initializeInstance(GEngineClasses::Instance &instance, size_t symIdx, EInstanceClass classIdx) {
   PARSymbol& s = m_DATFile.getSymbolByIndex(symIdx);
 
   // Enter address into instance-symbol
-  s.instanceDataHandle = &instance;
-  s.instanceDataClass  = classIdx;
+  s.instance.set(&instance,classIdx);
 
-  auto*          currentInstanceHandle = m_CurrentInstanceHandle;
-  EInstanceClass currentInstanceClass  = m_CurrentInstanceClass;
-
+  auto currentInstance = m_Instance;
   setCurrentInstance(symIdx);
 
   PARSymbol selfCpy;
@@ -512,18 +537,16 @@ void DaedalusVM::initializeInstance(GEngineClasses::Instance &instance, size_t s
   if(m_SelfId!=size_t(-1))
     globalSelf() = selfCpy;
 
-  m_CurrentInstanceHandle = currentInstanceHandle;
-  m_CurrentInstanceClass  = currentInstanceClass;
+  m_Instance = currentInstance;
   }
 
 void DaedalusVM::setCurrentInstance(size_t symIdx) {
   auto& sym = m_DATFile.getSymbolByIndex(symIdx);
-  m_CurrentInstanceHandle = sym.instanceDataHandle;
-  m_CurrentInstanceClass  = sym.instanceDataClass;
+  m_Instance = sym.instance;
   }
 
 GEngineClasses::Instance *DaedalusVM::getCurrentInstanceDataPtr() {
-  return m_CurrentInstanceHandle;
+  return m_Instance.get();
   }
 
 std::vector<std::string> DaedalusVM::getCallStack() {

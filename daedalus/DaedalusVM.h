@@ -40,7 +40,10 @@ class DaedalusVM {
     uint32_t     popVar(uint32_t& arrIdx);
     std::string  popString(bool toUpper);
 
-    void setInstance(const char *instSymbol, GEngineClasses::Instance *h, EInstanceClass instanceClass);
+    void setInstance(const char * instSymbol, GEngineClasses::Instance *h, EInstanceClass instanceClass);
+    void setInstance(const size_t instSymbol, GEngineClasses::Instance *h, EInstanceClass instanceClass);
+    void clearReferences(GEngineClasses::Instance& h);
+    void clearReferences(EInstanceClass h);
     void initializeInstance(GEngineClasses::Instance& instance, size_t symIdx, EInstanceClass classIdx);
 
     GEngineClasses::Instance*     getCurrentInstanceDataPtr();
@@ -115,8 +118,7 @@ class DaedalusVM {
     std::vector<std::function<void(DaedalusVM&)>>                m_ExternalsByIndex;
     std::function<void(DaedalusVM&)>                             m_OnUnsatisfiedCall;
 
-    GEngineClasses::Instance*                                    m_CurrentInstanceHandle;
-    EInstanceClass                                               m_CurrentInstanceClass;
+    InstancePtr                                                  m_Instance;
 
     size_t                                                       m_SelfId   = size_t(-1);
     size_t                                                       m_OtherId  = size_t(-1);

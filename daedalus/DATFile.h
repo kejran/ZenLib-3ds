@@ -1,11 +1,12 @@
 #pragma once
+
 #include <map>
 #include <string>
 #include <vector>
 #include <daedalus/DaedalusStdlib.h>
-#include <utils/logger.h>
-#include <utils/staticReferencedAllocator.h>
 #include <zenload/zenParser.h>
+#include <utils/logger.h>
+#include <cassert>
 
 namespace Daedalus {
 enum EInstanceClass {
@@ -26,6 +27,62 @@ enum EInstanceClass {
   IC_CamSys,
   IC_Spell,
   IC_Svm
+  };
+
+class InstancePtr final {
+  public:
+    InstancePtr() = default;
+    InstancePtr(const InstancePtr& other):cls(other.cls),ptr(other.ptr){
+      if(ptr)
+        ptr->useCount++;
+      }
+
+    InstancePtr(InstancePtr&& other):cls(other.cls),ptr(other.ptr){
+      other.ptr = nullptr;
+      }
+
+    ~InstancePtr() {
+      if(ptr)
+        ptr->useCount--;
+      }
+
+    void set(GEngineClasses::Instance *h, EInstanceClass c) {
+      if(h)
+        h->useCount++;
+      if(ptr)
+        ptr->useCount--;
+      cls = c;
+      ptr = h;
+      }
+
+    Daedalus::GEngineClasses::Instance*       get()       { return ptr; }
+    const Daedalus::GEngineClasses::Instance* get() const { return ptr; }
+
+    InstancePtr& operator = (const std::nullptr_t&) {
+      if(ptr)
+        ptr->useCount--;
+      cls = EInstanceClass::IC_None;
+      ptr = nullptr;
+      return *this;
+      }
+
+    InstancePtr& operator = (const InstancePtr& other) {
+      if(other.ptr)
+        other.ptr->useCount++;
+      if(ptr)
+        ptr->useCount--;
+      cls = other.cls;
+      ptr = other.ptr;
+      return *this;
+      }
+
+    bool instanceOf(const EInstanceClass& c) const {
+      return cls==c;
+      }
+
+  private:
+    Daedalus::EInstanceClass            cls = EInstanceClass::IC_None;
+    Daedalus::GEngineClasses::Instance* ptr = nullptr;
   };
 
 template <class C_Class>
@@ -187,8 +244,7 @@ struct PARSymbol {
   uint32_t                 classMemberArraySize=0;
 
   // Not stored in files, only valid for classes to directly write to engine memory
-  GEngineClasses::Instance*instanceDataHandle = nullptr;
-  EInstanceClass           instanceDataClass  = IC_None;
+  InstancePtr              instance;
   uint32_t                 parent             = 0xFFFFFFFF;  // 0xFFFFFFFF (-1) = none
 
   void warnIndexOutOfBounds(size_t index, size_t size) {

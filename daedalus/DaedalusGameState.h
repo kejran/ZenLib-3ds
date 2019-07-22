@@ -3,7 +3,6 @@
 #include <vector>
 #include "DATFile.h"
 #include "DaedalusStdlib.h"
-#include <utils/staticReferencedAllocator.h>
 
 namespace Daedalus {
     class DaedalusVM;
