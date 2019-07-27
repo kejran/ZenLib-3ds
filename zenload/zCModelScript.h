@@ -61,7 +61,9 @@ namespace ZenLoad
       DEF_PAR_FRAME,
       DEF_OPT_FRAME,
       DEF_HIT_END,
-      DEF_WINDOW
+      DEF_WINDOW,
+
+      DEF_LAST
     };
 
     struct zCModelScriptAni
