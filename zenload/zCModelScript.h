@@ -144,6 +144,12 @@ namespace ZenLoad
         std::vector<int32_t> m_Int;
     };
 
+    struct zCModelScriptEventMMStartAni
+    {
+        int32_t m_Frame;
+        std::string m_Animation;
+    };
+
     struct zCModelScriptEventSfx
     {
         int32_t m_Frame = 0;

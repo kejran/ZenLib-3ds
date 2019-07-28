@@ -84,6 +84,7 @@ namespace ZenLoad
         std::vector<zCModelEvent>&              event() { return m_Event; }
         std::vector<zCModelScriptEventPfx>&     pfx() { return m_Pfx; }
         std::vector<zCModelScriptEventPfxStop>& pfxStop() { return m_PfxStop; }
+        std::vector<zCModelScriptEventMMStartAni>& mmStartAni() { return m_MMStartAni; }
 
         /** 
      * @return All meshes which could be used with these animations
@@ -108,6 +109,7 @@ namespace ZenLoad
         std::vector<zCModelScriptEventSfx>     m_SfxGround;
         std::vector<zCModelScriptEventTag>     m_Tag;
         std::vector<zCModelEvent>              m_Event;
+        std::vector<zCModelScriptEventMMStartAni> m_MMStartAni;
         std::vector<std::string>               m_MeshesASC;
     };
 
