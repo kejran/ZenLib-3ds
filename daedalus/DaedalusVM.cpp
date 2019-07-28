@@ -117,12 +117,12 @@ void DaedalusVM::eval(uint32_t PC) {
       case EParOp_LogOr:
         a = popDataValue();
         b = popDataValue();
-        pushInt(a | b ? 1 : 0);
+        pushInt((a || b) ? 1 : 0);
         break;
       case EParOp_LogAnd:
         a = popDataValue();
         b = popDataValue();
-        pushInt(a & b ? 1 : 0);
+        pushInt((a && b) ? 1 : 0);
         break;
       case EParOp_ShiftLeft: {
         a = popDataValue();
