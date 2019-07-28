@@ -37,9 +37,6 @@ namespace ZenLoad
             target.emplace_back();
             zCVob::readObjectData(target.back(), parser, worldversion, header);
 
-            // Save classname of this vob
-            target.back().objectClass = header.classname;
-
             // Read how many vobs this one has as child
             parser.getImpl()->readEntry("", &numChildren, sizeof(numChildren), ZenLoad::ParserImpl::ZVT_INT);
 

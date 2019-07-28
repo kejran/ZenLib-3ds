@@ -178,7 +178,9 @@ namespace ZenLoad
             VT_oCZoneMusicDefault,
             VT_zCTrigger,
             VT_oCTriggerChangeLevel,
-            VT_zCMover
+            VT_oCTriggerWorldStart,
+            VT_zCMover,
+            VT_zCVobStartpoint
         };
 
         EVobType vobType;
