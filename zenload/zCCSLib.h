@@ -18,6 +18,7 @@ namespace ZenLoad
 		 */
         zCCSLib(const std::string& fileName, const VDFS::FileIndex& fileIndex);
         zCCSLib(const std::string& file);
+        zCCSLib(ZenParser &parser);
 
         /**
         * Reads this object from an internal zen

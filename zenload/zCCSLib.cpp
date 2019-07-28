@@ -47,6 +47,19 @@ zCCSLib::zCCSLib(const std::string& file)
         LogError() << e.what();
         return;
     }
+  }
+
+zCCSLib::zCCSLib(ZenParser &parser)
+{
+  try
+  {
+      readObjectData(parser);
+  }
+  catch (std::exception& e)
+  {
+      LogError() << e.what();
+      return;
+  }
 }
 
 void zCCSLib::readObjectData(ZenParser& parser)
