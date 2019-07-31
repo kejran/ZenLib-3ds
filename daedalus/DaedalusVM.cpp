@@ -525,7 +525,7 @@ void DaedalusVM::initializeInstance(GEngineClasses::Instance &instance, size_t s
   if(m_SelfId!=size_t(-1)) {
     selfCpy = globalSelf();  // Copy of "self"-symbol
     // Set self
-    setInstance("self", &instance, classIdx);
+    setInstance(m_SelfId, &instance, classIdx);
     }
 
   // Place the assigning symbol into the instance
