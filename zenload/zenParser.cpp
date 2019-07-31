@@ -387,16 +387,17 @@ bool ZenParser::skipString(const std::string& pattern)
     bool retVal = true;
     if (pattern.empty())
     {
-        while (!(m_Data[m_Seek] == '\n' || m_Data[m_Seek] == ' '))
-            ++m_Seek;
-        ++m_Seek;
+        while(m_Seek<m_DataSize && m_Data[m_Seek]!='\n' && m_Data[m_Seek]!=' ')
+          ++m_Seek;
+        if(m_Seek<m_DataSize)
+          ++m_Seek;
     }
     else
     {
         size_t lineSeek = 0;
         while (lineSeek < pattern.size())
         {
-            if (m_Data[m_Seek] != pattern[lineSeek])
+            if(m_Seek>=m_DataSize || m_Data[m_Seek]!=pattern[lineSeek])
             {
                 retVal = false;
                 break;
