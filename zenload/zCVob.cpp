@@ -182,7 +182,7 @@ static void read_zCVob_zCTrigger(zCVobData &info, ZenParser &parser, WorldVersio
 
   auto& rd = *parser.getImpl();
   info.vobType = zCVobData::VT_zCTrigger;
-  rd.readEntry("triggerEvent",      &info.zCTrigger.triggerTarget);
+  rd.readEntry("triggerTarget",     &info.zCTrigger.triggerTarget);
   rd.readEntry("unknown0",          &info.zCTrigger.unknown0, ZenLoad::ParserImpl::ZVT_RAW);
   rd.readEntry("unknown1",          &info.zCTrigger.unknown1, ZenLoad::ParserImpl::ZVT_RAW);
   rd.readEntry("respondToVobName",  &info.zCTrigger.respondToVobName);
@@ -190,6 +190,14 @@ static void read_zCVob_zCTrigger(zCVobData &info, ZenParser &parser, WorldVersio
   rd.readEntry("retriggerWaitSec",  &info.zCTrigger.retriggerWaitSec);
   rd.readEntry("damageThreshold",   &info.zCTrigger.damageThreshold);
   rd.readEntry("fireDelaySec",      &info.zCTrigger.fireDelaySec);
+  }
+
+static void read_zCVob_zCTrigger_oCTriggerScript(zCVobData &info, ZenParser &parser, WorldVersion version) {
+  read_zCVob_zCTrigger(info,parser,version);
+
+  auto& rd = *parser.getImpl();
+  info.vobType = zCVobData::VT_zCTriggerScript;
+  rd.readEntry("scriptFunc", &info.zCTriggerScript.scriptFunc);
   }
 
 static void read_zCVob_oCMOB(zCVobData &info, ZenParser &parser, WorldVersion version) {
@@ -389,7 +397,7 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
     return read_zCVob(info,parser,version);
 
   if(header.classname == "oCTriggerScript:zCTrigger:zCVob")
-    return read_zCVob_zCTrigger(info,parser,version);
+    return read_zCVob_zCTrigger_oCTriggerScript(info,parser,version);
   if(header.classname == "zCMover:zCTrigger:zCVob")
     return read_zCVob_zCTrigger_zCMover(info,parser,version);
   if(header.classname == "oCTriggerChangeLevel:zCTrigger:zCVob")

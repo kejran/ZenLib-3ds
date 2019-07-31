@@ -177,6 +177,7 @@ namespace ZenLoad
             VT_oCZoneMusic,
             VT_oCZoneMusicDefault,
             VT_zCTrigger,
+            VT_zCTriggerScript,
             VT_oCTriggerChangeLevel,
             VT_oCTriggerWorldStart,
             VT_zCMover,
@@ -300,6 +301,11 @@ namespace ZenLoad
             float       damageThreshold  =0;
             float       fireDelaySec     =0;
         } zCTrigger;
+
+        struct
+        {
+            std::string scriptFunc;
+        } zCTriggerScript;
 
         struct
         {
