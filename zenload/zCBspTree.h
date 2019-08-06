@@ -67,95 +67,76 @@ namespace ZenLoad
 
                 size_t chunkEnd = parser.getSeek() + chunkInfo.length;
 
-                switch (chunkInfo.id)
-                {
-                    case EBspChunk::CHUNK_BSP:
-                        version = parser.readBinaryWord();
-                        info.mode = static_cast<zCBspTreeData::TreeMode>(parser.readBinaryDWord());
-                        break;
+                switch (chunkInfo.id) {
+                  case EBspChunk::CHUNK_BSP:
+                    version = parser.readBinaryWord();
+                    info.mode = static_cast<zCBspTreeData::TreeMode>(parser.readBinaryDWord());
+                    break;
 
-                    case CHUNK_BSP_POLYLIST:
-                    {
-                        uint32_t numPolys = parser.readBinaryDWord();
-                        info.treePolyIndices.resize(numPolys);
+                  case CHUNK_BSP_POLYLIST: {
+                    uint32_t numPolys = parser.readBinaryDWord();
+                    info.treePolyIndices.resize(numPolys);
 
-                        if(numPolys>0)
-                          parser.readBinaryRaw(&info.treePolyIndices[0],numPolys*sizeof(uint32_t));
+                    if(numPolys>0)
+                      parser.readBinaryRaw(&info.treePolyIndices[0],numPolys*sizeof(uint32_t));
                     }
                     break;
 
-                    case CHUNK_BSP_TREE:
-                    {
-                        uint32_t numNodes = parser.readBinaryDWord();
-                        uint32_t numLeafs = parser.readBinaryDWord();
-                        //info.nodes.resize(numNodes + numLeafs);
-                        //info.leafIndices.reserve(numLeafs);
+                  case CHUNK_BSP_TREE: {
+                    uint32_t numNodes = parser.readBinaryDWord();
+                    uint32_t numLeafs = parser.readBinaryDWord();
 
-                        if (!numNodes)
-                        {
-                            parser.setSeek(chunkEnd);  // Skip chunk
-                            break;
-                        }
+                    if(!numNodes) {
+                      parser.setSeek(chunkEnd);  // Skip chunk
+                      break;
+                      }
 
-                        info.nodes.reserve(numNodes + numLeafs);
-                        info.nodes.emplace_back();
-                        info.nodes[0].parent = zCBspNode::INVALID_NODE;
+                    info.nodes.reserve(numNodes);
+                    info.leafIndices.reserve(numLeafs);
+                    info.nodes.emplace_back();
 
-                        loadRec(parser,fileInfo,info,true);
+                    loadRec(parser,fileInfo,info,0,true);
+                    assert(numNodes==info.nodes.size());
+                    assert(numLeafs==info.leafIndices.size());
                     }
                     break;
 
-                    case CHUNK_BSP_LEAF_LIGHT:
-                        parser.setSeek(chunkEnd);  // Skip chunk
-                        break;
+                  case CHUNK_BSP_LEAF_LIGHT:
+                    break;
 
-                    case CHUNK_BSP_OUTDOOR_SECTORS:
-                    {
-                        uint32_t numSectors = parser.readBinaryDWord();
+                  case CHUNK_BSP_OUTDOOR_SECTORS: {
+                    uint32_t numSectors = parser.readBinaryDWord();
 
-                        // Sectors
-                        for(uint32_t i = 0; i < numSectors; i++)
-                        {
-                            info.sectors.emplace_back();
-                            zCSector& sector = info.sectors.back();
+                    // Sectors
+                    for(uint32_t i = 0; i < numSectors; i++) {
+                      info.sectors.emplace_back();
+                      zCSector& sector = info.sectors.back();
 
-                            sector.thisIndex = info.sectors.size() - 1;
-                            sector.name = parser.readLine(false);
-                            uint32_t numSectorNodes = parser.readBinaryDWord();
-                            uint32_t numSectorPortals = parser.readBinaryDWord();
+                      sector.name = parser.readLine(false);
+                      uint32_t numSectorNodes = parser.readBinaryDWord();
+                      uint32_t numSectorPortals = parser.readBinaryDWord();
 
-                            // Read Nodes this sector belongs to
-                            for(int j = 0; j < numSectorNodes; j++)
-                            {
-                                uint32_t nodeIndex = parser.readBinaryDWord();
-                                sector.bspNodeIndices.push_back(static_cast<size_t>(nodeIndex));
-                            }
+                      // Read Nodes this sector belongs to
+                      sector.bspNodeIndices.resize(numSectorNodes);
+                      parser.readBinaryRaw(sector.bspNodeIndices.data(),numSectorNodes*sizeof(uint32_t));
 
-                            // Read portals in/out of this sector
-                            for(int j = 0; j < numSectorPortals; j++)
-                            {
-                                uint32_t portalPolyIndex = parser.readBinaryDWord();
-                                sector.portalPolygonIndices.push_back(static_cast<size_t>(portalPolyIndex));
-                            }
-                        }
+                      // Read portals in/out of this sector
+                      sector.portalPolygonIndices.resize(numSectorPortals);
+                      parser.readBinaryRaw(sector.portalPolygonIndices.data(),numSectorPortals*sizeof(uint32_t));
+                      }
 
-                        // Portal-list
-                        uint32_t numPortals = parser.readBinaryDWord();
-                        for(uint32_t i = 0; i < numSectors; i++)
-                        {
-                            uint32_t portalPolyIndex = parser.readBinaryDWord();
-                            info.portalPolyIndices.push_back(portalPolyIndex);
-                        }
+                    // Portal-list
+                    uint32_t numPortals = parser.readBinaryDWord();
+                    info.portalPolyIndices.resize(numPortals);
+                    parser.readBinaryRaw(info.portalPolyIndices.data(),numPortals*sizeof(uint32_t));
                     }
-                        break;
+                    break;
 
-                    case CHUNK_BSP_END:
-                        done = true;
-                        break;
-
-                    default:
-                        parser.setSeek(chunkEnd);  // Skip chunk
-                }
+                  case CHUNK_BSP_END:
+                    done = true;
+                    break;
+                  }
+                parser.setSeek(chunkEnd);  // Skip chunk
             }
             (void)version;
 
@@ -199,30 +180,18 @@ namespace ZenLoad
         }
 
     private:
-        static void loadRec(ZenParser& parser,const BinaryFileInfo& fileInfo,zCBspTreeData& info,bool isNode)
-        {
-          size_t idx = info.nodes.size() - 1;
-          //LogInfo() << " - Reading node " << idx;
-
+        static void loadRec(ZenParser& parser,const BinaryFileInfo& fileInfo,zCBspTreeData& info,size_t idx,bool isNode) {
           zCBspNode& n = info.nodes[idx];
 
           parser.readStructure(n.bbox3dMin);
           parser.readStructure(n.bbox3dMax);
 
-          n.bbox3dMin *= 0.01f;  // Convert to meters
-          n.bbox3dMax *= 0.01f;
-
           // Read indices to the polys this contains
           n.treePolyIndex = static_cast<size_t>(parser.readBinaryDWord());
           n.numPolys      = static_cast<size_t>(parser.readBinaryDWord());
 
-          n.front  = zCBspNode::INVALID_NODE;
-          n.back   = zCBspNode::INVALID_NODE;
-          n.parent = zCBspNode::INVALID_NODE;
-
           // Only need to load data if this isn't a leaf
-          if (isNode)
-          {
+          if(isNode) {
               /**
                * Flags:
                * 1: front
@@ -239,57 +208,56 @@ namespace ZenLoad
 
               // flags tell if this node got children and whether they are leafs
               uint8_t flags = parser.readBinaryByte();
-
               parser.readStructure(n.plane.w);
               parser.readStructure(n.plane.x);
               parser.readStructure(n.plane.y);
               parser.readStructure(n.plane.z);
 
-              n.plane.w *= 0.01f;  // Convert to meters
-
               // G1 has an extra byte here
-              if (fileInfo.version == Gothic_18k)
-                  parser.readBinaryByte();  // Lod-flag
+              if(fileInfo.version==Gothic_18k)
+                parser.readBinaryByte();  // Lod-flag
 
+              uint32_t front = zCBspNode::INVALID_NODE;
+              uint32_t back  = zCBspNode::INVALID_NODE;
+
+
+              if((flags & FLAG_FRONT)!=0) {
+                front=info.nodes.size();
+                info.nodes.emplace_back();
+                }
               // Read front node
-              if ((flags & FLAG_FRONT) != 0)
-              {
-                  // Assign index and add actual node
-                  n.front = info.nodes.size();
-                  info.nodes.emplace_back();
+              if(front != zCBspNode::INVALID_NODE) {
+                // Assign index and add actual node
+                info.nodes[idx].front = front;
+                // Set new nodes parent
+                info.nodes[front].parent = idx;
 
-                  zCBspNode& front = info.nodes[n.front];
+                // If this is a leaf, add it to the leaf-list
+                if((flags & FLAG_FRONT_IS_LEAF)!=0)
+                  info.leafIndices.push_back(front);
 
-                  // Set new nodes parent
-                  front.parent = idx;
+                // Continue to load the tree
+                loadRec(parser,fileInfo,info,front,(flags & FLAG_FRONT_IS_LEAF) == 0);
+                }
 
-                  // If this is a leaf, add it to the leaf-list
-                  if ((flags & FLAG_FRONT_IS_LEAF) != 0)
-                      info.leafIndices.push_back(n.front);
-
-                  // Continue to load the tree
-                  loadRec(parser,fileInfo,info,(flags & FLAG_FRONT_IS_LEAF) == 0);
-              }
-
+              if((flags & FLAG_BACK)!=0) {
+                back=info.nodes.size();
+                info.nodes.emplace_back();
+                }
               // Read back node
-              if ((flags & FLAG_BACK) != 0)
-              {
-                  // Assign index and add actual node
-                  n.back = info.nodes.size();
-                  info.nodes.emplace_back();
+              if(back != zCBspNode::INVALID_NODE) {
+                // Assign index and add actual node
+                info.nodes[idx].back = back;
+                // Set new nodes parent
+                info.nodes[back].parent = idx;
 
-                  zCBspNode& back = info.nodes[n.back];
+                // If this is a leaf, add it to the leaf-list
+                if((flags & FLAG_BACK_IS_LEAF) != 0)
+                  info.leafIndices.push_back(back);
 
-                  // Set new nodes parent
-                  back.parent = idx;
-
-                  // If this is a leaf, add it to the leaf-list
-                  if ((flags & FLAG_BACK_IS_LEAF) != 0)
-                      info.leafIndices.push_back(n.back);
-
-                  // Continue to load the tree
-                  loadRec(parser,fileInfo,info,(flags & FLAG_BACK_IS_LEAF) == 0);
-              }
+                // Continue to load the tree
+                loadRec(parser,fileInfo,info,back,(flags & FLAG_BACK_IS_LEAF) == 0);
+                }
           }
           else
           {

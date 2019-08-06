@@ -361,9 +361,8 @@ namespace ZenLoad
      */
     struct zCSector
     {
-      uint32_t              thisIndex=SECTOR_INDEX_INVALID; // Index of this sector inside zCBspTreeData::sectors
       std::string           name;
-      std::vector<uint32_t> bspNodeIndices;         // Indices to zCBspTreeData::nodes
+      std::vector<uint32_t> bspNodeIndices;         // Indices to zCBspTreeData::leafIndices
       std::vector<uint32_t> portalPolygonIndices;   // Indices to polygons of the worldmesh
     };
 
@@ -371,17 +370,18 @@ namespace ZenLoad
     {
         enum : size_t
         {
-            INVALID_NODE = static_cast<size_t>(-1)
+            INVALID_NODE = static_cast<uint32_t>(-1)
         };
 
         ZMath::float4 plane;
-        size_t front, back;
-        size_t parent;
+        uint32_t front=zCBspNode::INVALID_NODE;
+        uint32_t back =zCBspNode::INVALID_NODE;
+        uint32_t parent=zCBspNode::INVALID_NODE;
 
         ZMath::float3 bbox3dMin, bbox3dMax;
 
-        size_t treePolyIndex;
-        size_t numPolys;
+        size_t treePolyIndex=size_t(-1);
+        size_t numPolys=size_t(-1);
 
         bool isLeaf()
         {
@@ -404,11 +404,11 @@ namespace ZenLoad
 
         std::vector<zCBspNode> nodes;
         std::vector<uint32_t > leafIndices;
-        std::vector<uint32_t> treePolyIndices;
-        std::vector<uint32_t> portalPolyIndices;
+        std::vector<uint32_t>  treePolyIndices;
+        std::vector<uint32_t>  portalPolyIndices;
 
-        std::vector<zCSector> sectors;
-        std::vector<zCPortal> portals;
+        std::vector<zCSector>  sectors;
+        std::vector<zCPortal>  portals;
     };
 
     struct zCBspTreeData2
