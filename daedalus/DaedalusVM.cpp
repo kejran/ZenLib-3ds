@@ -37,11 +37,8 @@ DaedalusVM::DaedalusVM(const uint8_t* pDATFileData, size_t numBytes)
   }
 
 void DaedalusVM::eval(uint32_t PC) {
-  int32_t      a=0;
-  int32_t      b=0;
-  uint32_t     arr=0, arr2=0;
-  int32_t*     addr=nullptr;
-  std::string *straddr=nullptr;
+  int32_t a=0;
+  int32_t b=0;
 
   while(true) {
     const PARStackOpCode& op = nextInstruction(PC);
@@ -106,12 +103,10 @@ void DaedalusVM::eval(uint32_t PC) {
         }
 
       case EParOp_AssignFunc:
-      case EParOp_Assign: {
-        size_t  a = popVar(arr);
+      case EParOp_AssignInt: {
+        auto&   a = popIntVar();
         int32_t b = popDataValue();
-
-        int32_t& aInt = m_DATFile.getSymbolByIndex(a).getInt(arr, getCurrentInstanceDataPtr());
-        aInt = b;
+        a = b;
         break;
         }
       case EParOp_LogOr:
@@ -161,30 +156,30 @@ void DaedalusVM::eval(uint32_t PC) {
         break;
         }
       case EParOp_AssignAdd:{
-        size_t v = popVar(arr);
-        addr   = &m_DATFile.getSymbolByIndex(v).getInt(arr, getCurrentInstanceDataPtr());
-        *addr += popDataValue();
+        int32_t& v = popIntVar();
+        int32_t  a = popDataValue();
+        v += a;
         break;
         }
       case EParOp_AssignSubtract: {
-        size_t v = popVar(arr);
-        addr   = &m_DATFile.getSymbolByIndex(v).getInt(arr, getCurrentInstanceDataPtr());
-        *addr -= popDataValue();
+        int32_t& v = popIntVar();
+        int32_t  a = popDataValue();
+        v -= a;
         break;
         }
       case EParOp_AssignMultiply: {
-        size_t v = popVar(arr);
-        addr = &m_DATFile.getSymbolByIndex(v).getInt(arr, getCurrentInstanceDataPtr());
-        *addr *= popDataValue();
+        int32_t& v = popIntVar();
+        int32_t  a = popDataValue();
+        v *= a;
         break;
         }
       case EParOp_AssignDivide: {
-        size_t v = popVar(arr);
-        addr = &m_DATFile.getSymbolByIndex(v).getInt(arr, getCurrentInstanceDataPtr());
+        int32_t& v = popIntVar();
+        int32_t  b = popDataValue();
         b = popDataValue();
         if(b==0)
           terminateScript();
-        *addr /= b;
+        v /= b;
         break;
         }
       case EParOp_Plus:
@@ -240,18 +235,16 @@ void DaedalusVM::eval(uint32_t PC) {
         pushInt(op.value);
         break;
       case EParOp_PushVar:
-        pushVar(size_t(op.symbol));
+        pushVar(size_t(op.symbol),0);
         break;
       case EParOp_PushInstance:
-        pushVar(size_t(op.symbol));
+        pushInt(op.symbol);
+        //pushVar(size_t(op.symbol));
         break;  //TODO: Not sure about this
       case EParOp_AssignString: {
-        size_t a = popVar(arr);
-        size_t b = popVar(arr2);
-
-        straddr         = &m_DATFile.getSymbolByIndex(a).getString(arr,  getCurrentInstanceDataPtr());
-        std::string& s2 =  m_DATFile.getSymbolByIndex(b).getString(arr2, getCurrentInstanceDataPtr());
-        *straddr = s2;
+        std::string& s1 = popString();
+        std::string& s2 = popString();
+        s1 = s2;
         break;
         }
 
@@ -260,19 +253,15 @@ void DaedalusVM::eval(uint32_t PC) {
         break;
 
       case EParOp_AssignFloat: {
-        size_t a = popVar(arr);
+        float& a = popFloatVar();
         float  b = popFloatValue();
-        float& aFloat = m_DATFile.getSymbolByIndex(a).getFloat(arr, getCurrentInstanceDataPtr());
-        aFloat = b;
+        a = b;
         break;
         }
 
       case EParOp_AssignInstance: {
-        size_t a = popVar();
-        size_t b = popVar();
-
-        auto& sa = m_DATFile.getSymbolByIndex(a);
-        auto& sb = m_DATFile.getSymbolByIndex(b);
+        auto& sa = popVar();
+        auto& sb = popVar();
 
         sa.instance = sb.instance;
         break;
@@ -291,9 +280,10 @@ void DaedalusVM::eval(uint32_t PC) {
       case EParOp_SetInstance:
         setCurrentInstance(size_t(op.symbol));
         break;
-      case EParOp_PushArrayVar:
+      case EParOp_PushArrayVar:{
         pushVar(size_t(op.symbol), op.index);
         break;
+        }
       }
     }
   }
@@ -342,8 +332,7 @@ T DaedalusVM::popDataValue() {
 
 void DaedalusVM::pushVar(size_t index, uint32_t arrIdx) {
   auto& sym = m_DATFile.getSymbolByIndex(index);(void)sym;
-  //int32_t val = sym.getValue<int>(arrIdx, getCurrentInstanceDataPtr());
-  auto ptr = getCurrentInstanceDataPtr();
+  auto ptr  = getCurrentInstanceDataPtr();
   m_Stack.emplace_back(ptr,index,arrIdx);
   }
 
@@ -391,6 +380,10 @@ void DaedalusVM::setReturnVar(int32_t v) {
   pushVar(size_t(v));
   }
 
+uint32_t DaedalusVM::popUInt() {
+  return uint32_t(popInt());
+  }
+
 int32_t DaedalusVM::popInt() {
   if(m_Stack.empty())
     return 0;
@@ -418,10 +411,9 @@ float DaedalusVM::popFloat() {
   }
 
 std::string& DaedalusVM::popString() {
-  if(m_Stack.empty()){
-    static std::string err;
+  static std::string err;
+  if(m_Stack.empty())
     return err;
-    }
 
   auto top = m_Stack.back();
   m_Stack.pop_back();
@@ -430,7 +422,34 @@ std::string& DaedalusVM::popString() {
     return sym.getString(top.id,top.inst);
     }
 
-  static std::string err;
+  return err;
+  }
+
+int32_t &DaedalusVM::popIntVar() {
+  static int32_t err=0;
+  if(m_Stack.empty())
+    return err;
+
+  auto top = m_Stack.back();
+  m_Stack.pop_back();
+  if(top.tag==EParOp_PushVar){
+    auto& sym = m_DATFile.getSymbolByIndex(size_t(top.i32));
+    return sym.getInt(top.id,top.inst);
+    }
+  return err;
+  }
+
+float &DaedalusVM::popFloatVar() {
+  static float err=0;
+  if(m_Stack.empty())
+    return err;
+
+  auto top = m_Stack.back();
+  m_Stack.pop_back();
+  if(top.tag==EParOp_PushVar){
+    auto& sym = m_DATFile.getSymbolByIndex(size_t(top.i32));
+    return sym.getFloat(top.id,top.inst);
+    }
   return err;
   }
 
@@ -440,10 +459,17 @@ float DaedalusVM::popFloatValue() {
   return top.f;
   }
 
+PARSymbol &DaedalusVM::popVar() {
+  uint32_t arr = 0;
+  uint32_t idx = popVar(arr);
+  return m_DATFile.getSymbolByIndex(idx);
+  }
+
+/*
 uint32_t DaedalusVM::popVar() {
   uint32_t arr=0;
   return popVar(arr);
-  }
+  }*/
 
 void DaedalusVM::pushVar(const char* symName) {
   size_t idx = m_DATFile.getSymbolIndexByName(symName);

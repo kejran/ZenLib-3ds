@@ -118,7 +118,7 @@ enum EParOp : uint8_t
   EParOp_BinAnd = 6,           // a & b
   EParOp_Less = 7,             // a < b
   EParOp_Greater = 8,          // a > b
-  EParOp_Assign = 9,           // a = b
+  EParOp_AssignInt = 9,           // a = b
   EParOp_LogOr = 11,           // a || b
   EParOp_LogAnd = 12,          // a && b
   EParOp_ShiftLeft = 13,       // a << b

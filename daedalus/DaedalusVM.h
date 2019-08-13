@@ -33,10 +33,15 @@ class DaedalusVM {
     void setReturn(float f);
     void setReturnVar(int32_t v);
 
+    uint32_t     popUInt();
     int32_t      popInt();
     float        popFloat();
     std::string& popString();
-    uint32_t     popVar();
+
+
+    int32_t&     popIntVar();
+    float&       popFloatVar();
+    PARSymbol&   popVar();
     uint32_t     popVar(uint32_t& arrIdx);
     std::string  popString(bool toUpper);
 
