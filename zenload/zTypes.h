@@ -171,14 +171,17 @@ namespace ZenLoad
         enum EVobType
         {
             VT_zCVob,
+            VT_zCVobLevelCompo,
             VT_oCItem,
             VT_oCMOB,
             VT_oCMobInter,
+            VT_oCMobSwitch,
             VT_oCMobContainer,
             VT_zCVobLight,
             VT_zCVobSound,
             VT_oCZoneMusic,
             VT_oCZoneMusicDefault,
+            VT_zCCodeMaster,
             VT_zCTrigger,
             VT_zCTriggerScript,
             VT_oCTriggerChangeLevel,
@@ -295,6 +298,15 @@ namespace ZenLoad
 
         struct
         {
+          std::string              triggerTarget;
+          bool                     orderRelevant=false;
+          bool                     firstFalseIsFailure=false;
+          bool                     untriggeredCancels=false;
+          std::string              triggerTargetFailure;
+          std::vector<std::string> slaveVobName;
+        } zCCodeMaster;
+        struct
+        {
             std::string triggerTarget;
             uint8_t     unknown0         =0;
             uint8_t     unknown1         =0;
@@ -398,9 +410,9 @@ namespace ZenLoad
         };
 
         /**
-		 * Whether this tree is an indoor or outdoor location
-		 */
-        TreeMode mode;
+         * Whether this tree is an indoor or outdoor location
+         */
+        TreeMode               mode=TreeMode::Indoor;
 
         std::vector<zCBspNode> nodes;
         std::vector<uint32_t > leafIndices;
