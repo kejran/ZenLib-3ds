@@ -193,7 +193,7 @@ static void read_zCCodeMaster(zCVobData &info, ZenParser &parser, WorldVersion v
   rd.readEntry("firstFalseIsFailure",  &info.zCCodeMaster.firstFalseIsFailure);
   rd.readEntry("triggerTargetFailure", &info.zCCodeMaster.triggerTargetFailure);
   rd.readEntry("untriggeredCancels",   &info.zCCodeMaster.untriggeredCancels);
-  rd.readEntry("count", &count);
+  rd.readEntry("", &count);
   info.zCCodeMaster.slaveVobName.resize(count);
   for(auto& i:info.zCCodeMaster.slaveVobName)
     rd.readEntry("slaveVobName", &i);
@@ -206,12 +206,28 @@ static void read_zCVob_zCTrigger(zCVobData &info, ZenParser &parser, WorldVersio
   info.vobType = zCVobData::VT_zCTrigger;
   rd.readEntry("triggerTarget",     &info.zCTrigger.triggerTarget);
   rd.readEntry("unknown0",          &info.zCTrigger.unknown0, ZenLoad::ParserImpl::ZVT_RAW);
-  rd.readEntry("unknown1",          &info.zCTrigger.unknown1, ZenLoad::ParserImpl::ZVT_RAW);
+  rd.readEntry("unknown1",          &info.zCTrigger.unknown1, ZenLoad::ParserImpl::ZVT_RAW); //hash?
   rd.readEntry("respondToVobName",  &info.zCTrigger.respondToVobName);
   rd.readEntry("numCanBeActivated", &info.zCTrigger.numCanBeActivated);
   rd.readEntry("retriggerWaitSec",  &info.zCTrigger.retriggerWaitSec);
   rd.readEntry("damageThreshold",   &info.zCTrigger.damageThreshold);
   rd.readEntry("fireDelaySec",      &info.zCTrigger.fireDelaySec);
+  }
+
+static void read_zCVob_zCTrigger_zCTriggerList(zCVobData &info, ZenParser &parser, WorldVersion version) {
+  read_zCVob_zCTrigger(info,parser,version);
+
+  uint8_t count=0;
+  auto& rd = *parser.getImpl();
+  info.vobType = zCVobData::VT_zCTriggerList;
+
+  rd.readEntry("", &info.zCTriggerList.listProcess);
+  rd.readEntry("", &count);
+  info.zCTriggerList.list.resize(count);
+  for(auto& i:info.zCTriggerList.list) {
+    rd.readEntry("slaveVobName", &i.triggerTarget);
+    rd.readEntry("fireDelay",    &i.fireDelay);
+    }
   }
 
 static void read_zCVob_zCTrigger_oCTriggerScript(zCVobData &info, ZenParser &parser, WorldVersion version) {
@@ -251,6 +267,31 @@ static void read_zCVob_oCMOB_oCMobInter(zCVobData &info, ZenParser &parser, Worl
   rd.readEntry("conditionFunc", &info.oCMobInter.conditionFunc);
   rd.readEntry("onStateFunc", &info.oCMobInter.onStateFunc);
   rd.readEntry("rewind", &info.oCMobInter.rewind);
+  }
+
+static void read_zCVob_oCMOB_oCMobInter_oCMobBed(zCVobData &info, ZenParser &parser, WorldVersion version) {
+  read_zCVob_oCMOB_oCMobInter(info,parser,version);
+  info.vobType = zCVobData::VT_oCMobBed;
+  }
+
+static void read_zCVob_oCMOB_oCMobInter_oCMobDoor(zCVobData &info, ZenParser &parser, WorldVersion version) {
+  read_zCVob_oCMOB_oCMobInter(info,parser,version);
+  info.vobType = zCVobData::VT_oCMobDoor;
+  }
+
+static void read_zCVob_oCMOB_oCMobInter_oCMobFire(zCVobData &info, ZenParser &parser, WorldVersion version) {
+  read_zCVob_oCMOB_oCMobInter(info,parser,version);
+
+  std::string s0,s1;
+  auto& rd = *parser.getImpl();
+  info.vobType = zCVobData::VT_oCMobFire;
+  rd.readEntry("fireSlot", &s0);
+  rd.readEntry("fireVobtreeName", &s1);
+  }
+
+static void read_zCVob_oCMOB_oCMobInter_oCMobLadder(zCVobData &info, ZenParser &parser, WorldVersion version) {
+  read_zCVob_oCMOB_oCMobInter(info,parser,version);
+  info.vobType = zCVobData::VT_oCMobLadder;
   }
 
 static void read_zCVob_oCMOB_oCMobInter_oCMobSwitch(zCVobData &info, ZenParser &parser, WorldVersion version) {
@@ -377,11 +418,11 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
   if(header.classname == "oCMobInter:oCMOB:zCVob")
     return read_zCVob_oCMOB_oCMobInter(info,parser,version);
   if(header.classname == "oCMobBed:oCMobInter:oCMOB:zCVob")
-    return read_zCVob_oCMOB_oCMobInter(info,parser,version);
+    return read_zCVob_oCMOB_oCMobInter_oCMobBed(info,parser,version);
   if(header.classname == "oCMobFire:oCMobInter:oCMOB:zCVob")
-    return read_zCVob_oCMOB_oCMobInter(info,parser,version);
+    return read_zCVob_oCMOB_oCMobInter_oCMobFire(info,parser,version);
   if(header.classname == "oCMobLadder:oCMobInter:oCMOB:zCVob")
-    return read_zCVob_oCMOB_oCMobInter(info,parser,version);
+    return read_zCVob_oCMOB_oCMobInter_oCMobLadder(info,parser,version);
   if(header.classname == "oCMobSwitch:oCMobInter:oCMOB:zCVob")
     return read_zCVob_oCMOB_oCMobInter_oCMobSwitch(info,parser,version);
   if(header.classname == "oCMobWheel:oCMobInter:oCMOB:zCVob")
@@ -389,7 +430,7 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
   if(header.classname == "oCMobContainer:oCMobInter:oCMOB:zCVob")
     return read_zCVob_oCMOB_oCMobInter_oCMobContainer(info,parser,version);
   if(header.classname == "oCMobDoor:oCMobInter:oCMOB:zCVob")
-    return read_zCVob_oCMOB_oCMobInter(info,parser,version);
+    return read_zCVob_oCMOB_oCMobInter_oCMobDoor(info,parser,version);
 
   if(header.classname == "zCPFXControler:zCVob")
     return read_zCVob(info,parser,version);
@@ -425,6 +466,8 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
 
   if(header.classname == "zCCodeMaster:zCVob")
     return read_zCCodeMaster(info,parser,version);
+  if(header.classname == "zCTriggerList:zCTrigger:zCVob")
+    return read_zCVob_zCTrigger_zCTriggerList(info,parser,version);
   if(header.classname == "oCTriggerScript:zCTrigger:zCVob")
     return read_zCVob_zCTrigger_oCTriggerScript(info,parser,version);
   if(header.classname == "zCMover:zCTrigger:zCVob")
@@ -448,5 +491,6 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
 void zCVob::readObjectData(zCVobData &info, ZenParser &parser,
                            WorldVersion version, const ZenParser::ChunkHeader &header) {
   ::readObjectData(info,parser,version,header);
-  parser.skipChunk();
+  if(!parser.readChunkEnd())
+    parser.skipChunk();
   }

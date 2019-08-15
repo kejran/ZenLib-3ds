@@ -175,7 +175,12 @@ namespace ZenLoad
             VT_oCItem,
             VT_oCMOB,
             VT_oCMobInter,
+            VT_oCMobDoor,
+            VT_oCMobBed,
+            VT_oCMobFire,
+            VT_oCMobLadder,
             VT_oCMobSwitch,
+            VT_oCMobWheel,
             VT_oCMobContainer,
             VT_zCVobLight,
             VT_zCVobSound,
@@ -183,6 +188,7 @@ namespace ZenLoad
             VT_oCZoneMusicDefault,
             VT_zCCodeMaster,
             VT_zCTrigger,
+            VT_zCTriggerList,
             VT_zCTriggerScript,
             VT_oCTriggerChangeLevel,
             VT_oCTriggerWorldStart,
@@ -305,6 +311,7 @@ namespace ZenLoad
           std::string              triggerTargetFailure;
           std::vector<std::string> slaveVobName;
         } zCCodeMaster;
+
         struct
         {
             std::string triggerTarget;
@@ -316,6 +323,18 @@ namespace ZenLoad
             float       damageThreshold  =0;
             float       fireDelaySec     =0;
         } zCTrigger;
+
+        struct
+        {
+          struct Entry
+          {
+            std::string triggerTarget;
+            float       fireDelay=0;
+          };
+
+          int32_t            listProcess=0;
+          std::vector<Entry> list;
+        } zCTriggerList;
 
         struct
         {
