@@ -13,19 +13,13 @@
 
 using namespace ZenLoad;
 
+static void THROW(const char* msg) {
 #ifdef __ANDROID__
-#define ERROR(msg)         \
-    do                     \
-    {                      \
-        LogError() << msg; \
-    } while (0)
+  LogError() << msg;
 #else
-#define ERROR(msg)                     \
-    do                                 \
-    {                                  \
-        throw std::runtime_error(msg); \
-    } while (0)
+  throw std::runtime_error(msg);
 #endif
+  }
 
 /**
  * @brief reads a zen from a file
@@ -69,8 +63,8 @@ bool ZenParser::readFile(const std::string& fileName, std::vector<uint8_t>& data
 
     if (!file.good())
     {
-        ERROR("File does not exist");
-        ERROR(strerror(errno));
+        THROW("File does not exist");
+        THROW(strerror(errno));
     }
     LogInfo() << "Zen-File found! Size: " << size;
 
@@ -116,10 +110,10 @@ void ZenParser::skipHeader()
 void ZenParser::readHeader(ZenHeader& header, ParserImpl*& impl)
 {
     if (!skipString("ZenGin Archive"))
-        ERROR("Not a valid format");
+        THROW("Not a valid format");
 
     if (!skipString("ver"))
-        ERROR("Not a valid header");
+        THROW("Not a valid header");
 
     // Version should be always 1...
     header.version = readIntASCII();
@@ -145,11 +139,11 @@ void ZenParser::readHeader(ZenHeader& header, ParserImpl*& impl)
         impl = new ParserImplBinSafe(this);
     }
     else
-        ERROR("Unsupported file format");
+        THROW("Unsupported file format");
 
     // Read string of the format "savegame b", where b is 0 or 1
     if (!skipString("saveGame"))
-        ERROR("Unsupported file format");
+        THROW("Unsupported file format");
 
     header.saveGame = readBoolASCII();
 
@@ -166,7 +160,7 @@ void ZenParser::readHeader(ZenHeader& header, ParserImpl*& impl)
 
     // Reached the end of the main header
     if (!skipString("END"))
-        ERROR("No END in header(1)");
+        THROW("No END in header(1)");
 
     // Continue with the implementationspecific header
     skipSpaces();
@@ -185,7 +179,7 @@ void ZenParser::readWorld(oCWorldData& info, bool forceG2)
     readChunkStart(header);
 
     if (header.classname != "oCWorld:zCWorld")
-        ERROR("Expected oCWorld:zCWorld-Chunk not found!");
+        THROW("Expected oCWorld:zCWorld-Chunk not found!");
 
     oCWorld::readObjectData(info, *this, header.version, forceG2);
 }
@@ -321,7 +315,6 @@ void ZenParser::skipEntry()
 {
     ParserImpl::EZenValueType type;
     size_t size;
-    size_t ts = m_Seek;
 
     // Read type and size first, so we can allocate the data
     m_pParserImpl->readEntryType(type, size);
@@ -333,17 +326,18 @@ void ZenParser::skipEntry()
 /**
  * @brief reads an ASCII datatype from the loaded file
  */
-int32_t ZenParser::readIntASCII()
-{
-    skipSpaces();
-    std::string number;
-    while (m_Data[m_Seek] >= '0' && m_Data[m_Seek] <= '9')
-    {
-        number += m_Data[m_Seek];
-        ++m_Seek;
+int32_t ZenParser::readIntASCII() {
+  int32_t ret=0;
+  skipSpaces();
+
+  const char* i = reinterpret_cast<const char*>(m_Data)+m_Seek;
+  while(m_Seek<m_DataSize && '0'<=*i && *i <='9') {
+    ret = ret*10+(*i-'0');
+    ++m_Seek;
+    ++i;
     }
-    return std::stoi(number);
-}
+  return ret;
+  }
 
 /**
  * @brief reads an ASCII datatype from the loaded file
@@ -353,7 +347,7 @@ bool ZenParser::readBoolASCII()
     skipSpaces();
     bool retVal;
     if (m_Data[m_Seek] != '0' && m_Data[m_Seek] != '1')
-        ERROR("Value is not a bool");
+        THROW("Value is not a bool");
     else
         retVal = m_Data[m_Seek] == '0' ? false : true;
 
