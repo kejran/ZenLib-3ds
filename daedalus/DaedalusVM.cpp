@@ -3,6 +3,7 @@
 //
 
 #include "DaedalusVM.h"
+#include "DaedalusExcept.h"
 
 #include <map>
 #include <cassert>
@@ -65,7 +66,7 @@ void DaedalusVM::eval(uint32_t PC) {
         a = popDataValue();
         b = popDataValue();
         if(b==0)
-          terminateScript();
+          terminateScript<BadMath>();
         pushInt(a/b);
         break;
         }
@@ -73,7 +74,7 @@ void DaedalusVM::eval(uint32_t PC) {
         a = popDataValue();
         b = popDataValue();
         if(b==0)
-          terminateScript();
+          terminateScript<BadMath>();
         pushInt(a%b);
         break;
         }
@@ -178,7 +179,7 @@ void DaedalusVM::eval(uint32_t PC) {
         int32_t  b = popDataValue();
         b = popDataValue();
         if(b==0)
-          terminateScript();
+          terminateScript<BadMath>();
         v /= b;
         break;
         }
@@ -540,6 +541,8 @@ void DaedalusVM::clearReferences(EInstanceClass h) {
 void DaedalusVM::initializeInstance(GEngineClasses::Instance &instance, size_t symIdx, EInstanceClass classIdx) {
   PARSymbol& s = m_DATFile.getSymbolByIndex(symIdx);
 
+  if(s.properties.elemProps.type!=EParType_Instance)
+    terminateScript<InvalidCall>();
   // Enter address into instance-symbol
   s.instance.set(&instance,classIdx);
 
@@ -647,21 +650,31 @@ const std::string& DaedalusVM::nameFromFunctionInfo(DaedalusVM::CallStackFrame::
   return err;
   }
 
+template<class T>
 [[noreturn]]
 void DaedalusVM::terminateScript(){
-  throw std::logic_error("fatal script error");
+  std::vector<std::string> stk;
+
+  auto s = m_CallStack;
+  while(s!=nullptr) {
+    stk.push_back(s->nameHint);
+    s = s->calee;
+    }
+  throw T(std::move(stk));
   }
 
 DaedalusVM::CallStackFrame::CallStackFrame(DaedalusVM& vm, int32_t addressOrIndex, AddressType addrType)
     : calee(vm.m_CallStack), prevStackGuard(vm.m_StackGuard), vm(vm) {
-  auto  symIdx         = addrType==SymbolIndex ? size_t(addressOrIndex) : vm.getDATFile().getFunctionIndexByAddress(address);
+  auto  symIdx         = addrType==SymbolIndex ? size_t(addressOrIndex)
+                                               : vm.getDATFile().getFunctionIndexByAddress(size_t(addressOrIndex));
   auto& functionSymbol = vm.getDATFile().getSymbolByIndex(symIdx);
   address              = functionSymbol.address;
   if(address == 0)
     return;
+  nameHint = functionSymbol.name.c_str();
 
   if(vm.m_Stack.size()<functionSymbol.properties.elemProps.count)
-    vm.terminateScript();
+    vm.terminateScript<InconsistentState>();
   vm.m_StackGuard = vm.m_Stack.size() - functionSymbol.properties.elemProps.count;
   hasReturnVal    = functionSymbol.hasEParFlag(EParFlag_Return);
 

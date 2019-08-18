@@ -81,6 +81,7 @@ class DaedalusVM {
         ~CallStackFrame();
 
         CallStackFrame* const calee         =nullptr;
+        const char*           nameHint      =nullptr;
         size_t                address       =0;
         size_t                prevStackGuard=0;
         bool                  hasReturnVal  =false;
@@ -113,6 +114,8 @@ class DaedalusVM {
       };
 
     const std::string &nameFromFunctionInfo(CallStackFrame::FunctionInfo functionInfo);
+
+    template<class T>
     [[noreturn]] void terminateScript();
 
     std::vector<Stk>                                             m_Stack;
