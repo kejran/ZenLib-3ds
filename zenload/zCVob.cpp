@@ -177,6 +177,11 @@ static void read_zCVob_oCItem(zCVobData &info, ZenParser &parser, WorldVersion v
   rd.readEntry("itemInstance", &info.oCItem.instanceName);
   }
 
+static void read_zCVob_zCVobSpot(zCVobData &info, ZenParser &parser, WorldVersion version) {
+  read_zCVob(info,parser,version);
+  info.vobType = zCVobData::VT_zCVobSpot;
+  }
+
 static void read_zCVob_zCVobStartpoint(zCVobData &info, ZenParser &parser, WorldVersion version) {
   read_zCVob(info,parser,version);
   info.vobType = zCVobData::VT_zCVobStartpoint;
@@ -343,6 +348,16 @@ static void read_zCVob_zCVobSound(zCVobData &info, ZenParser &parser, WorldVersi
   rd.readEntry("sndName", &info.zCVobSound.sndName);
   }
 
+static void read_zCVob_zCVobSound_zCVobSoundDaytime(zCVobData &info, ZenParser &parser, WorldVersion version) {
+  read_zCVob_zCVobSound(info,parser,version);
+
+  auto& rd = *parser.getImpl();
+  info.vobType = zCVobData::VT_zCVobSoundDaytime;
+  rd.readEntry("sndStartTime", &info.zCVobSoundDaytime.sndStartTime);
+  rd.readEntry("sndEndTime",   &info.zCVobSoundDaytime.sndEndTime);
+  rd.readEntry("sndName2",     &info.zCVobSoundDaytime.sndName2);
+  }
+
 static void read_zCVob_oCZoneMusic(zCVobData &info, ZenParser &parser, WorldVersion version) {
   read_zCVob(info,parser,version);
 
@@ -441,19 +456,21 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
 
   if(header.classname == "zCVobLight:zCVob")
     return read_zCVob_zCVobLight(info,parser,version);
+
   if(header.classname == "zCVobSpot:zCVob")
-    return read_zCVob(info,parser,version);
+    return read_zCVob_zCVobSpot(info,parser,version);
   if(header.classname == "zCVobStartpoint:zCVob")
     return read_zCVob_zCVobStartpoint(info,parser,version);
 
   if(header.classname == "zCVobSound:zCVob")
     return read_zCVob_zCVobSound(info,parser,version);
   if(header.classname == "zCVobSoundDaytime:zCVobSound:zCVob")
-    return read_zCVob_zCVobSound(info,parser,version);
-  if(header.classname == "oCZoneMusicDefault:oCZoneMusic:zCVob")
-    return read_zCVob_oCZoneMusic_oCZoneMusicDefault(info,parser,version);
+    return read_zCVob_zCVobSound_zCVobSoundDaytime(info,parser,version);
+
   if(header.classname == "oCZoneMusic:zCVob")
     return read_zCVob_oCZoneMusic(info,parser,version);
+  if(header.classname == "oCZoneMusicDefault:oCZoneMusic:zCVob")
+    return read_zCVob_oCZoneMusic_oCZoneMusicDefault(info,parser,version);
 
   if(header.classname == "zCZoneZFog:zCVob")
     return read_zCVob(info,parser,version);

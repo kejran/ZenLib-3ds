@@ -184,6 +184,7 @@ namespace ZenLoad
             VT_oCMobContainer,
             VT_zCVobLight,
             VT_zCVobSound,
+            VT_zCVobSoundDaytime,
             VT_oCZoneMusic,
             VT_oCZoneMusicDefault,
             VT_zCCodeMaster,
@@ -193,7 +194,8 @@ namespace ZenLoad
             VT_oCTriggerChangeLevel,
             VT_oCTriggerWorldStart,
             VT_zCMover,
-            VT_zCVobStartpoint
+            VT_zCVobStartpoint,
+            VT_zCVobSpot
         };
 
         EVobType vobType;
@@ -291,6 +293,13 @@ namespace ZenLoad
             float sndRadius;
             std::string sndName;
         } zCVobSound;
+
+        struct
+        {
+            float sndStartTime=0.f;
+            float sndEndTime=0.f;
+            std::string sndName2;
+        } zCVobSoundDaytime;
 
         struct
         {
