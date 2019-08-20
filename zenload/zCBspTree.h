@@ -76,9 +76,7 @@ namespace ZenLoad
                   case CHUNK_BSP_POLYLIST: {
                     uint32_t numPolys = parser.readBinaryDWord();
                     info.treePolyIndices.resize(numPolys);
-
-                    if(numPolys>0)
-                      parser.readBinaryRaw(&info.treePolyIndices[0],numPolys*sizeof(uint32_t));
+                    parser.readBinaryRaw(info.treePolyIndices.data(),numPolys*sizeof(uint32_t));
                     }
                     break;
 
@@ -296,15 +294,13 @@ namespace ZenLoad
             return sectorsOnly.substr(sectorsOnly.find_first_of('_') + 1);
         }
 
-        static bool isMaterialForPortal(const zCMaterialData& m)
-        {
-            return m.matName.substr(0, 2) == "P:";
-        }
+        static bool isMaterialForPortal(const zCMaterialData& m) {
+          return m.matName.find("P:")==0;
+          }
 
-        static bool isMaterialForSector(const zCMaterialData& m)
-        {
-            return m.matName.substr(0, 2) == "S:";
-        }
+        static bool isMaterialForSector(const zCMaterialData& m) {
+          return m.matName.find("S:")==0;
+          }
 
         /**
          * Extracts the information given by the various indices inside the BspTree-Structure and packs them
