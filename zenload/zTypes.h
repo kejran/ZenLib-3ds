@@ -32,6 +32,16 @@ namespace ZenLoad
         SVT_ELLIPSOID
     };
 
+    enum MutateType : uint8_t
+    {
+        MT_NONE=0,
+        MT_TRIGGER,
+        MT_UNTRIGGER,
+        MT_ENABLE,
+        MT_DISABLE,
+        MT_TOOGLE_ENABLED
+    };
+
     using SectorIndex = uint32_t;
     enum : uint32_t { SECTOR_INDEX_INVALID = uint32_t(-1) };
 
@@ -187,6 +197,7 @@ namespace ZenLoad
             VT_zCVobSoundDaytime,
             VT_oCZoneMusic,
             VT_oCZoneMusicDefault,
+            VT_zCMessageFilter,
             VT_zCCodeMaster,
             VT_zCTrigger,
             VT_zCTriggerList,
@@ -313,13 +324,20 @@ namespace ZenLoad
 
         struct
         {
-          std::string              triggerTarget;
-          bool                     orderRelevant=false;
-          bool                     firstFalseIsFailure=false;
-          bool                     untriggeredCancels=false;
-          std::string              triggerTargetFailure;
-          std::vector<std::string> slaveVobName;
+            std::string              triggerTarget;
+            bool                     orderRelevant=false;
+            bool                     firstFalseIsFailure=false;
+            bool                     untriggeredCancels=false;
+            std::string              triggerTargetFailure;
+            std::vector<std::string> slaveVobName;
         } zCCodeMaster;
+
+        struct
+        {
+            std::string triggerTarget;
+            MutateType  onTrigger=MT_NONE;
+            MutateType  onUntrigger=MT_NONE;
+        } zCMessageFilter;
 
         struct
         {
@@ -335,14 +353,14 @@ namespace ZenLoad
 
         struct
         {
-          struct Entry
-          {
-            std::string triggerTarget;
-            float       fireDelay=0;
-          };
+            struct Entry
+            {
+                std::string triggerTarget;
+                float       fireDelay=0;
+            };
 
-          int32_t            listProcess=0;
-          std::vector<Entry> list;
+            int32_t            listProcess=0;
+            std::vector<Entry> list;
         } zCTriggerList;
 
         struct
@@ -377,6 +395,12 @@ namespace ZenLoad
             std::string levelName;
             std::string startVobName;
         } oCTriggerChangeLevel;
+
+        struct
+        {
+            std::string triggerTarget;
+            bool        fireOnlyFirstTime;
+        } oCTriggerWorldStart;
 
         std::vector<zCVobData> childVobs;
     };

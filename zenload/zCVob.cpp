@@ -187,6 +187,16 @@ static void read_zCVob_zCVobStartpoint(zCVobData &info, ZenParser &parser, World
   info.vobType = zCVobData::VT_zCVobStartpoint;
   }
 
+static void read_zCMessageFilter(zCVobData &info, ZenParser &parser, WorldVersion version) {
+  read_zCVob(info,parser,version);
+
+  auto& rd = *parser.getImpl();
+  info.vobType = zCVobData::VT_zCMessageFilter;
+  rd.readEntry("triggerTarget", &info.zCMessageFilter.triggerTarget);
+  rd.readEntry("onTrigger",     reinterpret_cast<uint8_t*>(&info.zCMessageFilter.onTrigger));
+  rd.readEntry("onUntrigger",   reinterpret_cast<uint8_t*>(&info.zCMessageFilter.onUntrigger));
+  }
+
 static void read_zCCodeMaster(zCVobData &info, ZenParser &parser, WorldVersion version) {
   read_zCVob(info,parser,version);
   uint8_t     count=0;
@@ -226,7 +236,7 @@ static void read_zCVob_zCTrigger_zCTriggerList(zCVobData &info, ZenParser &parse
   auto& rd = *parser.getImpl();
   info.vobType = zCVobData::VT_zCTriggerList;
 
-  rd.readEntry("", &info.zCTriggerList.listProcess);
+  rd.readEntry("listProcess", &info.zCTriggerList.listProcess);
   rd.readEntry("", &count);
   info.zCTriggerList.list.resize(count);
   for(auto& i:info.zCTriggerList.list) {
@@ -417,6 +427,14 @@ static void read_zCVob_zCTrigger_oCTriggerChangeLevel(zCVobData &info, ZenParser
   rd.readEntry("startVobName", &info.oCTriggerChangeLevel.startVobName);
   }
 
+static void read_zCVob_zCTrigger_zCTriggerWorldStart(zCVobData &info, ZenParser &parser, WorldVersion version) {
+  read_zCVob(info,parser,version);
+  auto& rd = *parser.getImpl();
+  info.vobType = zCVobData::VT_oCTriggerWorldStart;
+  rd.readEntry("triggerTarget",     &info.oCTriggerWorldStart.triggerTarget);
+  rd.readEntry("fireOnlyFirstTime", &info.oCTriggerWorldStart.fireOnlyFirstTime);
+  }
+
 static void readObjectData(zCVobData &info, ZenParser &parser,
                            WorldVersion version, const ZenParser::ChunkHeader &header) {
   info.objectClass = header.classname;
@@ -481,6 +499,8 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
   if(header.classname == "zCZoneVobFarPlaneDefault:zCZoneVobFarPlane:zCVob")
     return read_zCVob(info,parser,version);
 
+  if(header.classname == "zCMessageFilter:zCVob")
+    return read_zCMessageFilter(info,parser,version);
   if(header.classname == "zCCodeMaster:zCVob")
     return read_zCCodeMaster(info,parser,version);
   if(header.classname == "zCTriggerList:zCTrigger:zCVob")
@@ -491,17 +511,8 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
     return read_zCVob_zCTrigger_zCMover(info,parser,version);
   if(header.classname == "oCTriggerChangeLevel:zCTrigger:zCVob")
     return read_zCVob_zCTrigger_oCTriggerChangeLevel(info,parser,version);
-  if(header.classname == "zCTriggerWorldStart:zCVob") {
-    read_zCVob(info,parser,version);
-    std::string s0;
-    bool        b0;
-    info.vobType = zCVobData::VT_oCTriggerWorldStart;
-    //rd.readEntry("?",  &s0);
-    //rd.readEntry("?",  &b0);
-    //rd.readEntry("?",  &s0);
-    //rd.readEntry("?",  &s0);
-    return;
-    }
+  if(header.classname == "zCTriggerWorldStart:zCVob")
+    return read_zCVob_zCTrigger_zCTriggerWorldStart(info,parser,version);
   // LogInfo() << "skip: \"" << header.classname << "\"";
   }
 
