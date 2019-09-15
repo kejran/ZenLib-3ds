@@ -1,4 +1,4 @@
-#include "daedalusexcept.h"
+#include "DaedalusExcept.h"
 
 using namespace Daedalus;
 
