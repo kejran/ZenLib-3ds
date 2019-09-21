@@ -61,10 +61,10 @@ namespace ZenLoad {
       std::vector<zCModelEvent>              modelTag;
 
     protected:
-      virtual Chunk beginChunk()=0;
-      virtual void  endChunk(){}
-      virtual void  beginArgs(){}
-      virtual void  endArgs(){}
+      virtual Chunk       beginChunk()=0;
+      virtual void        endChunk(){}
+      virtual void        beginArgs(){}
+      virtual void        endArgs(){}
 
       virtual std::string readStr()=0;
       virtual std::string readKeyword()=0;
@@ -128,10 +128,9 @@ namespace ZenLoad {
     private:
       ZenParser&  zen;
       uint32_t    chunkEnd=0;
-      std::string buf;
 
-      Chunk beginChunk() override;
-      void  endChunk() override;
+      Chunk       beginChunk() override;
+      void        endChunk() override;
 
       std::string readStr() override;
       std::string readKeyword() override;

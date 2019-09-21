@@ -24,7 +24,7 @@ MdsParserTxt::TokType MdsParserTxt::nextTok(std::string& buf) {
     if(first==' ' || first=='\n' || first=='\r' || first=='\t') {
       loop = true;
       }
-    if(first==':') {
+    else if(first==':') {
       // fps semicolon
       loop = true;
       }
@@ -35,9 +35,6 @@ MdsParserTxt::TokType MdsParserTxt::nextTok(std::string& buf) {
         if(cur=='\n')
           break;
         }
-      loop = true;
-      }
-    else if(first==' ' || first=='\n' || first=='\r' || first=='\t') {
       loop = true;
       }
     else if(('a'<=first && first<='z') || ('A'<=first && first<='Z') || first=='_' || first=='*' ) {
