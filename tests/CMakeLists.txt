@@ -31,8 +31,8 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
                  ${CMAKE_BINARY_DIR}/googletest-build
                  EXCLUDE_FROM_ALL)
 
-add_executable(test_vdfs test_vdfs.cpp)
-target_link_libraries(test_vdfs gtest vdfs utils)
+add_executable(test_vdfs test_vdfs.cpp test_mds.cpp)
+target_link_libraries(test_vdfs gtest zenload vdfs utils)
 
 enable_testing()
 add_test(test_vdfs test_vdfs)

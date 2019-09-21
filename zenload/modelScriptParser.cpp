@@ -7,1036 +7,457 @@
 #include "modelScriptParser.h"
 #include "zenParser.h"
 
-namespace ZenLoad
-{
-    ModelScriptParser::ModelScriptParser(ZenParser& zen)
-        : m_Zen(zen)
-    {
-    }
+using namespace ZenLoad;
 
-    ModelScriptParser::~ModelScriptParser()
-    {
-    }
+MdsParserTxt::MdsParserTxt(ZenParser &zen)
+  :zen(zen) {
+  buf.reserve(8);
+  }
 
-    ModelScriptBinParser::ModelScriptBinParser(ZenParser& zen)
-        : ModelScriptParser(zen)
-    {
-    }
+MdsParserTxt::TokType MdsParserTxt::nextTok(std::string& buf) {
+  buf.clear();
+  bool loop=true;
+  while(loop && zen.getRamainBytes()>0) {
+    loop = false;
+    const char first = zen.readChar();
 
-    ModelScriptBinParser::EChunkType ModelScriptBinParser::parse()
-    {
-        if (m_Zen.getSeek() >= m_Zen.getFileSize())
-            return CHUNK_EOF;
-
-        BinaryChunkInfo chunk;
-        m_Zen.readStructure(chunk);
-
-        // store position after header so that we can skip the chunk
-        size_t chunk_end = m_Zen.getSeek() + chunk.length;
-
-        switch (chunk.id)
-        {
-            case CHUNK_MESH_AND_TREE:
-                readMeshAndTree();
-                m_Zen.setSeek(chunk_end);
-                return CHUNK_MESH_AND_TREE;
-            case CHUNK_REGISTER_MESH:
-                readRegisterMesh();
-                m_Zen.setSeek(chunk_end);
-                return CHUNK_REGISTER_MESH;
-            case CHUNK_ANI:
-                readAni();
-                m_Zen.setSeek(chunk_end);
-                return CHUNK_ANI;
-            case CHUNK_ANI_ALIAS:
-                readAlias();
-                m_Zen.setSeek(chunk_end);
-                return CHUNK_ANI_ALIAS;
-            case CHUNK_EVENT_SFX:
-                readSfx();
-                m_Zen.setSeek(chunk_end);
-                return CHUNK_EVENT_SFX;
-            case CHUNK_EVENT_SFX_GRND:
-                readSfx();
-                m_Zen.setSeek(chunk_end);
-                return CHUNK_EVENT_SFX_GRND;
-            case CHUNK_EVENT_PFX:
-                readPfx();
-                m_Zen.setSeek(chunk_end);
-                return CHUNK_EVENT_PFX;
-            case CHUNK_EVENT_PFX_STOP:
-                readPfxStop();
-                m_Zen.setSeek(chunk_end);
-                return CHUNK_EVENT_PFX_STOP;
-            case CHUNK_EVENT_TAG:
-                readEvent();
-                m_Zen.setSeek(chunk_end);
-                return CHUNK_EVENT_TAG;
-            default:
-                m_Zen.setSeek(chunk_end);
-                return parse();  // skip unknown chunk
+    if(first==' ' || first=='\n' || first=='\r' || first=='\t') {
+      loop = true;
+      }
+    if(first==':') {
+      // fps semicolon
+      loop = true;
+      }
+    else if(first=='/' && zen.peekChar()=='/') {
+      zen.readChar();
+      while(zen.getRamainBytes()>0) {
+        const char cur = zen.readChar();
+        if(cur=='\n')
+          break;
         }
-
-        return CHUNK_EOF;
-    }
-
-    static uint32_t makeAniFlags(ZenParser& zen)
-    {
-        uint32_t flags = 0;
-        std::string flag_str = zen.readLine(true);
-        for (auto ch : flag_str)
-        {
-            switch (ch)
-            {
-                case 'M':
-                    flags |= MSB_MOVE_MODEL;
-                    break;
-                case 'R':
-                    flags |= MSB_ROTATE_MODEL;
-                    break;
-                case 'E':
-                    flags |= MSB_QUEUE_ANI;
-                    break;
-                case 'F':
-                    flags |= MSB_FLY;
-                    break;
-                case 'I':
-                    flags |= MSB_IDLE;
-                    break;
-            }
-        }
-        return flags;
-    }
-
-    static EModelScriptAniDir makeAniDir(ZenParser& zen)
-    {
-        std::string str = zen.readLine();
-        return (!str.empty() && str[0] == 'R') ? MSB_BACKWARD : MSB_FORWARD;
-    }
-
-    void ModelScriptBinParser::readMeshAndTree()
-    {
-        bool dontUseMesh = m_Zen.readBinaryDWord() != 0;
-        std::string meshNameASC = m_Zen.readLine();
-
-        if (!dontUseMesh)
-        {
-            m_MeshesASC.push_back(meshNameASC);
-        }
-    }
-
-    void ModelScriptBinParser::readRegisterMesh()
-    {
-        // Reads "Some_Mesh.ASC"
-        std::string mesh = m_Zen.readLine();
-
-        m_MeshesASC.push_back(mesh);
-    }
-
-    void ModelScriptBinParser::readAni()
-    {
-        m_Ani.m_Name = m_Zen.readLine();
-        m_Ani.m_Layer = m_Zen.readBinaryDWord();
-        m_Ani.m_Next = m_Zen.readLine();
-        m_Ani.m_BlendIn = m_Zen.readBinaryFloat();
-        m_Ani.m_BlendOut = m_Zen.readBinaryFloat();
-        m_Ani.m_Flags = makeAniFlags(m_Zen);
-        m_Ani.m_Asc = m_Zen.readLine();
-        m_Ani.m_Dir = makeAniDir(m_Zen);
-        m_Ani.m_FirstFrame = m_Zen.readBinaryDWord();
-        m_Ani.m_LastFrame = m_Zen.readBinaryDWord();
-        m_Ani.m_MaxFps = m_Zen.readBinaryFloat();
-        m_Ani.m_Speed = m_Zen.readBinaryFloat();
-        m_Ani.m_ColVolScale = m_Zen.readBinaryFloat();
-    }
-
-    void ModelScriptBinParser::readAlias()
-    {
-        m_Alias.m_Name = m_Zen.readLine(true);
-        m_Alias.m_Layer = m_Zen.readBinaryDWord();
-        m_Alias.m_Next = m_Zen.readLine(true);
-        m_Alias.m_BlendIn = m_Zen.readBinaryFloat();
-        m_Alias.m_BlendOut = m_Zen.readBinaryFloat();
-        m_Alias.m_Flags = makeAniFlags(m_Zen);
-        m_Alias.m_Alias = m_Zen.readLine(true);
-        m_Ani.m_Dir = makeAniDir(m_Zen);
-    }
-
-    void ModelScriptBinParser::readSfx()
-    {
-        m_Sfx.emplace_back();
-        m_Sfx.back().m_Frame = m_Zen.readBinaryDWord();
-        m_Sfx.back().m_Name = m_Zen.readLine(true);
-
-        float range = m_Zen.readBinaryFloat();
-        float emptySlot = m_Zen.readBinaryFloat();
-
-        m_Sfx.back().m_Range = range;        // Convert to meters
-        m_Sfx.back().m_EmptySlot = emptySlot > 0.0f;  // They encoded this as float for some reason...
-    }
-
-    void ModelScriptBinParser::readPfx()
-    {
-        m_Pfx.emplace_back();
-
-        m_Pfx.back().m_Frame = m_Zen.readBinaryDWord();
-
-        m_Pfx.back().m_Num = m_Zen.readBinaryDWord();
-        m_Pfx.back().m_Name = m_Zen.readLine(true);
-        m_Pfx.back().m_Pos = m_Zen.readLine(true);
-        //Like EmptySlot in readSfx encoded in float. No " " around value might be a hint that no string is used
-        m_Pfx.back().m_isAttached = m_Zen.readBinaryFloat() > 0.0f;
-    }
-
-    void ModelScriptBinParser::readPfxStop()
-    {
-        m_PfxStop.emplace_back();
-        m_PfxStop.back().m_Frame = m_Zen.readBinaryDWord();
-        m_PfxStop.back().m_Num = m_Zen.readBinaryDWord();
-    }
-
-    void ModelScriptBinParser::readEvent()
-    {
-      std::string str;
-      m_Event.emplace_back();
-
-      m_Event.back().m_Frame    = m_Zen.readBinaryFloat();
-      str = m_Zen.readLine(true);
-      if(str=="DEF_CREATE_ITEM")
-        m_Event.back().m_Def=DEF_CREATE_ITEM;
-      else if(str=="DEF_INSERT_ITEM")
-        m_Event.back().m_Def=DEF_INSERT_ITEM;
-      else if(str=="DEF_REMOVE_ITEM")
-        m_Event.back().m_Def=DEF_REMOVE_ITEM;
-      else if(str=="DEF_DESTROY_ITEM")
-        m_Event.back().m_Def=DEF_DESTROY_ITEM;
-      else if(str=="DEF_PLACE_ITEM")
-        m_Event.back().m_Def=DEF_PLACE_ITEM;
-      else if(str=="DEF_EXCHANGE_ITEM")
-        m_Event.back().m_Def=DEF_EXCHANGE_ITEM;
-      else if(str=="DEF_FIGHTMODE")
-        m_Event.back().m_Def=DEF_FIGHTMODE;
-      else if(str=="DEF_PLACE_MUNITION")
-        m_Event.back().m_Def=DEF_PLACE_MUNITION;
-      else if(str=="DEF_REMOVE_MUNITION")
-        m_Event.back().m_Def=DEF_REMOVE_MUNITION;
-      else if(str=="DEF_DRAWSOUND")
-        m_Event.back().m_Def=DEF_DRAWSOUND;
-      else if(str=="DEF_UNDRAWSOUND")
-        m_Event.back().m_Def=DEF_UNDRAWSOUND;
-      else if(str=="DEF_SWAPMESH")
-        m_Event.back().m_Def=DEF_SWAPMESH;
-      else if(str=="DEF_DRAWTORCH")
-        m_Event.back().m_Def=DEF_DRAWTORCH;
-      else if(str=="DEF_INV_TORCH")
-        m_Event.back().m_Def=DEF_INV_TORCH;
-      else if(str=="DEF_DROP_TORCH")
-        m_Event.back().m_Def=DEF_DROP_TORCH;
-      else if(str=="DEF_HIT_LIMB")
-        m_Event.back().m_Def=DEF_HIT_LIMB;
-      else if(str=="DEF_HIT_DIR")
-        m_Event.back().m_Def=DEF_HIT_DIR;
-      else if(str=="DEF_DAM_MULTIPLY")
-        m_Event.back().m_Def=DEF_DAM_MULTIPLY;
-      else if(str=="DEF_PAR_FRAME")
-        m_Event.back().m_Def=DEF_PAR_FRAME;
-      else if(str=="DEF_OPT_FRAME")
-        m_Event.back().m_Def=DEF_OPT_FRAME;
-      else if(str=="DEF_HIT_END")
-        m_Event.back().m_Def=DEF_HIT_END;
-      else if(str=="DEF_WINDOW")
-        m_Event.back().m_Def=DEF_WINDOW;
-      {
-        str = m_Zen.readLine(true);
-        std::stringstream ss(str);
-        while(!ss.eof())
-          {
-            int frame=0;
-            ss >> frame;
-            if(!ss.good() && !ss.eof())
-              break;
-            m_Event.back().m_Int.push_back(frame);
+      loop = true;
+      }
+    else if(first==' ' || first=='\n' || first=='\r' || first=='\t') {
+      loop = true;
+      }
+    else if(('a'<=first && first<='z') || ('A'<=first && first<='Z') || first=='_' || first=='*' ) {
+      buf.push_back(first);
+      while(zen.getRamainBytes()>0) {
+        const char cur = zen.peekChar();
+        if(('a'<=cur && cur<='z') || ('A'<=cur && cur<='Z') || cur=='*' || cur=='_' || ('0'<=cur && cur<='9')) {
+          buf.push_back(zen.readChar());
+          } else {
+          break;
           }
+        }
+      return TokType::TK_Name;
+      }
+    else if('0'<=first && first<='9') {
+      bool flt=false;
+      buf.push_back(first);
+      while(zen.getRamainBytes()>0) {
+        const char cur = zen.peekChar();
+        if(('0'<=cur && cur<='9') || (cur=='.' && !flt)) {
+          buf.push_back(zen.readChar());
+          if(cur=='.')
+            flt=true;
+          } else {
+          break;
+          }
+        }
+      return TokType::TK_Num;
+      }
+    else if(first=='\"') {
+      while(zen.getRamainBytes()>0) {
+        const char cur = zen.readChar();
+        if(cur=='\"')
+          break;
+        buf.push_back(cur);
+        }
+      return TokType::TK_String;
+      }
+    else if(first=='(') {
+      return TokType::TK_BracketL;
+      }
+    else if(first==')') {
+      return TokType::TK_BracketR;
+      }
+    else if(first=='{') {
+      return TokType::TK_Begin;
+      }
+    else if(first=='}') {
+      return TokType::TK_End;
       }
     }
 
-    ModelScriptTextParser::ModelScriptTextParser(ZenParser& zen)
-        : ModelScriptParser(zen)
-        , m_Line(1)
-    {
-        // read current token into next
-        token();
+  return TokType::TK_Null;
+  }
 
-        m_Context.push_back(ContextFile);
-
-        //LogInfo() << "MDS\n" << reinterpret_cast<const char*>(&zen.getData()[0]);
+MdsParser::Chunk MdsParserTxt::beginChunk() {
+  while(zen.getRamainBytes()>0) {
+    const TokType tt = nextTok(buf);
+    if(tt==TK_Name) {
+      if(buf=="meshAndTree")
+        return CHUNK_MESH_AND_TREE;
+      if(buf=="registerMesh")
+        return CHUNK_REGISTER_MESH;
+      if(buf=="ani")
+        return CHUNK_ANI;
+      if(buf=="aniAlias")
+        return CHUNK_ANI_ALIAS;
+      if(buf=="*eventSFX")
+        return CHUNK_EVENT_SFX;
+      if(buf=="*eventSFXGrnd")
+        return CHUNK_EVENT_SFX_GRND;
+      if(buf=="*eventPFX")
+        return CHUNK_EVENT_PFX;
+      if(buf=="*eventPFXStop")
+        return CHUNK_EVENT_PFX_STOP;
+      if(buf=="*eventTag")
+        return CHUNK_EVENT_TAG;
+      }
     }
+  return CHUNK_EOF;
+  }
 
-    bool ModelScriptTextParser::isEof() const
-    {
-        return m_Zen.getSeek() >= m_Zen.getFileSize();
+void MdsParserTxt::beginArgs() {
+  implReadItem(TK_BracketL);
+  }
+
+void MdsParserTxt::endArgs() {
+  while(zen.getRamainBytes()>0) {
+    const TokType tt = nextTok(buf);
+    if(tt==TK_BracketR)
+      return;
     }
+  }
 
-    ModelScriptTextParser::Result ModelScriptTextParser::token()
-    {
-        Result res = skipSpace();
-        if (res != Success)
-            return res;
-
-        m_Token = m_NextToken;
-        m_NextToken.text.clear();
-        m_NextToken.line = m_Line;
-
-        while (!isEof())
-        {
-            char ch = m_Zen.readBinaryByte();
-            if (ch == '"')
-            {
-                while (true)
-                {
-                    if (isEof())
-                    {
-                        LogError() << "parser error in line " << m_Line << ": unexpected end in quoted string";
-                        return Error;
-                    }
-
-                    ch = m_Zen.readBinaryByte();
-                    if (ch == '"')
-                        return Success;  // Need to return early here, because emtpy strings ( "" ) happen, which should not be seen as empty lines
-
-                    if (ch == '\n')
-                        m_Line++;
-
-                    m_NextToken.text.push_back(ch);
-                }
-
-                continue;
-            }
-            else if (ch == '/' && (!m_Strict || ((m_Zen.getSeek() < m_Zen.getFileSize() - 1) && (*m_Zen.getDataPtr() == '/'))))  // Single / were supported by the original parser as well
-            {
-                while (m_Zen.readBinaryByte() != '\n')
-                {
-                    if (isEof())
-                        return End;
-                }
-
-                m_Line++;
-                skipSpace();  // Skip any empty lines after the comment
-                continue;     // Don't want comments inside the tokens
-            }
-            else if (isspace(ch) || ch == '(' || ch == ')' || ch == '{' || ch == '}')
-            {
-                if (m_NextToken.text.empty())
-                {
-                    if (!isspace(ch))
-                        m_NextToken.text.push_back(ch);
-                }
-                else
-                {
-                    // we already have token text, the next token will be the special char
-                    m_Zen.setSeek(m_Zen.getSeek() - 1);
-                }
-                break;
-            }
-
-            m_NextToken.text.push_back(toupper(ch));
-        }
-
-        return m_NextToken.text.empty() ? End : Success;
+void MdsParserTxt::implReadItem(MdsParserTxt::TokType dest) {
+  while(zen.getRamainBytes()>0) {
+    const TokType tt = nextTok(buf);
+    if(tt==dest)
+      return;
+    if(tt==TK_BracketR){
+      zen.setSeek(zen.getSeek()-1); // unget
+      break;
+      }
     }
+  buf.clear();
+  }
 
-    ModelScriptTextParser::Result ModelScriptTextParser::skipSpace()
-    {
-        while (true)
-        {
-            if (isEof())
-                return End;
+std::string MdsParserTxt::readStr() {
+  implReadItem(TK_String);
+  return std::move(buf);
+  }
 
-            auto& zd = *m_Zen.getDataPtr();
-            if (!isspace(zd) && zd != '\n')
-                break;
+std::string MdsParserTxt::readKeyword() {
+  implReadItem(TK_Name);
+  return std::move(buf);
+  }
 
-            if (zd == '\n')
-                m_Line++;
+uint32_t MdsParserTxt::readDWord() {
+  return uint32_t(readI32());
+  }
 
-            m_Zen.readBinaryByte();
-        }
+int32_t MdsParserTxt::readI32() {
+  implReadItem(TK_Num);
+  if(buf.size()>0)
+    return std::atol(buf.c_str());
+  return 0;
+  }
 
-        return Success;
+float MdsParserTxt::readFloat() {
+  implReadItem(TK_Num);
+  if(buf.size()>0)
+    return float(std::atof(buf.c_str()));
+  return 0;
+  }
+
+void MdsParserTxt::readMeshAndTree() {
+  std::string mesh = readStr();
+  std::string hint = readKeyword();
+  if(hint!="DONT_USE_MESH")
+    meshesASC.emplace_back(std::move(mesh));
+  }
+
+
+MdsParserBin::MdsParserBin(ZenParser &zen)
+  :zen(zen) {
+  }
+
+MdsParser::Chunk MdsParserBin::beginChunk() {
+  if(zen.getFileSize()<=zen.getSeek()+sizeof(BinaryChunkInfo))
+    return MdsParser::CHUNK_EOF;
+
+  BinaryChunkInfo chunk;
+  zen.readStructure(chunk);
+  chunkEnd = zen.getSeek()+chunk.length;
+  return MdsParser::Chunk(chunk.id);
+  }
+
+void MdsParserBin::endChunk() {
+  zen.setSeek(chunkEnd);
+  }
+
+std::string MdsParserBin::readStr() {
+  return zen.readLine();
+  }
+
+std::string MdsParserBin::readKeyword() {
+  return zen.readLine();
+  }
+
+uint32_t MdsParserBin::readDWord() {
+  return zen.readBinaryDWord();
+  }
+
+int32_t MdsParserBin::readI32() {
+  return int32_t(zen.readBinaryDWord());
+  }
+
+float MdsParserBin::readFloat() {
+  return zen.readBinaryFloat();
+  }
+
+void MdsParserBin::readMeshAndTree() {
+  const bool dontUseMesh = readDWord()!=0;
+
+  if(!dontUseMesh) {
+    std::string mesh = readStr();
+    meshesASC.emplace_back(std::move(mesh));
     }
+  }
 
-    ModelScriptTextParser::Result ModelScriptTextParser::expectChar(char ch)
-    {
-        Result res = token();
-        if (res != Success)
-        {
-            LogError() << "unexpected end in line " << m_Line << ", expected " << ch;
-            return Error;
-        }
 
-        if (m_Token.text.empty() || m_Token.text[0] != ch)
-        {
-            LogError() << "invalid token '" << m_Token.text << "' in line " << m_Line << ", expected " << ch;
-            return Error;
-        }
-
-        return Success;
+MdsParser::Chunk MdsParser::parse() {
+  while(true) {
+    const Chunk ch = beginChunk();
+    switch(ch) {
+      case CHUNK_EOF:
+        break;
+      case CHUNK_ERROR:
+        break;
+      case CHUNK_SOURCE:
+        break;
+      case CHUNK_MODEL_SCRIPT:
+        break;
+      case CHUNK_MODEL_SCRIPT_END:
+        break;
+      case CHUNK_MODEL:
+        break;
+      case CHUNK_MODEL_END:
+        break;
+      case CHUNK_ANI_ENUM:
+        break;
+      case CHUNK_ANI_BLEND:
+        beginArgs();
+        endArgs();
+        break;
+      case CHUNK_MESH_AND_TREE:
+        readMeshAndTree();
+        break;
+      case CHUNK_REGISTER_MESH:
+        readRegisterMesh();
+        break;
+      case CHUNK_ANI:
+        beginArgs();
+        readAni();
+        endArgs();
+        break;
+      case CHUNK_ANI_ALIAS:
+        beginArgs();
+        readAniAlias();
+        endArgs();
+        break;
+      case CHUNK_EVENT_SFX:
+        beginArgs();
+        readSfx(sfx);
+        endArgs();
+        break;
+      case CHUNK_EVENT_SFX_GRND:
+        beginArgs();
+        readSfx(gfx);
+        endArgs();
+        break;
+      case CHUNK_EVENT_PFX:
+        beginArgs();
+        readPfx();
+        endArgs();
+        break;
+      case CHUNK_EVENT_PFX_STOP:
+        beginArgs();
+        readPfxStop();
+        endArgs();
+        break;
+      case CHUNK_EVENT_TAG:
+        beginArgs();
+        readEvent(eventTag);
+        endArgs();
+        break;
+      case CHUNK_MODEL_TAG:
+        beginArgs();
+        readEvent(modelTag);
+        endArgs();
+        break;
+      }
+    endChunk();
+    return ch;
     }
+  }
 
-    bool ModelScriptTextParser::nextIs(char ch) const
-    {
-        return !m_NextToken.text.empty() && m_NextToken.text[0] == ch;
+uint32_t MdsParser::makeAniFlags(const std::string& flag_str) {
+  uint32_t flags = 0;
+  for(auto ch : flag_str) {
+    switch(ch) {
+      case 'M':
+        flags |= MSB_MOVE_MODEL;
+        break;
+      case 'R':
+        flags |= MSB_ROTATE_MODEL;
+        break;
+      case 'E':
+        flags |= MSB_QUEUE_ANI;
+        break;
+      case 'F':
+        flags |= MSB_FLY;
+        break;
+      case 'I':
+        flags |= MSB_IDLE;
+        break;
+      }
     }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseObjectStart()
-    {
-        return expectChar('{');
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseObjectEnd()
-    {
-        return expectChar('}');
-    }
-
-    ModelScriptBinParser::EChunkType ModelScriptTextParser::parse()
-    {
-        if (isEof())
-            return CHUNK_EOF;
-
-        // token is consumed by the functions below
-        Result res = token();
-        if (res != Success)
-            return CHUNK_ERROR;
-
-        if (!m_Token.text.empty() && m_Token.text[0] == '}')
-        {
-            // skip '}'
-            if (!token())
-                return CHUNK_ERROR;
-
-            if (m_Context.empty())
-            {
-                LogError() << "unexpected '}' at line " << m_Line;
-                return CHUNK_ERROR;
-            }
-
-            m_Context.pop_back();
-
-            return parse();
-        }
-
-        switch (m_Context.back())
-        {
-            case ContextFile:
-                return parseFileChunk();
-            case ContextModel:
-                return parseModelChunk();
-            case ContextAniEnum:
-                return parseAniEnumChunk();
-        }
-
-        return CHUNK_EOF;
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseArguments()
-    {
-        if (!nextIs('('))
-        {
-            // no args, just object name
-            return Success;
-        }
-
-        Result res = expectChar('(');
-        if (res != Success)
-            return res;
-
-        m_Args.clear();
-        m_ArgCount = 0;
-        while (true)
-        {
-            res = token();
-            if (res != Success)
-            {
-                if (res == End)
-                {
-                    LogError() << "invalid end in argument list in line " << m_Line;
-                    return Error;
-                }
-                return res;
-            }
-
-            if (m_ArgCount < m_Args.size())
-            {
-                std::string& arg = m_Args[m_ArgCount];
-                arg.clear();
-                arg.insert(arg.begin(), m_Token.text.begin(), m_Token.text.end());
-            }
-            else
-                m_Args.emplace_back(m_Token.text);
-
-            m_ArgCount++;
-
-            if (!m_NextToken.text.empty() && m_NextToken.text[0] == ')')
-                break;
-        }
-
-        return expectChar(')');
-    }
-
-    ModelScriptParser::EChunkType ModelScriptTextParser::parseFileChunk()
-    {
-        if (m_Token.text == "MODEL")
-        {
-            if (!parseModelStart())
-                return CHUNK_ERROR;
-
-            return CHUNK_MODEL;
-        }
-
-        if (!m_Strict && !m_Token.text.empty() && m_Token.text[0] == '(')
-        {
-            // fixes duplicate '}' after anim, which will make the parser think
-            // it's on the file level
-            m_Context.push_back(ContextAniEnum);
-            return parseAniEnumChunk();
-        }
-
-        LogError() << "invalid token '" << m_Token.text << "' in file at line " << m_Line;
-        return CHUNK_ERROR;
-    }
-
-    bool ModelScriptTextParser::parseModelStart()
-    {
-        Result res = parseArguments();
-        if (res != Success)
-            return false;
-
-        // TODO: assign
-
-        res = parseObjectStart();
-        if (res != Success)
-            return false;
-
-        m_Context.push_back(ContextModel);
-
-        return true;
-    }
-
-    ModelScriptParser::EChunkType ModelScriptTextParser::parseModelChunk()
-    {
-        if (m_Token.text == "MESHANDTREE")
-        {
-            Result res = parseArguments();
-            // TODO
-            return (res != Success) ? CHUNK_ERROR : CHUNK_MESH_AND_TREE;
-        }
-        else if (m_Token.text == "REGISTERMESH")
-        {
-            Result res = parseArguments();
-            // TODO
-            return (res != Success) ? CHUNK_ERROR : CHUNK_REGISTER_MESH;
-        }
-        else if (m_Token.text == "ANIENUM")
-        {
-            if (!parseAniEnumStart())
-                return CHUNK_ERROR;
-
-            return CHUNK_ANI_ENUM;
-        }
-
-        LogError() << "invalid token '" << m_Token.text << "' in Model at line " << m_Line;
-        return CHUNK_ERROR;
-    }
-
-    bool ModelScriptTextParser::parseAniEnumStart()
-    {
-        Result res = parseArguments();
-        if (res != Success)
-            return false;
-
-        // TODO: assign
-
-        res = parseObjectStart();
-        if (res != Success)
-            return false;
-
-        m_Context.push_back(ContextAniEnum);
-
-        return true;
-    }
-
-    ModelScriptTextParser::EChunkType ModelScriptTextParser::parseAniEnumChunk()
-    {
-        if (m_Token.text == "ANI")
-        {
-            return (parseAni() != Success) ? CHUNK_ERROR : CHUNK_ANI;
-        }
-        else if (m_Token.text == "ANIALIAS")
-        {
-            return (parseAniAlias() != Success) ? CHUNK_ERROR : CHUNK_ANI_ALIAS;
-        }
-        else if (m_Token.text == "ANIBLEND")
-        {
-            return (parseAniBlend() != Success) ? CHUNK_ERROR : CHUNK_ANI_BLEND;
-        }
-        else if (m_Token.text == "MODELTAG")
-        {
-            return (parseModelTag() != Success) ? CHUNK_ERROR : CHUNK_MODEL_TAG;
-        }
-        else if (m_Token.text == "ANIDISABLE")
-        {
-            return (parseAniDisable() != Success) ? CHUNK_ERROR : CHUNK_MODEL_TAG;
-        }
-        else if (m_Token.text == "ANICOMB")
-        {
-            return (parseAniComb() != Success) ? CHUNK_ERROR : CHUNK_MODEL_TAG;
-        }
-
-        LogError() << "invalid token '" << m_Token.text << "' in aniEnum at line " << m_Line;
-        return CHUNK_ERROR;
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseAniEvents()
-    {
-        if (!nextIs('{'))
-            return Success;  // no events
-
-        Result res = parseObjectStart();
-        if (res != Success)
-            return Error;
-        while (true)
-        {
-            // Need to check this first, to fix parsing of empty { } blocks
-            if (nextIs('}'))
-                break;
-
-            res = token();
-            if (res != Success)
-                break;
-
-            if (m_Token.text == "*EVENTSWAPMESH")
-            {
-                res = parseSwapMeshEvent();
-                if (res != Success)
-                    break;
-            }
-            else if (m_Token.text == "*EVENTPFX")
-            {
-                //gets never called...
-                res = parsePfxEvent();
-                if (res != Success)
-                    break;
-            }
-            else if (m_Token.text == "*EVENTPFXSTOP")
-            {
-                res = parsePfxStopEvent();
-                if (res != Success)
-                    break;
-            }
-            else if (m_Token.text == "*EVENTSFX")
-            {
-                res = parseSfxEvent();
-                if (res != Success)
-                    break;
-            }
-            else if (m_Token.text == "*EVENTSFXGRND")
-            {
-                res = parseSfxGrndEvent();
-                if (res != Success)
-                    break;
-            }
-            else if (m_Token.text == "*EVENTTAG")
-            {
-                res = parseTagEvent();
-                if (res != Success)
-                    break;
-            }
-            else if (m_Token.text == "*EVENTMMSTARTANI")
-            {
-                res = parseMMStartAniEvent();
-                if (res != Success)
-                    break;
-            }
-            else if (m_Token.text == "*EVENTCAMTREMOR")
-            {
-                res = parseCamTremorEvent();
-                if (res != Success)
-                    break;
-            }
-            else
-            {
-                LogError() << "invalid token '" << m_Token.text << "' in ani at line " << m_Line;
-                return Error;
-            }
-        }
-
-        return parseObjectEnd();
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseAni()
-    {
-        Result res = parseArguments();
-        if (res != Success)
-            return Error;
-
-        // Most of the ani-chunks have 10 args, but they can have an additional one for FPS and some have only 8, omitting start and end-frame
-        if (m_ArgCount < 8)
-        {
-            LogError() << "invalid number of arguments for ani at line " << m_Line;
-            return Error;
-        }
-
-        m_Ani.m_Name = m_Args[0];
-
-        std::transform(m_Ani.m_Name.begin(), m_Ani.m_Name.end(), m_Ani.m_Name.begin(), ::toupper);
-
-        /*m_Ani.m_Layer = m_Args[1];*/
-        m_Ani.m_Next = m_Args[2];
-        std::transform(m_Ani.m_Next.begin(), m_Ani.m_Next.end(), m_Ani.m_Next.begin(), ::toupper);
-
-        std::string& flags = m_Args[5];
-
-        m_Ani.m_Flags = 0;
-        for (size_t i = 0; i < flags.size(); i++)
-        {
-            switch (flags[i])
-            {
-                case 'M':
-                    m_Ani.m_Flags |= EModelScriptAniFlags::MSB_MOVE_MODEL;
-                    break;
-
-                case 'R':
-                    m_Ani.m_Flags |= EModelScriptAniFlags::MSB_ROTATE_MODEL;
-                    break;
-
-                case 'E':
-                    m_Ani.m_Flags |= EModelScriptAniFlags::MSB_QUEUE_ANI;
-                    break;
-
-                case 'F':
-                    m_Ani.m_Flags |= EModelScriptAniFlags::MSB_FLY;
-                    break;
-
-                case 'I':
-                    m_Ani.m_Flags |= EModelScriptAniFlags::MSB_IDLE;
-                    break;
-
-                case '.':
-                    // This is used as a placeholder
-                    break;
-
-                default:
-                    LogWarn() << "Anim: Unknown animation-flag: " << flags[i];
-            }
-        }
-
-        if (m_Args.size() >= 10)
-        {
-            std::string firstFrame = m_Args[8];
-            std::string lastFrame = m_Args[9];
-
-            m_Ani.m_FirstFrame = std::stoi(firstFrame);
-            m_Ani.m_LastFrame = std::stoi(lastFrame);
-        }
-
-        /*m_Ani.m_BlendIn = m_Args[3];*/
-        /*m_Ani.m_BlendOut = m_Args[4];*/
-        /*m_Ani.m_Flags = m_Args[5];*/
-        /*m_Ani.m_Asc = m_Args[6];*/
-        /**/
-        /*m_Ani.mStartFrame = m_Args[8];*/
-        /*m_Ani.mEndFrame = m_Args[9];*/
-        // TODO: Read FPS
-
-        return parseAniEvents();
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseAniAlias()
-    {
-        Result res = parseArguments();
-        if (res != Success)
-            return Error;
-
-        if (m_ArgCount < 8)
-        {
-            LogError() << "invalid number of arguments for aniAlias at line " << m_Line;
-            return Error;
-        }
-
-        m_Alias.m_Name = m_Args[0];
-
-        std::transform(m_Alias.m_Name.begin(), m_Alias.m_Name.end(), m_Alias.m_Name.begin(), ::toupper);
-
-        m_Alias.m_Next = m_Args[2];
-        std::transform(m_Alias.m_Next.begin(), m_Alias.m_Next.end(), m_Alias.m_Next.begin(), ::toupper);
-
-        m_Alias.m_Alias = m_Args[6];
-        std::transform(m_Alias.m_Alias.begin(), m_Alias.m_Alias.end(), m_Alias.m_Alias.begin(), ::toupper);
-
-        m_Alias.m_Dir = (!m_Args[7].empty() && m_Args[7][0] == 'R') ? MSB_BACKWARD : MSB_FORWARD;
-
-        std::string& flags = m_Args[5];
-
-        m_Alias.m_Flags = 0;
-        for (size_t i = 0; i < flags.size(); i++)
-        {
-            switch (flags[i])
-            {
-                case 'M':
-                    m_Alias.m_Flags |= EModelScriptAniFlags::MSB_MOVE_MODEL;
-                    break;
-
-                case 'R':
-                    m_Alias.m_Flags |= EModelScriptAniFlags::MSB_ROTATE_MODEL;
-                    break;
-
-                case 'E':
-                    m_Alias.m_Flags |= EModelScriptAniFlags::MSB_QUEUE_ANI;
-                    break;
-
-                case 'F':
-                    m_Alias.m_Flags |= EModelScriptAniFlags::MSB_FLY;
-                    break;
-
-                case 'I':
-                    m_Alias.m_Flags |= EModelScriptAniFlags::MSB_IDLE;
-                    break;
-
-                case '.':
-                    // This is used as a placeholder
-                    break;
-
-                default:
-                    LogWarn() << "Anim: Unknown anialias-flag: " << flags[i];
-            }
-        }
-
-        return parseAniEvents();
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseAniBlend()
-    {
-        Result res = parseArguments();
-        if (res != Success)
-            return Error;
-
-        return parseAniEvents();
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseSwapMeshEvent()
-    {
-        Result res = parseArguments();
-        if (res != Success)
-            return Error;
-
-        // TODO: assign
-
-        return Success;
-    }
-
-    inline bool isStringNumber(const std::string& s)
-    {
-        return s.find_first_not_of("0123456789") == std::string::npos;
-    }
-    ModelScriptTextParser::Result ModelScriptTextParser::parsePfxEvent()
-    {
-        Result res = parseArguments();
-        if (res != Success || m_Args.size() < 3 || m_Args.size() > 5)
-            return Error;
-
-        m_Pfx.emplace_back();
-        unsigned int currentArgIndex = 0;
-        //Base case: no node name and no attach
-        m_Pfx.back().m_Frame = (uint32_t)std::stoi(m_Args[currentArgIndex]);
-        ++currentArgIndex;
-        //If pfx event has no handle number, no pfx end event exists for it
-        if (isStringNumber(m_Args[currentArgIndex]))
-        {
-            m_Pfx.back().m_Num = (uint32_t)std::stoi(m_Args[currentArgIndex]);
-            ++currentArgIndex;
-        }
-        else
-        {
-            m_Pfx.back().m_Num = 0;
-        }
-        m_Pfx.back().m_Name = m_Args[currentArgIndex];
-        ++currentArgIndex;
-
-        switch (m_Args.size())
-        {
-            //No attach
-            case 4:
-                m_Pfx.back().m_Pos = m_Args[currentArgIndex];
-                break;
-            case 5:
-                m_Pfx.back().m_Pos = m_Args[currentArgIndex];
-                if (m_Args[currentArgIndex] == "ATTACH")
-                {
-                    //FIXME attach is encoded as float in other parsing function. Is this different here?
-                    m_Pfx.back().m_isAttached = true;
-                }
-                else
-                {
-                    LogWarn() << "Unknown string at the end of PFX Start Event " << m_Args[currentArgIndex];
-                }
-                break;
-            default:
-                LogWarn() << "Parsed malformed PFX Start Event";
-        }
-        return Success;
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parsePfxStopEvent()
-    {
-        Result res = parseArguments();
-        if (res != Success || m_Args.size() != 2)
-            return Error;
-
-        m_PfxStop.emplace_back();
-        m_PfxStop.back().m_Frame = (uint32_t)std::stoi(m_Args[0]);
-        m_PfxStop.back().m_Num = (uint32_t)std::stoi(m_Args[1]);
-
-        return Success;
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseSfxEvent()
-    {
-        Result res = parseArguments();
-        if (res != Success || m_Args.size() < 2 || m_Args.size() > 4)
-            return Error;
-
-        m_Sfx.emplace_back();
-        m_Sfx.back().m_Frame = (uint32_t)std::stoi(m_Args[0]);
-        m_Sfx.back().m_Name = m_Args[1];
-
-        for (size_t i = 2; i < std::min(m_Args.size(), static_cast<size_t>(4)); i++)
-        {
-            // Look for optional arguments (First 2 args are required)
-            if (m_Args[i].find("R:") != std::string::npos)
-            {
-                m_Sfx.back().m_Range = std::stof(m_Args[i].substr(m_Args[i].find("R:") + 2));  // 2: Skip R:
-            }
-            else if (m_Args[i] == "EMPTY_SLOT")
-            {
-                m_Sfx.back().m_EmptySlot = true;
-            }
-            else
-            {
-                LogWarn() << "MODELSCRIPT: Invalid eventSFX-Option: " << m_Args[i];
-            }
-        }
-
-        return Success;
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseSfxGrndEvent()
-    {
-        Result res = parseArguments();
-        if (res != Success || m_Args.size() < 2 || m_Args.size() > 4)
-            return Error;
-
-        m_SfxGround.emplace_back();
-        m_SfxGround.back().m_Frame = (uint32_t)std::stoi(m_Args[0]);
-        m_SfxGround.back().m_Name = m_Args[1];
-
-        for (size_t i = 2; i < std::min(m_Args.size(), static_cast<size_t>(4)); i++)
-        {
-            // Look for optional arguments (First 2 args are required)
-            if (m_Args[i].find("R:") != std::string::npos)
-            {
-                m_Sfx.back().m_Range = std::stof(m_Args[i].substr(m_Args[i].find("R:") + 2));  // 2: Skip R:
-            }
-            else if (m_Args[i] == "EMPTY_SLOT")
-            {
-                m_Sfx.back().m_EmptySlot = true;
-            }
-            else
-            {
-                LogWarn() << "MODELSCRIPT: Invalid eventSFX-Option: " << m_Args[i];
-            }
-        }
-
-        return Success;
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseTagEvent()
-    {
-        Result res = parseArguments();
-        if (res != Success || m_Args.size() < 2)
-            return Error;
-
-        m_Tag.emplace_back();
-
-        // atoi is used here since some original MDS files have invalid arguments, which relay on atoi returning 0
-        // on anything that is not a number. For example, t_BSANVIL_S1_2_S0 in HUMANS.MDS has a double opening
-        // brace on one of the EventTags.
-        m_Tag.back().m_Frame = (uint32_t)atoi(m_Args[0].c_str());
-        m_Tag.back().m_Tag = m_Args[1];
-
-        if (m_Args.size() >= 3)
-        {
-            m_Tag.back().m_Argument = m_Args[2];
-        }
-
-        return Success;
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseMMStartAniEvent()
-    {
-        Result res = parseArguments();
-        if (res != Success)
-            return Error;
-
-        m_MMStartAni.emplace_back();
-
-        m_MMStartAni.back().m_Frame = (uint32_t)atoi(m_Args[0].c_str());
-        m_MMStartAni.back().m_Animation = m_Args[1];
-
-        return Success;
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseModelTag()
-    {
-        Result res = parseArguments();
-        if (res != Success)
-            return Error;
-
-        // TODO: assign
-
-        return Success;
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseAniDisable()
-    {
-        Result res = parseArguments();
-        if (res != Success)
-            return Error;
-
-        // TODO: assign
-
-        return Success;
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseAniComb()
-    {
-        Result res = parseArguments();
-        if (res != Success)
-            return Error;
-
-        // TODO: assign
-
-        return parseAniEvents();
-    }
-
-    ModelScriptTextParser::Result ModelScriptTextParser::parseCamTremorEvent()
-    {
-        Result res = parseArguments();
-        if (res != Success)
-            return Error;
-
-        // TODO: assign
-
-        return Success;
-    }
-
-}  // namespace ZenLoad
+  return flags;
+  }
+
+EModelScriptAniDir MdsParser::makeAniDir(const std::string& str){
+  return (!str.empty() && str[0] == 'R') ? MSB_BACKWARD : MSB_FORWARD;
+  }
+
+void MdsParser::readRegisterMesh() {
+  // Reads "Some_Mesh.ASC"
+  std::string mesh = readStr();
+  meshesASC.emplace_back(std::move(mesh));
+  }
+
+void MdsParser::readAni() {
+  ani.m_Name        = readStr();
+  ani.m_Layer       = readDWord();
+  ani.m_Next        = readStr();
+  ani.m_BlendIn     = readFloat();
+  ani.m_BlendOut    = readFloat();
+  ani.m_Flags       = makeAniFlags(readKeyword());
+  ani.m_Asc         = readStr();
+  ani.m_Dir         = makeAniDir(readKeyword());
+  ani.m_FirstFrame  = readI32();
+  ani.m_LastFrame   = readI32();
+  ani.m_MaxFps      = readFloat();
+  ani.m_Speed       = readFloat();
+  ani.m_ColVolScale = readFloat();
+  }
+
+void MdsParser::readAniAlias() {
+  alias.m_Name     = readStr();
+  alias.m_Layer    = readDWord();
+  alias.m_Next     = readStr();
+  alias.m_BlendIn  = readFloat();
+  alias.m_BlendOut = readFloat();
+  alias.m_Flags    = makeAniFlags(readKeyword());
+  alias.m_Alias    = readStr();
+  alias.m_Dir      = makeAniDir(readKeyword());
+  }
+
+void MdsParser::readSfx(std::vector<zCModelScriptEventSfx> &out) {
+  zCModelScriptEventSfx s;
+  s.m_Frame     = readI32();
+  s.m_Name      = readStr();
+  s.m_Range     = readFloat();
+  s.m_EmptySlot = readDWord()!=0;
+  out.emplace_back(std::move(s));
+  }
+
+void MdsParser::readPfx() {
+  zCModelScriptEventPfx p;
+  p.m_Frame = readI32();
+  p.m_Num   = readI32();
+  p.m_Name  = readStr();
+  p.m_Pos   = readStr();
+  //Like EmptySlot in readSfx encoded in float. No " " around value might be a hint that no string is used
+  p.m_isAttached = readDWord()!=0;
+  pfx.emplace_back(std::move(p));
+  }
+
+void MdsParser::readPfxStop() {
+  zCModelScriptEventPfxStop p;
+  p.m_Frame = readI32();
+  p.m_Num   = readI32();
+  pfxStop.emplace_back(p);
+  }
+
+void MdsParser::readEvent(std::vector<zCModelEvent> &out) {
+  zCModelEvent evt;
+  std::string str;
+  evt.m_Frame = readI32();
+  str = readStr();
+
+  // https://worldofplayers.ru/threads/37708/
+  if(str=="DEF_CREATE_ITEM")
+    evt.m_Def=DEF_CREATE_ITEM;
+  else if(str=="DEF_INSERT_ITEM")
+    evt.m_Def=DEF_INSERT_ITEM;
+  else if(str=="DEF_REMOVE_ITEM")
+    evt.m_Def=DEF_REMOVE_ITEM;
+  else if(str=="DEF_DESTROY_ITEM")
+    evt.m_Def=DEF_DESTROY_ITEM;
+  else if(str=="DEF_PLACE_ITEM")
+    evt.m_Def=DEF_PLACE_ITEM;
+  else if(str=="DEF_EXCHANGE_ITEM")
+    evt.m_Def=DEF_EXCHANGE_ITEM;
+  else if(str=="DEF_FIGHTMODE")
+    evt.m_Def=DEF_FIGHTMODE;
+  else if(str=="DEF_PLACE_MUNITION")
+    evt.m_Def=DEF_PLACE_MUNITION;
+  else if(str=="DEF_REMOVE_MUNITION")
+    evt.m_Def=DEF_REMOVE_MUNITION;
+  else if(str=="DEF_DRAWSOUND")
+    evt.m_Def=DEF_DRAWSOUND;
+  else if(str=="DEF_UNDRAWSOUND")
+    evt.m_Def=DEF_UNDRAWSOUND;
+  else if(str=="DEF_SWAPMESH")
+    evt.m_Def=DEF_SWAPMESH;
+  else if(str=="DEF_DRAWTORCH")
+    evt.m_Def=DEF_DRAWTORCH;
+  else if(str=="DEF_INV_TORCH")
+    evt.m_Def=DEF_INV_TORCH;
+  else if(str=="DEF_DROP_TORCH")
+    evt.m_Def=DEF_DROP_TORCH;
+  else if(str=="DEF_HIT_LIMB")
+    evt.m_Def=DEF_HIT_LIMB;
+  else if(str=="DEF_HIT_DIR")
+    evt.m_Def=DEF_HIT_DIR;
+  else if(str=="DEF_DAM_MULTIPLY")
+    evt.m_Def=DEF_DAM_MULTIPLY;
+  else if(str=="DEF_PAR_FRAME")
+    evt.m_Def=DEF_PAR_FRAME;
+  else if(str=="DEF_OPT_FRAME")
+    evt.m_Def=DEF_OPT_FRAME;
+  else if(str=="DEF_HIT_END")
+    evt.m_Def=DEF_HIT_END;
+  else if(str=="DEF_WINDOW")
+    evt.m_Def=DEF_WINDOW;
+
+  if(evt.m_Def==DEF_DAM_MULTIPLY ||
+     evt.m_Def==DEF_PAR_FRAME || evt.m_Def==DEF_OPT_FRAME ||
+     evt.m_Def==DEF_HIT_END || evt.m_Def==DEF_WINDOW){
+    str = readStr();
+    std::stringstream ss(str);
+    while(!ss.eof())
+      {
+        int frame=0;
+        ss >> frame;
+        if(!ss.good() && !ss.eof())
+          break;
+        evt.m_Int.push_back(frame);
+      }
+  }
+  out.emplace_back(std::move(evt));
+}

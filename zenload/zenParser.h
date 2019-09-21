@@ -131,9 +131,12 @@ namespace ZenLoad
 		*/
         uint32_t readBinaryDWord();
         uint16_t readBinaryWord();
-        uint8_t readBinaryByte();
-        float readBinaryFloat();
-        void readBinaryRaw(void* target, size_t numBytes);
+        uint8_t  readBinaryByte();
+        float    readBinaryFloat();
+        void     readBinaryRaw(void* target, size_t numBytes);
+
+        char     readChar();
+        char     peekChar() const;
 
         /**
 		 * @brief Reads a line to \r or \n

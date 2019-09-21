@@ -486,8 +486,19 @@ void ZenParser::readBinaryRaw(void* target, size_t numBytes)
     {
         std::memcpy(target, &m_Data[m_Seek], numBytes);
         m_Seek += numBytes;
-    }
-}
+      }
+  }
+
+char ZenParser::readChar() {
+  uint8_t retVal = *reinterpret_cast<const uint8_t*>(m_Data+m_Seek);
+  m_Seek++;
+  return char(retVal);
+  }
+
+char ZenParser::peekChar() const {
+  uint8_t retVal = *reinterpret_cast<const uint8_t*>(m_Data+m_Seek);
+  return char(retVal);
+  }
 
 /**
 * @brief Reads a line to \r or \n
