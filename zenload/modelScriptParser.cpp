@@ -112,6 +112,8 @@ MdsParser::Chunk MdsParserTxt::beginChunk() {
         return CHUNK_EVENT_PFX_STOP;
       if(buf=="*eventTag")
         return CHUNK_EVENT_TAG;
+      if(buf=="*eventMMStartAni")
+        return CHUNK_EVENT_MMSTARTANI;
       }
     }
   return CHUNK_EOF;
@@ -296,6 +298,11 @@ MdsParser::Chunk MdsParser::parse() {
         readEvent(modelTag);
         endArgs();
         break;
+      case CHUNK_EVENT_MMSTARTANI:
+        beginArgs();
+        readMMStart();
+        endArgs();
+        break;
       }
     endChunk();
     return ch;
@@ -392,9 +399,8 @@ void MdsParser::readPfxStop() {
 
 void MdsParser::readEvent(std::vector<zCModelEvent> &out) {
   zCModelEvent evt;
-  std::string str;
   evt.m_Frame = readI32();
-  str = readStr();
+  std::string str = readStr();
 
   // https://worldofplayers.ru/threads/37708/
   if(str=="DEF_CREATE_ITEM")
@@ -427,7 +433,7 @@ void MdsParser::readEvent(std::vector<zCModelEvent> &out) {
     evt.m_Def=DEF_INV_TORCH;
   else if(str=="DEF_DROP_TORCH")
     evt.m_Def=DEF_DROP_TORCH;
-  else if(str=="DEF_HIT_LIMB")
+  else if(str=="DEF_HIT_LIMB" || str=="HIT_LIMB")
     evt.m_Def=DEF_HIT_LIMB;
   else if(str=="DEF_HIT_DIR")
     evt.m_Def=DEF_HIT_DIR;
@@ -441,20 +447,72 @@ void MdsParser::readEvent(std::vector<zCModelEvent> &out) {
     evt.m_Def=DEF_HIT_END;
   else if(str=="DEF_WINDOW")
     evt.m_Def=DEF_WINDOW;
+  else
+    return;
 
-  if(evt.m_Def==DEF_DAM_MULTIPLY ||
-     evt.m_Def==DEF_PAR_FRAME || evt.m_Def==DEF_OPT_FRAME ||
-     evt.m_Def==DEF_HIT_END || evt.m_Def==DEF_WINDOW){
-    str = readStr();
-    std::stringstream ss(str);
-    while(!ss.eof())
-      {
-        int frame=0;
-        ss >> frame;
-        if(!ss.good() && !ss.eof())
-          break;
-        evt.m_Int.push_back(frame);
+  switch(evt.m_Def) {
+    case DEF_NULL:
+    case DEF_LAST:
+      break;
+    case DEF_CREATE_ITEM:
+    case DEF_EXCHANGE_ITEM:
+      evt.m_Slot = readStr();
+      evt.m_Item = readStr();
+      break;
+    case DEF_INSERT_ITEM:
+    case DEF_PLACE_MUNITION:
+      evt.m_Slot = readStr();
+      break;
+    case DEF_REMOVE_ITEM:
+    case DEF_DESTROY_ITEM:
+    case DEF_PLACE_ITEM:
+    case DEF_REMOVE_MUNITION:
+      break;
+    case DEF_DRAWSOUND:
+    case DEF_UNDRAWSOUND:
+      break;
+    case DEF_FIGHTMODE:
+      evt.m_Fmode = readStr();
+      break;
+    case DEF_SWAPMESH:
+      evt.m_Slot  = readStr();
+      evt.m_Slot2 = readStr();
+      break;
+    case DEF_DRAWTORCH:
+    case DEF_INV_TORCH:
+    case DEF_DROP_TORCH:
+      break;
+    case DEF_HIT_LIMB:
+    case DEF_HIT_DIR:
+      // TODO
+      break;
+    case DEF_DAM_MULTIPLY:
+    case DEF_PAR_FRAME:
+    case DEF_OPT_FRAME:
+    case DEF_HIT_END:
+    case DEF_WINDOW:{
+      str = readStr();
+      std::stringstream ss(str);
+      while(!ss.eof())
+        {
+          int frame=0;
+          ss >> frame;
+          if(!ss.good() && !ss.eof())
+            break;
+          evt.m_Int.push_back(frame);
+        }
+      break;
       }
-  }
+    }
+
   out.emplace_back(std::move(evt));
-}
+  }
+
+void MdsParser::readMMStart() {
+  zCModelScriptEventMMStartAni mm;
+  mm.m_Frame     = readI32();
+  mm.m_Animation = readStr();
+  mm.m_Node      = readStr();
+
+  mmStartAni.emplace_back(std::move(mm));
+  }

@@ -142,12 +142,15 @@ namespace ZenLoad
         int32_t              m_Frame=0;
         EModelScriptAniDef   m_Def  =DEF_NULL;
         std::vector<int32_t> m_Int;
+        std::string          m_Slot, m_Item, m_Fmode;
+        std::string          m_Slot2;
     };
 
     struct zCModelScriptEventMMStartAni
     {
-        int32_t m_Frame;
+        int32_t     m_Frame=0;
         std::string m_Animation;
+        std::string m_Node;
     };
 
     struct zCModelScriptEventSfx

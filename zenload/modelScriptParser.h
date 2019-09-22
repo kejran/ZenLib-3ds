@@ -43,7 +43,7 @@ namespace ZenLoad {
         // CHUNK_EVENT_PFX_GRND        = 0xF5A6,
         // CHUNK_EVENT_SET_MESH        = 0xF5A7,
         // CHUNK_EVENT_SWAP_MESH       = 0xF5A8,
-        // CHUNK_EVENT_MMSTARTANI      = 0xF5A9,
+        CHUNK_EVENT_MMSTARTANI      = 0xF5A9,
         // CHUNK_EVENT_CAMTREMOR       = 0xF5AA
         };
 
@@ -51,14 +51,15 @@ namespace ZenLoad {
 
       virtual Chunk parse();
 
-      std::vector<std::string>               meshesASC;
-      zCModelScriptAni                       ani;
-      zCModelScriptAniAlias                  alias;
-      std::vector<zCModelScriptEventSfx>     sfx, gfx;
-      std::vector<zCModelScriptEventPfx>     pfx;
-      std::vector<zCModelScriptEventPfxStop> pfxStop;
-      std::vector<zCModelEvent>              eventTag;
-      std::vector<zCModelEvent>              modelTag;
+      std::vector<std::string>                  meshesASC;
+      zCModelScriptAni                          ani;
+      zCModelScriptAniAlias                     alias;
+      std::vector<zCModelScriptEventSfx>        sfx, gfx;
+      std::vector<zCModelScriptEventPfx>        pfx;
+      std::vector<zCModelScriptEventPfxStop>    pfxStop;
+      std::vector<zCModelEvent>                 eventTag;
+      std::vector<zCModelEvent>                 modelTag;
+      std::vector<zCModelScriptEventMMStartAni> mmStartAni;
 
     protected:
       virtual Chunk       beginChunk()=0;
@@ -80,6 +81,7 @@ namespace ZenLoad {
       void                readPfx();
       void                readPfxStop();
       void                readEvent(std::vector<zCModelEvent>& out);
+      void                readMMStart();
 
       static uint32_t     makeAniFlags(const std::string &flag_str);
       static auto         makeAniDir(const std::string &str) -> EModelScriptAniDir;
