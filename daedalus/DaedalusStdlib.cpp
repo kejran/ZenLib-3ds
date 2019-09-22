@@ -234,6 +234,55 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER(C_SFX, pfxName);
     }
 
+  if(classExists("CFx_Base")) {
+    REGISTER(CFx_Base, visName_S);
+    REGISTER(CFx_Base, visSize_S);
+    REGISTER(CFx_Base, visAlpha);
+    REGISTER(CFx_Base, visAlphaBlendFunc_S);
+    REGISTER(CFx_Base, visTexAniFPS);
+    REGISTER(CFx_Base, visTexAniIsLooping);
+    REGISTER(CFx_Base, emTrjMode_S);
+    REGISTER(CFx_Base, emTrjOriginNode);
+    REGISTER(CFx_Base, emTrjTargetNode);
+    REGISTER(CFx_Base, emTrjTargetRange);
+    REGISTER(CFx_Base, emTrjTargetAzi);
+    REGISTER(CFx_Base, emTrjTargetElev);
+    REGISTER(CFx_Base, emTrjNumKeys);
+    REGISTER(CFx_Base, emTrjNumKeysVar);
+    REGISTER(CFx_Base, emTrjAngleElevVar);
+    REGISTER(CFx_Base, emTrjAngleHeadVar);
+    REGISTER(CFx_Base, emTrjKeyDistVar);
+    REGISTER(CFx_Base, emTrjLoopMode_S);
+    REGISTER(CFx_Base, emTrjEaseFunc_S);
+    REGISTER(CFx_Base, emTrjEaseVel);
+    REGISTER(CFx_Base, emTrjDynUpdateDelay);
+    REGISTER(CFx_Base, emTrjDynUpdateTargetOnly);
+    REGISTER(CFx_Base, emFXCreate_S);
+    REGISTER(CFx_Base, emFXInvestOrigin_S);
+    REGISTER(CFx_Base, emFXInvestTarget_S);
+    REGISTER(CFx_Base, emFXTriggerDelay);
+    REGISTER(CFx_Base, emFXCreatedOwnTrj);
+    REGISTER(CFx_Base, emActionCollDyn_S);
+    REGISTER(CFx_Base, emActionCollStat_S);
+    REGISTER(CFx_Base, emFXCollStat_S);
+    REGISTER(CFx_Base, emFXCollDyn_S);
+    REGISTER(CFx_Base, emFXCollDynPerc_S);
+    REGISTER(CFx_Base, emFXCollStatAlign_S);
+    REGISTER(CFx_Base, emFXCollDynAlign_S);
+    REGISTER(CFx_Base, emFXLifeSpan);
+    REGISTER(CFx_Base, emCheckCollision);
+    REGISTER(CFx_Base, emAdjustShpToOrigin);
+    REGISTER(CFx_Base, emInvestNextKeyDuration);
+    REGISTER(CFx_Base, emFlyGravity);
+    REGISTER(CFx_Base, emSelfRotVel_S);
+    REGISTER(CFx_Base, userString);
+    REGISTER(CFx_Base, lightPresetName);
+    REGISTER(CFx_Base, sfxID);
+    REGISTER(CFx_Base, sfxIsAmbient);
+    REGISTER(CFx_Base, sendAssessMagic);
+    REGISTER(CFx_Base, secsPerDamage);
+    }
+
   if(classExists("C_ParticleFX")) {
     REGISTER(C_ParticleFX, ppsValue);
     REGISTER(C_ParticleFX, ppsScaleKeys_S);

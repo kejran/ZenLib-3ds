@@ -21,6 +21,7 @@ enum EInstanceClass {
   IC_MenuItem,
   IC_Sfx,
   IC_Pfx,
+  IC_Vfx,
   IC_MusicTheme,
   IC_GilValues,
   IC_FightAi,

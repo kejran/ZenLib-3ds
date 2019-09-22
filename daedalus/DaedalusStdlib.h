@@ -26,6 +26,7 @@ namespace Daedalus
         const int ATR_INDEX_MAX = 8;
         const int ITM_TEXT_MAX = 6;
         const int GIL_MAX = 66;
+        const int VFX_NUM_USERSTRINGS = 5;
 
         enum {
           DAM_INDEX_BARRIER = 0,  //				 nur der Vollstandigkeit und Transparenz wegen hier definiert ( _NICHT_ verwenden )
@@ -244,6 +245,55 @@ namespace Daedalus
             // with the next setting you can define weather this pfx is an ambient pfx, thus can be disabled in the gothic.ini with the value [ENGINE]/noAmbientPFX
             int32_t m_bIsAmbientPFX;
         };
+
+        struct CFx_Base : Instance {
+          std::string	visName_S;
+          std::string	visSize_S;
+          float	      visAlpha=0.f;
+          std::string	visAlphaBlendFunc_S;
+          float       visTexAniFPS=0.f;
+          int32_t     visTexAniIsLooping;
+          std::string	emTrjMode_S;						// none, target, line, spline, random
+          std::string	emTrjOriginNode;
+          std::string	emTrjTargetNode;
+          float       emTrjTargetRange=0.f;
+          float	      emTrjTargetAzi=0.f;
+          float       emTrjTargetElev=0.f;
+          int32_t		  emTrjNumKeys=0;
+          int32_t		  emTrjNumKeysVar=0;
+          float	      emTrjAngleElevVar=0.f;
+          float	      emTrjAngleHeadVar=0.f;
+          float	      emTrjKeyDistVar=0.f;
+          std::string emTrjLoopMode_S;
+          std::string emTrjEaseFunc_S;
+          float     	emTrjEaseVel=0.f;
+          float	      emTrjDynUpdateDelay=0.f;
+          int32_t     emTrjDynUpdateTargetOnly=0.f;
+          std::string	emFXCreate_S;
+          std::string	emFXInvestOrigin_S;
+          std::string	emFXInvestTarget_S;
+          float       emFXTriggerDelay=0.f;
+          int32_t     emFXCreatedOwnTrj=0;
+          std::string emActionCollDyn_S;			// CREATE, BOUNCE, CREATEONCE, NORESP, COLLIDE
+          std::string emActionCollStat_S;			// CREATE, BOUNCE, CREATEONCE, NORESP, COLLIDE, CREATEQUAD
+          std::string	emFXCollStat_S;
+          std::string	emFXCollDyn_S;
+          std::string emFXCollDynPerc_S;
+          std::string	emFXCollStatAlign_S;			// TRAJECTORY, COLLISIONNORMAL
+          std::string	emFXCollDynAlign_S;
+          float	      emFXLifeSpan=0.f;
+          int32_t	    emCheckCollision=0;
+          int32_t     emAdjustShpToOrigin=0;
+          float	      emInvestNextKeyDuration=0.f;
+          float	      emFlyGravity=0.f;
+          std::string emSelfRotVel_S;
+          std::string userString[VFX_NUM_USERSTRINGS];
+          std::string	lightPresetName;
+          std::string	sfxID;
+          int32_t 	  sfxIsAmbient=0;
+          int32_t		  sendAssessMagic=0;
+          float	      secsPerDamage=0.f;
+          };
 
         struct C_Menu : Instance
         {
