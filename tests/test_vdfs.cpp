@@ -52,7 +52,7 @@ TEST(VDFS, LoadTestTxt) {
     std::vector<uint8_t> data_from_archive;
     std::vector<uint8_t> data_from_file;
     ASSERT_TRUE(idx.getFileData("test.txt", data_from_archive));
-    ASSERT_TRUE(readFile("files/test.txt", data_from_file));
+    ASSERT_TRUE(readFile("files/test.txt.bin", data_from_file));
 
     ASSERT_EQ(data_from_archive, data_from_file);
 }
