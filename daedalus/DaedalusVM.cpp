@@ -37,7 +37,7 @@ DaedalusVM::DaedalusVM(const uint8_t* pDATFileData, size_t numBytes)
   m_ItemId   = m_DATFile.getSymbolIndexByName("item");
   }
 
-void DaedalusVM::eval(uint32_t PC) {
+void DaedalusVM::eval(size_t PC) {
   int32_t a=0;
   int32_t b=0;
 

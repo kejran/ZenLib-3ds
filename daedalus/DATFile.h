@@ -7,6 +7,7 @@
 #include <zenload/zenParser.h>
 #include <utils/logger.h>
 #include <cassert>
+#include <cstddef>
 
 namespace Daedalus {
 enum EInstanceClass {

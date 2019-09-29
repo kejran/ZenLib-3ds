@@ -14,7 +14,7 @@ class DaedalusVM {
     DaedalusVM(const std::vector<uint8_t> data);
     DaedalusVM(const uint8_t* pDATFileData, size_t numBytes);
 
-    void    eval(uint32_t pcInit);
+    void    eval(size_t pcInit);
     int32_t runFunctionBySymIndex(size_t symIdx, bool clearDataStack = true);
 
     void registerExternalFunction(const char *symName, const std::function<void(DaedalusVM&)>& fn);
