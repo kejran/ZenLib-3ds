@@ -147,7 +147,15 @@ namespace ZenLoad
             // Reset to mesh position
             size_t seek = parser.getSeek();
             parser.setSeek(meshPosition);
-            mesh->readObjectData(parser, nonLodPolys);
+
+            bool forceG132bitIndices = false;
+            ZenParser::ZenHeader zenHeader = parser.getZenHeader();
+            if (!zenHeader.user.empty())
+            {
+				forceG132bitIndices = zenHeader.user.find("XZEN") != std::string::npos;
+            }
+
+            mesh->readObjectData(parser, nonLodPolys, forceG132bitIndices);
 
             // Make access to portals and sectors easier by packing them in better structures
             connectPortals(info, mesh);
