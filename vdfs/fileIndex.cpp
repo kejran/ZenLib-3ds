@@ -30,7 +30,17 @@ FileIndex::FileIndex()
     }
 
     if (!PHYSFS_isInit())
-        PHYSFS_init(internal::argv0.c_str());
+        if(!PHYSFS_init(internal::argv0.c_str()))
+        {
+          const PHYSFS_ErrorCode err = PHYSFS_getLastErrorCode();
+          const char* errstr = (err!=0) ? PHYSFS_getErrorByCode(err) : nullptr;
+
+          char error[256]={};
+          std::snprintf(error,sizeof(error),"Failed to initialize PHYSFS!(%s)",errstr);
+
+          LogError() << error;
+          throw std::runtime_error(error);
+        }
 
     internal::numAliveIndices++;
 
