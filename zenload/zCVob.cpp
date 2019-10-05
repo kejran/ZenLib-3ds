@@ -220,8 +220,8 @@ static void read_zCVob_zCTrigger(zCVobData &info, ZenParser &parser, WorldVersio
   auto& rd = *parser.getImpl();
   info.vobType = zCVobData::VT_zCTrigger;
   rd.readEntry("triggerTarget",     &info.zCTrigger.triggerTarget);
-  rd.readEntry("unknown0",          &info.zCTrigger.unknown0, ZenLoad::ParserImpl::ZVT_RAW);
-  rd.readEntry("unknown1",          &info.zCTrigger.unknown1, ZenLoad::ParserImpl::ZVT_RAW); //hash?
+  rd.readEntry("flags",             &info.zCTrigger.unknown0, ZenLoad::ParserImpl::ZVT_RAW);
+  rd.readEntry("filterFlags",       &info.zCTrigger.unknown1, ZenLoad::ParserImpl::ZVT_RAW); //hash?
   rd.readEntry("respondToVobName",  &info.zCTrigger.respondToVobName);
   rd.readEntry("numCanBeActivated", &info.zCTrigger.numCanBeActivated);
   rd.readEntry("retriggerWaitSec",  &info.zCTrigger.retriggerWaitSec);
@@ -239,9 +239,11 @@ static void read_zCVob_zCTrigger_zCTriggerList(zCVobData &info, ZenParser &parse
   rd.readEntry("listProcess", &info.zCTriggerList.listProcess);
   rd.readEntry("", &count);
   info.zCTriggerList.list.resize(count);
-  for(auto& i:info.zCTriggerList.list) {
-    rd.readEntry("slaveVobName", &i.triggerTarget);
-    rd.readEntry("fireDelay",    &i.fireDelay);
+  for (int i = 0; i < count; i++) {
+    const char* triggerTarget = (((version != WorldVersion::VERSION_G1_08k) ? "slaveVobName" : "triggerTarget")+ std::to_string(i)).c_str();
+    const char* fireDelay = ("fireDelay" + std::to_string(i)).c_str();
+    rd.readEntry(triggerTarget, &info.zCTriggerList.list[i].triggerTarget);
+    rd.readEntry(fireDelay, &info.zCTriggerList.list[i].fireDelay);
     }
   }
 
@@ -396,7 +398,7 @@ static void read_zCVob_zCTrigger_zCMover(zCVobData &info, ZenParser &parser, Wor
   rd.readEntry("touchBlockerDamage",&info.zCMover.touchBlockerDamage);
   rd.readEntry("stayOpenTimeSec",   &info.zCMover.stayOpenTimeSec);
   rd.readEntry("moverLocked",       &info.zCMover.moverLocked);
-  rd.readEntry("autoLinkEnable",    &info.zCMover.autoLinkEnable);
+  rd.readEntry("autoLinkEnabled",    &info.zCMover.autoLinkEnable);
   if(version!=WorldVersion::VERSION_G1_08k)
     rd.readEntry("autoRotate",      &info.zCMover.autoRotate);
   rd.readEntry("numKeyframes",      &numKeyframes,sizeof(numKeyframes),ZenLoad::ParserImpl::ZVT_WORD);
@@ -405,7 +407,7 @@ static void read_zCVob_zCTrigger_zCMover(zCVobData &info, ZenParser &parser, Wor
     rd.readEntry("posLerpType",   &info.zCMover.posLerpType);
     rd.readEntry("speedType",     &info.zCMover.speedType);
     std::vector<zKeyFrame> fr(numKeyframes);
-    rd.readEntry("keyframe",&fr[0],sizeof(zKeyFrame)*numKeyframes,ZenLoad::ParserImpl::ZVT_RAW);
+    rd.readEntry("keyframes", &fr[0],sizeof(zKeyFrame)*numKeyframes,ZenLoad::ParserImpl::ZVT_RAW);
     info.zCMover.keyframes = std::move(fr);
     }
   rd.readEntry("sfxOpenStart",  &info.zCMover.sfxOpenStart);
