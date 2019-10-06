@@ -82,6 +82,7 @@ namespace ZenLoad {
       void                readPfxStop();
       void                readEvent(std::vector<zCModelEvent>& out);
       void                readMMStart();
+      EFightMode          readFMode();
 
       static uint32_t     makeAniFlags(const std::string &flag_str);
       static auto         makeAniDir(const std::string &str) -> EModelScriptAniDir;

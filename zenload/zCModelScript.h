@@ -66,6 +66,18 @@ namespace ZenLoad
       DEF_LAST
     };
 
+    enum EFightMode : uint8_t
+    {
+      FM_NONE,
+      FM_FIST,
+      FM_1H,
+      FM_2H,
+      FM_BOW,
+      FM_CBOW,
+      FM_MAG,
+      FM_LAST
+    };
+
     struct zCModelScriptAni
     {
         /// Add + ".MAN" for the animation data
@@ -141,8 +153,9 @@ namespace ZenLoad
     {
         int32_t              m_Frame=0;
         EModelScriptAniDef   m_Def  =DEF_NULL;
+        EFightMode           m_Fmode=FM_NONE;
         std::vector<int32_t> m_Int;
-        std::string          m_Slot, m_Item, m_Fmode;
+        std::string          m_Slot, m_Item;
         std::string          m_Slot2;
     };
 

@@ -190,7 +190,7 @@ MdsParser::Chunk MdsParserBin::beginChunk() {
 
   BinaryChunkInfo chunk;
   zen.readStructure(chunk);
-  chunkEnd = zen.getSeek()+chunk.length;
+  chunkEnd = uint32_t(zen.getSeek())+chunk.length;
   return MdsParser::Chunk(chunk.id);
   }
 
@@ -199,11 +199,11 @@ void MdsParserBin::endChunk() {
   }
 
 std::string MdsParserBin::readStr() {
-  return zen.readLine();
+  return zen.readLine(false);
   }
 
 std::string MdsParserBin::readKeyword() {
-  return zen.readLine();
+  return zen.readLine(false);
   }
 
 uint32_t MdsParserBin::readDWord() {
@@ -472,7 +472,7 @@ void MdsParser::readEvent(std::vector<zCModelEvent> &out) {
     case DEF_UNDRAWSOUND:
       break;
     case DEF_FIGHTMODE:
-      evt.m_Fmode = readStr();
+      evt.m_Fmode = readFMode();
       break;
     case DEF_SWAPMESH:
       evt.m_Slot  = readStr();
@@ -515,4 +515,23 @@ void MdsParser::readMMStart() {
   mm.m_Node      = readStr();
 
   mmStartAni.emplace_back(std::move(mm));
+  }
+
+EFightMode MdsParser::readFMode() {
+  auto s = readStr();
+  if(s=="")
+    return FM_NONE;
+  if(s=="FIST")
+    return FM_FIST;
+  if(s=="1H")
+    return FM_1H;
+  if(s=="2H")
+    return FM_2H;
+  if(s=="BOW")
+    return FM_BOW;
+  if(s=="CBOW")
+    return FM_CBOW;
+  if(s=="MAG")
+    return FM_MAG;
+  return FM_NONE;
   }
