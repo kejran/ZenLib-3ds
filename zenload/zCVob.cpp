@@ -239,11 +239,16 @@ static void read_zCVob_zCTrigger_zCTriggerList(zCVobData &info, ZenParser &parse
   rd.readEntry("listProcess", &info.zCTriggerList.listProcess);
   rd.readEntry("", &count);
   info.zCTriggerList.list.resize(count);
-  for (int i = 0; i < count; i++) {
-    const char* triggerTarget = (((version != WorldVersion::VERSION_G1_08k) ? "slaveVobName" : "triggerTarget")+ std::to_string(i)).c_str();
-    const char* fireDelay = ("fireDelay" + std::to_string(i)).c_str();
+  for (uint8_t i = 0; i < count; i++) {
+    char triggerTarget[64]={};
+    char fireDelay    [64]={};
+    if(version != WorldVersion::VERSION_G1_08k) {
+      std::snprintf(triggerTarget,sizeof(triggerTarget),"slaveVobName%d",int(i));
+      } else {
+      std::snprintf(triggerTarget,sizeof(triggerTarget),"triggerTarget%d",int(i));
+      }
     rd.readEntry(triggerTarget, &info.zCTriggerList.list[i].triggerTarget);
-    rd.readEntry(fireDelay, &info.zCTriggerList.list[i].fireDelay);
+    rd.readEntry(fireDelay,     &info.zCTriggerList.list[i].fireDelay);
     }
   }
 
