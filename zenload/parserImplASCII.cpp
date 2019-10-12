@@ -197,7 +197,8 @@ void ParserImplASCII::readEntry(const char* _expectedName, void* target, size_t 
     // Special cases for chunk starts/ends
     if (line == "[]" || (line.front() == '[' && line.back() == ']'))
     {
-        *reinterpret_cast<std::string*>(target) = line;
+        if(expectedType==ZVT_STRING)
+          *reinterpret_cast<std::string*>(target) = line;
         return;
     }
 
