@@ -128,13 +128,13 @@ namespace ZenLoad
     struct zCModelScriptAniCombine
     {
         std::string m_Name;
-        uint32_t m_Layer = 0;
+        uint32_t    m_Layer = 0;
         std::string m_Next;
-        float m_BlendIn = 0;
-        float m_BlendOut = 0;
-        uint32_t m_Flags = 0;
+        float       m_BlendIn = 0;
+        float       m_BlendOut = 0;
+        uint32_t    m_Flags = 0;
         std::string m_Asc;
-        uint32_t m_LastFrame = 0;
+        uint32_t    m_LastFrame = 0;
     };
 
     struct zCModelScriptAniDisable

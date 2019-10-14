@@ -100,6 +100,8 @@ MdsParser::Chunk MdsParserTxt::beginChunk() {
         return CHUNK_REGISTER_MESH;
       if(buf=="ani")
         return CHUNK_ANI;
+      if(buf=="aniComb")
+        return CHUNK_ANI_COMB;
       if(buf=="aniAlias")
         return CHUNK_ANI_ALIAS;
       if(buf=="*eventSFX")
@@ -248,6 +250,11 @@ MdsParser::Chunk MdsParser::parse() {
         break;
       case CHUNK_ANI_ENUM:
         break;
+      case CHUNK_ANI_COMB:
+        beginArgs();
+        readAniComb();
+        endArgs();
+        break;
       case CHUNK_ANI_BLEND:
         beginArgs();
         endArgs();
@@ -357,6 +364,17 @@ void MdsParser::readAni() {
   ani.m_MaxFps      = readFloat();
   ani.m_Speed       = readFloat();
   ani.m_ColVolScale = readFloat();
+  }
+
+void MdsParser::readAniComb() {
+  comb.m_Name      = readStr();
+  comb.m_Layer     = readDWord();
+  comb.m_Next      = readStr();
+  comb.m_BlendIn   = readFloat();
+  comb.m_BlendOut  = readFloat();
+  comb.m_Flags     = makeAniFlags(readKeyword());
+  comb.m_Asc       = readStr();
+  comb.m_LastFrame = readDWord();
   }
 
 void MdsParser::readAniAlias() {

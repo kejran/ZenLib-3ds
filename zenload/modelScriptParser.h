@@ -30,7 +30,7 @@ namespace ZenLoad {
         CHUNK_ANI_BLEND                = 0xF540,
         // CHUNK_ANI_SYNC              = 0xF550,
         // CHUNK_ANI_BATCH             = 0xF560,
-        // CHUNK_ANI_COMB              = 0xF570,
+        CHUNK_ANI_COMB                 = 0xF570,
         // CHUNK_ANI_DISABLE           = 0xF580,
         CHUNK_MODEL_TAG                = 0xF590,
         // CHUNK_ANI_EVENTS            = 0xF5A0,
@@ -54,6 +54,7 @@ namespace ZenLoad {
       std::vector<std::string>                  meshesASC;
       zCModelScriptAni                          ani;
       zCModelScriptAniAlias                     alias;
+      zCModelScriptAniCombine                   comb;
       std::vector<zCModelScriptEventSfx>        sfx, gfx;
       std::vector<zCModelScriptEventPfx>        pfx;
       std::vector<zCModelScriptEventPfxStop>    pfxStop;
@@ -82,6 +83,7 @@ namespace ZenLoad {
       void                readPfxStop();
       void                readEvent(std::vector<zCModelEvent>& out);
       void                readMMStart();
+      void                readAniComb();
       EFightMode          readFMode();
 
       static uint32_t     makeAniFlags(const std::string &flag_str);
