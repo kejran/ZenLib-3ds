@@ -31,7 +31,7 @@ namespace ZenLoad {
         // CHUNK_ANI_SYNC              = 0xF550,
         // CHUNK_ANI_BATCH             = 0xF560,
         CHUNK_ANI_COMB                 = 0xF570,
-        // CHUNK_ANI_DISABLE           = 0xF580,
+        CHUNK_ANI_DISABLE              = 0xF580,
         CHUNK_MODEL_TAG                = 0xF590,
         // CHUNK_ANI_EVENTS            = 0xF5A0,
         // CHUNK_ANI_EVENTS_END        = 0xF5AF,
@@ -55,6 +55,7 @@ namespace ZenLoad {
       zCModelScriptAni                          ani;
       zCModelScriptAniAlias                     alias;
       zCModelScriptAniCombine                   comb;
+      zCModelScriptAniDisable                   disable;
       std::vector<zCModelScriptEventSfx>        sfx, gfx;
       std::vector<zCModelScriptEventPfx>        pfx;
       std::vector<zCModelScriptEventPfxStop>    pfxStop;
@@ -78,6 +79,7 @@ namespace ZenLoad {
       void                readRegisterMesh();
       void                readAni();
       void                readAniAlias();
+      void                readAniDisable();
       void                readSfx(std::vector<zCModelScriptEventSfx>& out);
       void                readPfx();
       void                readPfxStop();

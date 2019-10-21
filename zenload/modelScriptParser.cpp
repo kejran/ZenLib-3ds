@@ -102,6 +102,8 @@ MdsParser::Chunk MdsParserTxt::beginChunk() {
         return CHUNK_ANI;
       if(buf=="aniComb")
         return CHUNK_ANI_COMB;
+      if(buf=="aniDisable")
+        return CHUNK_ANI_DISABLE;
       if(buf=="aniAlias")
         return CHUNK_ANI_ALIAS;
       if(buf=="*eventSFX")
@@ -255,6 +257,11 @@ MdsParser::Chunk MdsParser::parse() {
         readAniComb();
         endArgs();
         break;
+      case CHUNK_ANI_DISABLE:
+        beginArgs();
+        readAniDisable();
+        endArgs();
+        break;
       case CHUNK_ANI_BLEND:
         beginArgs();
         endArgs();
@@ -386,6 +393,10 @@ void MdsParser::readAniAlias() {
   alias.m_Flags    = makeAniFlags(readKeyword());
   alias.m_Alias    = readStr();
   alias.m_Dir      = makeAniDir(readKeyword());
+  }
+
+void MdsParser::readAniDisable() {
+  disable.m_Name = readStr();
   }
 
 void MdsParser::readSfx(std::vector<zCModelScriptEventSfx> &out) {
