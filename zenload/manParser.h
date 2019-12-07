@@ -1,5 +1,4 @@
-#ifndef MANPARSER_H
-#define MANPARSER_H
+#pragma once
 
 #include <zenload/zCModelAni.h>
 
@@ -66,5 +65,3 @@ namespace ZenLoad
     };
 
 }  // namespace ZenLoad
-
-#endif  // MANPARSER_H
