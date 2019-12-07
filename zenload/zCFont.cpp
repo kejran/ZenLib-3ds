@@ -10,16 +10,8 @@
 
 using namespace ZenLoad;
 
-zCFont::zCFont(const std::string& fileName, const VDFS::FileIndex& fileIndex)
+zCFont::zCFont(const char *fileName, const VDFS::FileIndex& fileIndex)
 {
-    std::string fntFile = fileName;
-    std::transform(fntFile.begin(), fntFile.end(), fntFile.begin(), ::tolower);
-
-    if (fntFile.find(".tga") != std::string::npos)
-        fntFile = fntFile.substr(0, fntFile.size() - 4) + ".FNT";
-    else if (fntFile.find(".fnt") == std::string::npos)
-        fntFile += ".FNT";
-
     std::vector<uint8_t> data;
     fileIndex.getFileData(fileName, data);
 
