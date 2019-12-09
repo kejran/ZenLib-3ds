@@ -317,7 +317,7 @@ void zCMesh::readObjectData(ZenParser& parser, const std::vector<size_t>& skipPo
 
                 // Preallocate some memory for the triangles
                 // Note: There will be some more triangles, since not all polys have 3 vertices. Times 2 could be a little bit too hugh, though.
-                m_Triangles.reserve(numPolys * 2);
+                // m_Triangles.reserve(numPolys * 2);
 
                 // Iterate throuh every poly
                 for (auto i = size_t{0}; i < numPolys; i++)
