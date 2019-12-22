@@ -7,6 +7,11 @@ namespace VDFS
     class FileIndex;
 }
 
+namespace Daedalus
+{
+     class ZString;
+}
+
 namespace ZenLoad
 {
     class ZenParser;
@@ -28,12 +33,12 @@ namespace ZenLoad
         /**
          * @return the message of the given name
          */
-        const oCMsgConversationData& getMessageByName(const std::string& name);
+        const oCMsgConversationData& getMessageByName(const Daedalus::ZString& name);
 
         /**
          * @return true if the message was found
          */
-        bool messageExists(const std::string& name) const;
+        bool messageExists(const Daedalus::ZString& name) const;
 
         const zCCSLibData& getData() { return m_Data; }
 

@@ -9,6 +9,8 @@
 #include <cassert>
 #include <cstddef>
 
+#include "ZString.h"
+
 namespace Daedalus {
 enum EInstanceClass {
   IC_None,
@@ -234,7 +236,7 @@ struct PARSymbol {
   std::string              name;
   std::vector<float>       floatData;
   std::vector<int32_t>     intData;
-  std::vector<std::string> strData;
+  std::vector<ZString>     strData;
   int32_t                  classOffset=0;
   uint32_t                 address=0;
 
@@ -259,7 +261,7 @@ struct PARSymbol {
     }
 
   int32_t&     getInt(size_t idx = 0, void* baseAddr = nullptr);
-  std::string& getString(size_t idx = 0, void* baseAddr = nullptr);
+  ZString&     getString(size_t idx = 0, void* baseAddr = nullptr);
   float&       getFloat(size_t idx = 0, void* baseAddr = nullptr);
 
   template <typename T>

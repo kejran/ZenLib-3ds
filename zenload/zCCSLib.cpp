@@ -137,18 +137,18 @@ void zCCSLib::readObjectData(ZenParser& parser)
     }
 }
 
-const oCMsgConversationData& zCCSLib::getMessageByName(const std::string& name)
+const oCMsgConversationData& zCCSLib::getMessageByName(const Daedalus::ZString& name)
 {
-    auto nameUppered = name;
+    std::string nameUppered = name.c_str();
     std::transform(nameUppered.begin(), nameUppered.end(), nameUppered.begin(), ::toupper);
     assert(m_MessagesByName.find(nameUppered) != m_MessagesByName.end());
     size_t idx = m_MessagesByName[nameUppered];
     return m_Data.blocks[idx].command;
 }
 
-bool zCCSLib::messageExists(const std::string& name) const
+bool zCCSLib::messageExists(const Daedalus::ZString& name) const
 {
-    auto nameUppered = name;
+    std::string nameUppered = name.c_str();
     std::transform(nameUppered.begin(), nameUppered.end(), nameUppered.begin(), ::toupper);
     return m_MessagesByName.find(nameUppered) != m_MessagesByName.end();
 }

@@ -4,6 +4,7 @@
 #include <vector>
 #include <inttypes.h>
 #include "utils/mathlib.h"
+#include "daedalus/ZString.h"
 
 namespace ZenLoad
 {
@@ -496,9 +497,9 @@ namespace ZenLoad
 
     struct oCMsgConversationData : public ParsedZenObject
     {
-        uint8_t subType;
-        std::string text;
-        std::string name;
+        uint8_t           subType;
+        Daedalus::ZString text;
+        Daedalus::ZString name;
     };
 
     struct zCCSRoleData : public ParsedZenObject

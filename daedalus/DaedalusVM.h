@@ -7,6 +7,7 @@
 #include "DATFile.h"
 #include "DaedalusGameState.h"
 #include "DaedalusStdlib.h"
+#include "ZString.h"
 
 namespace Daedalus {
 class DaedalusVM {
@@ -24,26 +25,25 @@ class DaedalusVM {
     void pushInt(int32_t value);
     void pushVar(size_t index, uint32_t arrIdx = 0);
     void pushVar(const char *symName);
-    void pushString(const std::string& str);
-    void pushString(std::string&& str);
+    void pushString(const ZString& str);
 
     void setReturn(int32_t v);
-    void setReturn(const std::string& v);
-    void setReturn(std::string&&      v);
+    void setReturn(const ZString& v);
     void setReturn(float f);
     void setReturnVar(int32_t v);
 
     uint32_t     popUInt();
     int32_t      popInt();
     float        popFloat();
-    std::string& popString();
+    ZString      popString();
 
 
     int32_t&     popIntVar();
     float&       popFloatVar();
+    ZString&     popStringVar();
+
     PARSymbol&   popVar();
     uint32_t     popVar(uint32_t& arrIdx);
-    std::string  popString(bool toUpper);
 
     void setInstance(const char * instSymbol, GEngineClasses::Instance *h, EInstanceClass instanceClass);
     void setInstance(const size_t instSymbol, GEngineClasses::Instance *h, EInstanceClass instanceClass);
@@ -95,12 +95,14 @@ class DaedalusVM {
     struct Stk {
       Stk(int32_t i):i32(i){}
       Stk(float   f):f(f){}
+      Stk(const ZString& s):s(s){}
       Stk(void* inst,int32_t i,size_t id):i32(i),tag(EParOp_PushVar),id(id),inst(inst){}
 
       union {
         int32_t i32;
         float   f;
         };
+      ZString  s;
       EParOp   tag=EParOp_PushInt;
       uint32_t id =0;
       void*    inst=nullptr;
@@ -132,7 +134,5 @@ class DaedalusVM {
     size_t                                                       m_OtherId  = size_t(-1);
     size_t                                                       m_VictimId = size_t(-1);
     size_t                                                       m_ItemId   = size_t(-1);
-
-    std::queue<size_t>                                           m_FakeStringSymbols;
   };
 }  // namespace Daedalus

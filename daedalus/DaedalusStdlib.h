@@ -1,9 +1,12 @@
 #pragma once
+
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <string>
 #include <vector>
+
+#include "daedalus/ZString.h"
 
 namespace Daedalus
 {
@@ -154,40 +157,40 @@ namespace Daedalus
         struct C_ParticleFX : Instance
         {
             // 1) Emitter: zeitliches  Austoss-Verhalten, particles-per-second
-            float ppsValue;
-            std::string ppsScaleKeys_S;
-            int32_t ppsIsLooping;
-            int32_t ppsIsSmooth;
-            float ppsFPS;
-            std::string ppsCreateEm_S;
-            float ppsCreateEmDelay;
+            float   ppsValue=0.f;
+            ZString ppsScaleKeys_S;
+            int32_t ppsIsLooping=0;
+            int32_t ppsIsSmooth=0;
+            float   ppsFPS=0.f;
+            ZString ppsCreateEm_S;
+            float   ppsCreateEmDelay=0.f;
 
             // 2) Emitter: raeumliches Austoss-Verhalten
-            std::string shpType_S;  //	"point, line, box, circle, sphere, mesh"
-            std::string shpFOR_S;   //	"object,world"
-            std::string shpOffsetVec_S;
-            std::string shpDistribType_S;  //	"RAND, UNIFORM, WALK"
-            float shpDistribWalkSpeed;
-            int32_t shpIsVolume;
-            std::string shpDim_S;   //	"", "30", "10 20 30", "30", "30", "" //	line: nur 1 Dimension !=0 // shape Dimensions
-            std::string shpMesh_S;  //	"cross.3ds"
-            int32_t shpMeshRender_B;
-            std::string shpScaleKeys_S;  //	"[1.0] [0.8 0.9 0.2] [1.0]"
-            int32_t shpScaleIsLooping;
-            int32_t shpScaleIsSmooth;
-            float shpScaleFPS;
+            ZString shpType_S;  //	"point, line, box, circle, sphere, mesh"
+            ZString shpFOR_S;   //	"object,world"
+            ZString shpOffsetVec_S;
+            ZString shpDistribType_S;  //	"RAND, UNIFORM, WALK"
+            float   shpDistribWalkSpeed=0.f;
+            int32_t shpIsVolume=0;
+            ZString shpDim_S;   //	"", "30", "10 20 30", "30", "30", "" //	line: nur 1 Dimension !=0 // shape Dimensions
+            ZString shpMesh_S;  //	"cross.3ds"
+            int32_t shpMeshRender_B=0;
+            ZString shpScaleKeys_S;  //	"[1.0] [0.8 0.9 0.2] [1.0]"
+            int32_t shpScaleIsLooping=0;
+            int32_t shpScaleIsSmooth=0;
+            float   shpScaleFPS=0.f;
 
             // 3) Partikel: Start Richtung/Speed:
-            std::string dirMode_S;  //	"DIR, TARGET, MESH_POLY"
-            std::string dirFOR_S;   //	"OBJECT, WORLD"
-            std::string dirModeTargetFOR_S;
-            std::string dirModeTargetPos_S;  //	"30 23 67"
-            float dirAngleHead;
-            float dirAngleHeadVar;
-            float dirAngleElev;
-            float dirAngleElevVar;
-            float velAvg;
-            float velVar;
+            ZString dirMode_S;  //	"DIR, TARGET, MESH_POLY"
+            ZString dirFOR_S;   //	"OBJECT, WORLD"
+            ZString dirModeTargetFOR_S;
+            ZString dirModeTargetPos_S;  //	"30 23 67"
+            float   dirAngleHead=0;
+            float   dirAngleHeadVar=0;
+            float   dirAngleElev=0;
+            float   dirAngleElevVar=0;
+            float   velAvg=0;
+            float   velVar=0;
 
             // 4) Partikel: Lebensdauer
             float lspPartAvg;
@@ -195,67 +198,67 @@ namespace Daedalus
 
             // 5) Partikel: Flugverhalten (gravity, nicht-linear?, mesh-selfRot?,..)
             // grav: a) nur Y, b) XYZ, c) auf Ziel zu steuern
-            // std::string  flyMode_S;								//	"LINEAR, LIN_SINUS,.."
+            // ZString  flyMode_S;								//	"LINEAR, LIN_SINUS,.."
             // flyMeshSelfRotSpeedMin, flyMeshSelfRotSpeedMax
-            std::string flyGravity_S;
-            int32_t flyCollDet_B;
+            ZString flyGravity_S;
+            int32_t flyCollDet_B=0;
 
             // 6) Partikel: Visualisierung
-            std::string visName_S;         //	"NAME_V0_A0.TGA/.3DS"	(Variation, Animation)
-            std::string visOrientation_S;  //	"NONE, VELO"
-            int32_t visTexIsQuadPoly;      //	0=triMesh, 1=quadMesh
-            float visTexAniFPS;
-            int32_t visTexAniIsLooping;  //	0=oneShot, 1=looping
+            ZString visName_S;         //	"NAME_V0_A0.TGA/.3DS"	(Variation, Animation)
+            ZString visOrientation_S;  //	"NONE, VELO"
+            int32_t visTexIsQuadPoly=0;      //	0=triMesh, 1=quadMesh
+            float   visTexAniFPS=0.f;
+            int32_t visTexAniIsLooping=0;  //	0=oneShot, 1=looping
             // color		(nur Tex, lifeSpan-Sync)
-            std::string visTexColorStart_S;
-            std::string visTexColorEnd_S;
+            ZString visTexColorStart_S;
+            ZString visTexColorEnd_S;
             // size-ani		(nur Tex, lifeSpan-Sync)
-            std::string visSizeStart_S;
-            float visSizeEndScale;
+            ZString visSizeStart_S;
+            float   visSizeEndScale=0;
             // alpha		(lifeSpan-Sync)
-            std::string visAlphaFunc_S;
-            float visAlphaStart;
-            float visAlphaEnd;
+            ZString visAlphaFunc_S;
+            float   visAlphaStart=0.f;
+            float   visAlphaEnd=0.f;
 
             // 7) misc effects
 
             // trail
-            float trlFadeSpeed;
-            std::string trlTexture_S;
-            float trlWidth;
+            float   trlFadeSpeed=0.f;
+            ZString trlTexture_S;
+            float   trlWidth=0.f;
 
             // marks
-            float mrkFadeSpeed;
-            std::string mrkTexture_S;
-            float mrkSize;
+            float   mrkFadeSpeed=0;
+            ZString mrkTexture_S;
+            float   mrkSize=0;
 
             // flocking
-            std::string flockMode;
-            float flockStrength;
+            ZString flockMode;
+            float   flockStrength=0.f;
 
             // local frame of reference override
             // calculates the position of the particles each frame relative to the emitters pos/rot
             // can be expensive
             // WARNING: in comb with flyCollDet_B this can be a performance-hog deluxe
-            int32_t useEmittersFOR;
+            int32_t useEmittersFOR=0;
 
             // optional you can set a valid timeperiod in which this pfx should be rendered (e.g. "8 22": should be rendererd from 8 to 22 o clock")
-            std::string timeStartEnd_S;
+            ZString timeStartEnd_S;
 
             // with the next setting you can define weather this pfx is an ambient pfx, thus can be disabled in the gothic.ini with the value [ENGINE]/noAmbientPFX
-            int32_t m_bIsAmbientPFX;
+            int32_t m_bIsAmbientPFX=0;
         };
 
         struct CFx_Base : Instance {
-          std::string	visName_S;
-          std::string	visSize_S;
+          ZString	    visName_S;
+          ZString	    visSize_S;
           float	      visAlpha=0.f;
-          std::string	visAlphaBlendFunc_S;
+          ZString	    visAlphaBlendFunc_S;
           float       visTexAniFPS=0.f;
-          int32_t     visTexAniIsLooping;
-          std::string	emTrjMode_S;						// none, target, line, spline, random
-          std::string	emTrjOriginNode;
-          std::string	emTrjTargetNode;
+          int32_t     visTexAniIsLooping=0;
+          ZString	    emTrjMode_S; // none, target, line, spline, random
+          ZString	    emTrjOriginNode;
+          ZString	    emTrjTargetNode;
           float       emTrjTargetRange=0.f;
           float	      emTrjTargetAzi=0.f;
           float       emTrjTargetElev=0.f;
@@ -264,32 +267,32 @@ namespace Daedalus
           float	      emTrjAngleElevVar=0.f;
           float	      emTrjAngleHeadVar=0.f;
           float	      emTrjKeyDistVar=0.f;
-          std::string emTrjLoopMode_S;
-          std::string emTrjEaseFunc_S;
+          ZString     emTrjLoopMode_S;
+          ZString     emTrjEaseFunc_S;
           float     	emTrjEaseVel=0.f;
           float	      emTrjDynUpdateDelay=0.f;
           int32_t     emTrjDynUpdateTargetOnly=0.f;
-          std::string	emFXCreate_S;
-          std::string	emFXInvestOrigin_S;
-          std::string	emFXInvestTarget_S;
+          ZString   	emFXCreate_S;
+          ZString   	emFXInvestOrigin_S;
+          ZString   	emFXInvestTarget_S;
           float       emFXTriggerDelay=0.f;
           int32_t     emFXCreatedOwnTrj=0;
-          std::string emActionCollDyn_S;			// CREATE, BOUNCE, CREATEONCE, NORESP, COLLIDE
-          std::string emActionCollStat_S;			// CREATE, BOUNCE, CREATEONCE, NORESP, COLLIDE, CREATEQUAD
-          std::string	emFXCollStat_S;
-          std::string	emFXCollDyn_S;
-          std::string emFXCollDynPerc_S;
-          std::string	emFXCollStatAlign_S;			// TRAJECTORY, COLLISIONNORMAL
-          std::string	emFXCollDynAlign_S;
+          ZString     emActionCollDyn_S;			// CREATE, BOUNCE, CREATEONCE, NORESP, COLLIDE
+          ZString     emActionCollStat_S;			// CREATE, BOUNCE, CREATEONCE, NORESP, COLLIDE, CREATEQUAD
+          ZString    	emFXCollStat_S;
+          ZString    	emFXCollDyn_S;
+          ZString     emFXCollDynPerc_S;
+          ZString    	emFXCollStatAlign_S;			// TRAJECTORY, COLLISIONNORMAL
+          ZString    	emFXCollDynAlign_S;
           float	      emFXLifeSpan=0.f;
           int32_t	    emCheckCollision=0;
           int32_t     emAdjustShpToOrigin=0;
           float	      emInvestNextKeyDuration=0.f;
           float	      emFlyGravity=0.f;
-          std::string emSelfRotVel_S;
-          std::string userString[VFX_NUM_USERSTRINGS];
-          std::string	lightPresetName;
-          std::string	sfxID;
+          ZString     emSelfRotVel_S;
+          ZString     userString[VFX_NUM_USERSTRINGS];
+          ZString     lightPresetName;
+          ZString     sfxID;
           int32_t 	  sfxIsAmbient=0;
           int32_t		  sendAssessMagic=0;
           float	      secsPerDamage=0.f;
@@ -309,14 +312,14 @@ namespace Daedalus
             };
 
             C_Menu() = default;
-            std::string backPic;
-            std::string backWorld;
+            ZString backPic;
+            ZString backWorld;
             int32_t posx=0, posy=0;
             int32_t dimx=0, dimy=0;
             int32_t alpha=0;
-            std::string musicTheme;
+            ZString musicTheme;
             int32_t eventTimerMSec=0;
-            std::string items[MenuConstants::MAX_ITEMS];
+            ZString items[MenuConstants::MAX_ITEMS];
             int32_t flags=0;
             int32_t defaultOutGame=0;
             int32_t defaultInGame=0;
@@ -356,31 +359,31 @@ namespace Daedalus
             };
 
             C_Menu_Item() = default;
-            std::string fontName;
-            std::string text[MenuConstants::MAX_USERSTRINGS];
-            std::string backPic;
-            std::string alphaMode;
+            ZString     fontName;
+            ZString     text[MenuConstants::MAX_USERSTRINGS];
+            ZString     backPic;
+            ZString     alphaMode;
             int32_t     alpha=0;
             int32_t     type =0;
             int32_t     onSelAction[MenuConstants::MAX_SEL_ACTIONS]={};
-            std::string onSelAction_S[MenuConstants::MAX_SEL_ACTIONS];
-            std::string onChgSetOption;
-            std::string onChgSetOptionSection;
+            ZString     onSelAction_S[MenuConstants::MAX_SEL_ACTIONS];
+            ZString     onChgSetOption;
+            ZString     onChgSetOptionSection;
 
-            int32_t onEventAction[MenuConstants::MAX_EVENTS]={};
-            int32_t posx=0, posy=0;
-            int32_t dimx=0, dimy=0;  // -1 = AUTODETECT (FONTWISE)
-            float sizeStartScale=0.f;
-            int32_t flags=0;
-            float openDelayTime=0;
-            float openDuration=0;
-            float userfloat[MenuConstants::MAX_USERVARS]={};
-            std::string userString[MenuConstants::MAX_USERVARS];
-            int32_t frameSizeX=0;
-            int32_t frameSizeY=0;
-            std::string hideIfOptionSectionSet;
-            std::string hideIfOptionSet;
-            int32_t hideOnValue=0;
+            int32_t     onEventAction[MenuConstants::MAX_EVENTS]={};
+            int32_t     posx=0, posy=0;
+            int32_t     dimx=0, dimy=0;  // -1 = AUTODETECT (FONTWISE)
+            float       sizeStartScale=0.f;
+            int32_t     flags=0;
+            float       openDelayTime=0;
+            float       openDuration=0;
+            float       userfloat[MenuConstants::MAX_USERVARS]={};
+            ZString     userString[MenuConstants::MAX_USERVARS];
+            int32_t     frameSizeX=0;
+            int32_t     frameSizeY=0;
+            ZString     hideIfOptionSectionSet;
+            ZString     hideIfOptionSet;
+            int32_t     hideOnValue=0;
         };
 
         struct C_Npc : Instance
@@ -410,34 +413,34 @@ namespace Daedalus
 
             C_Npc() = default;
 
-            int32_t     id=0;
-            std::string name[5];
-            std::string slot;
-            std::string effect;
-            ENPCType    npcType = NPCTYPE_AMBIENT;
-            ENPCFlag    flags   = EFLAG_NONE;
-            int32_t     attribute[EATR_MAX]={};
-            int32_t     hitChance[MAX_HITCHANCE]={};
-            int32_t     protection[PROT_INDEX_MAX]={};
-            int32_t     damage[DAM_INDEX_MAX]={};
-            int32_t     damagetype=0;
-            int32_t     guild=0;
-            int32_t     level=0;
-            uint32_t    mission[MAX_MISSIONS]={};
-            int32_t     fight_tactic=0;
-            int32_t     weapon=0;
+            int32_t  id=0;
+            ZString  name[5];
+            ZString  slot;
+            ZString  effect;
+            ENPCType npcType = NPCTYPE_AMBIENT;
+            ENPCFlag flags   = EFLAG_NONE;
+            int32_t  attribute[EATR_MAX]={};
+            int32_t  hitChance[MAX_HITCHANCE]={};
+            int32_t  protection[PROT_INDEX_MAX]={};
+            int32_t  damage[DAM_INDEX_MAX]={};
+            int32_t  damagetype=0;
+            int32_t  guild=0;
+            int32_t  level=0;
+            uint32_t mission[MAX_MISSIONS]={};
+            int32_t  fight_tactic=0;
+            int32_t  weapon=0;
 
-            int32_t     voice=0;
-            int32_t     voicePitch=0;
-            int32_t     bodymass=0;
-            uint32_t    daily_routine=0;
-            uint32_t    start_aistate=0;
+            int32_t  voice=0;
+            int32_t  voicePitch=0;
+            int32_t  bodymass=0;
+            uint32_t daily_routine=0;
+            uint32_t start_aistate=0;
 
             // **********************
             // Spawn
             // **********************
-            std::string spawnPoint;
-            int32_t     spawnDelay=0;
+            ZString spawnPoint;
+            int32_t spawnDelay=0;
 
             // **********************
             // SENSES
@@ -448,8 +451,8 @@ namespace Daedalus
             // **********************
             // Feel free to use
             // **********************
-            int32_t     aivar[100]={};
-            std::string wp;
+            int32_t aivar[100]={};
+            ZString wp;
 
             // **********************
             // Experience dependant
@@ -466,8 +469,8 @@ namespace Daedalus
 
         struct C_Mission : Instance
         {
-            std::string name;  //	Name des Auftrages
-            std::string description;
+            ZString name;  //	Name des Auftrages
+            ZString description;
             int32_t duration;  //	Max. Dauer in Tageszeiten
             int32_t important;
 
@@ -516,125 +519,88 @@ namespace Daedalus
                 ITEM_MISSION = 1 << 12,
             };
 
-            C_Item()
-                : on_state{}
-                , count{}
-                , cond_atr{}
-                , cond_value{}
-                , change_atr{}
-                , change_value{}
-                , protection{}
-                , damage{}
-            {
-                id = 0;
-                hp = 0;
-                hp_max = 0;
-                mainflag = 0;
-                flags = 0;
-                weight = 0;
-                value = 0;
-                damageType = 0;
-                damageTotal = 0;
-                wear = 0;
-                nutrition = 0;
-                magic = 0;
-                on_equip = 0;
-                on_unequip = 0;
-                owner = 0;
-                ownerGuild = 0;
-                disguiseGuild = 0;
-                visual_skin = 0;
-                material = 0;
-                munition = 0;
-                spell = 0;
-                range = 0;
-                mag_circle = 0;
-                inv_zbias = 0;
-                inv_rotx = 0;
-                inv_roty = 0;
-                inv_rotz = 0;
-                inv_animate = 0;
-                amount = 0;
-            }
+            C_Item()=default;
 
             // Für alle Items
-            int32_t id;
-            std::string name, nameID;
-            int32_t hp, hp_max;
+            int32_t id=0;
+            ZString name;
+            ZString nameID;
+            int32_t hp=0;
+            int32_t hp_max=0;
 
-            int32_t mainflag, flags;  //	Hauptflag und weitere Flags
-            int32_t weight, value;
+            int32_t mainflag=0, flags=0; // Hauptflag und weitere Flags
+            int32_t weight=0, value=0;
 
             // Für Waffen
-            int32_t damageType;  //	Welche Schadensarten
-            int32_t damageTotal;
-            int32_t damage[DAM_INDEX_MAX];
+            int32_t damageType=0;  // Welche Schadensarten
+            int32_t damageTotal=0;
+            int32_t damage[DAM_INDEX_MAX]={};
 
             // Für Rüstungen
-            int32_t wear;
-            int32_t protection[PROT_INDEX_MAX];
+            int32_t wear=0;
+            int32_t protection[PROT_INDEX_MAX]={};
 
             // Für Nahrung
-            int32_t nutrition;  //	HP-Steigerung bei Nahrung
+            int32_t nutrition=0;  // HP-Steigerung bei Nahrung
 
             // Benötigte Attribute zum Benutzen des Items
             enum
             {
                 COND_ATR_MAX = 3
             };
-            int32_t cond_atr[COND_ATR_MAX];
-            int32_t cond_value[COND_ATR_MAX];
+            int32_t cond_atr  [COND_ATR_MAX]={};
+            int32_t cond_value[COND_ATR_MAX]={};
 
             // Attribute, die bei anlegen des Items verändert werden
             enum
             {
                 CHANGE_ATR_MAX = 3
             };
-            int32_t change_atr[CHANGE_ATR_MAX];
-            int32_t change_value[CHANGE_ATR_MAX];
+            int32_t change_atr  [CHANGE_ATR_MAX]={};
+            int32_t change_value[CHANGE_ATR_MAX]={};
 
             // Parserfunktionen
-            uint32_t magic;       //	Parserfunktion zum "Magie Header"
-            uint32_t on_equip;    //	Parserfunktion, wenn Item equipped wird.
-            uint32_t on_unequip;  //	Parserfunktion, wenn Item unequipped wird.
-            uint32_t on_state[4];
+            uint32_t magic=0;       // Parserfunktion zum "Magie Header"
+            uint32_t on_equip=0;    // Parserfunktion, wenn Item equipped wird.
+            uint32_t on_unequip=0;  // Parserfunktion, wenn Item unequipped wird.
+            uint32_t on_state[4]={};
 
             // Besitzer
-            uint32_t owner;         //	Besitzer : Instanz-Name
-            int32_t ownerGuild;     //	Besitzer : Gilde
-            int32_t disguiseGuild;  //	Zur Schau getragene Gilde durch Verkleidung
+            uint32_t owner=0;          // Besitzer : Instanz-Name
+            int32_t  ownerGuild=0;     // Besitzer : Gilde
+            int32_t  disguiseGuild=0;  // Zur Schau getragene Gilde durch Verkleidung
 
             // Die 3DS-Datei
-            std::string visual;
+            ZString visual;
 
             // Veränderung des NSC-Meshes beim Anlegen dieses Gegenstandes
-            std::string visual_change;  //	ASC - File
-            std::string effect;
-            int32_t visual_skin;
+            ZString visual_change;  //	ASC - File
+            ZString effect;
+            int32_t visual_skin=0;
 
-            std::string scemeName;
-            int32_t material;
-            // std::string	pfx								;		//	Magic Weapon PFX
-            int32_t munition;  //	Instance of Munition
+            ZString scemeName;
+            int32_t material=0;
+            // ZString	pfx								;		// Magic Weapon PFX
+            int32_t munition=0;  // Instance of Munition
 
-            int32_t spell;
-            int32_t range;
+            int32_t spell=0;
+            int32_t range=0;
 
-            int32_t mag_circle;
+            int32_t mag_circle=0;
 
-            std::string description;
-            std::string text[ITM_TEXT_MAX];
-            int32_t count[ITM_TEXT_MAX];
+            ZString description;
+            ZString text[ITM_TEXT_MAX];
+            int32_t count[ITM_TEXT_MAX]={};
 
             // inventory darstellungs geschichten, wird nur benutzt, falls von 0 abweichend
-            int32_t inv_zbias;    //  wie weit ist das item im inventory richtung far plane verschoben (integer scale 100=1)
-            int32_t inv_rotx;     //  wieviel grad um die x achse ist das item im inv gedreht
-            int32_t inv_roty;     //  wieviel grad um die y achse ist das item im inv gedreht
-            int32_t inv_rotz;     //  wieviel grad um die z achse ist das item im inv gedreht
-            int32_t inv_animate;  //  soll das item in inv rotiert werden
+            int32_t inv_zbias=0;    // wie weit ist das item im inventory richtung far plane verschoben (integer scale 100=1)
+            int32_t inv_rotx=0;     // wieviel grad um die x achse ist das item im inv gedreht
+            int32_t inv_roty=0;     // wieviel grad um die y achse ist das item im inv gedreht
+            int32_t inv_rotz=0;     // wieviel grad um die z achse ist das item im inv gedreht
+            int32_t inv_animate=0;  // soll das item in inv rotiert werden
 
             // REGoth member, number of items
-            uint32_t amount;
+            uint32_t amount=0;
         };
 
         struct C_Focus : Instance
@@ -661,21 +627,21 @@ namespace Daedalus
 
         struct SubChoice
         {
-            std::string text;
-            uint32_t functionSym;
+            ZString  text;
+            uint32_t functionSym=0;
         };
 
         struct C_Info : Instance
         {
             C_Info()=default;
-            int32_t npc=0;
-            int32_t nr=0;
-            int32_t important=0;  //	Wichtig Flag -> ansprechen
+            int32_t  npc=0;
+            int32_t  nr=0;
+            int32_t  important=0;  //	Wichtig Flag -> ansprechen
             uint32_t condition=0;
             uint32_t information=0;
-            std::string description;
-            int32_t trade=0; // bool32-flag
-            int32_t permanent=0;
+            ZString  description;
+            int32_t  trade=0; // bool32-flag
+            int32_t  permanent=0;
             std::vector<SubChoice> subChoices;
             void addChoice(const SubChoice& subChoice)
             {
@@ -689,34 +655,34 @@ namespace Daedalus
 
         struct C_Spell : Instance
         {
-            float   time_per_mana;       // Zeit pro investierten Manapunkt (ms)
-            int32_t damage_per_level;  // Schaden pro Level
-            int32_t damageType;        // CAN BE ONLY ONE DAMAGE TYPE
-            int32_t spellType;         // Good, Neutral or Bad
-            int32_t canTurnDuringInvest;
-            int32_t canChangeTargetDuringInvest;
-            int32_t isMultiEffect;  // Effect Class is oCVisFX_MultiTarget if set to 1 (e.g. the effect can have multiple trajectorys (massdeath)
-            int32_t targetCollectAlgo;
-            int32_t targetCollectType;
-            int32_t targetCollectRange;
-            int32_t targetCollectAzi;
-            int32_t targetCollectElev;
+            float   time_per_mana=0;       // Zeit pro investierten Manapunkt (ms)
+            int32_t damage_per_level=0;    // Schaden pro Level
+            int32_t damageType=0;          // CAN BE ONLY ONE DAMAGE TYPE
+            int32_t spellType=0;           // Good, Neutral or Bad
+            int32_t canTurnDuringInvest=0;
+            int32_t canChangeTargetDuringInvest=0;
+            int32_t isMultiEffect=0;       // Effect Class is oCVisFX_MultiTarget if set to 1 (e.g. the effect can have multiple trajectorys (massdeath)
+            int32_t targetCollectAlgo=0;
+            int32_t targetCollectType=0;
+            int32_t targetCollectRange=0;
+            int32_t targetCollectAzi=0;
+            int32_t targetCollectElev=0;
         };
 
         struct C_ItemReact : Instance
         {
-            int32_t npc;
-            int32_t trade_item;
-            int32_t trade_amount;
-            int32_t requested_cat;
-            int32_t requested_item;
-            int32_t requested_amount;
-            uint32_t reaction;
+            int32_t  npc             =0;
+            int32_t  trade_item      =0;
+            int32_t  trade_amount    =0;
+            int32_t  requested_cat   =0;
+            int32_t  requested_item  =0;
+            int32_t  requested_amount=0;
+            uint32_t reaction        =0;
         };
 
         struct C_SFX : Instance
         {
-            std::string file;
+            ZString file;
             // pitch offset in semi-tones
             int32_t pitchOff = 0;
             // semitone variance
@@ -726,59 +692,59 @@ namespace Daedalus
             int32_t loop = 0;
             int32_t loopStartOffset = 0;
             int32_t loopEndOffset = 0;
-            float reverbLevel = 0.0f;
-            std::string pfxName;
+            float   reverbLevel = 0.0f;
+            ZString pfxName;
         };
 
         struct C_MusicTheme : Instance {
-          std::string file;
-          float       vol=0.f;
-          int32_t     loop=0;
-          float       reverbMix=0;
-          float       reverbTime=0;
-          int32_t     transType=0;
-          int32_t     transSubType=0;
+          ZString file;
+          float   vol=0.f;
+          int32_t loop=0;
+          float   reverbMix=0;
+          float   reverbTime=0;
+          int32_t transType=0;
+          int32_t transSubType=0;
           };
 
         struct C_GilValues : Instance {
-          C_GilValues(){
+          C_GilValues() {
             for(auto& i:jumpup_height)      i = 200;
             for(auto& i:blood_max_distance) i = 1000;
             for(auto& i:blood_amount)       i = 10;
             for(auto& i:turn_speed)         i = 150;
             }
-          int32_t      water_depth_knee   [GIL_MAX]={};
-          int32_t      water_depth_chest  [GIL_MAX]={};
-          int32_t      jumpup_height      [GIL_MAX]={};		//	DEFAULT = 200;
-          // int32_t      JUMPUP_FORCE       [GIL_MAX]={};
-          int32_t      swim_time          [GIL_MAX]={};
-          int32_t      dive_time          [GIL_MAX]={};
-          int32_t      step_height			  [GIL_MAX]={};
-          int32_t      jumplow_height     [GIL_MAX]={};
-          int32_t      jumpmid_height     [GIL_MAX]={};
-          int32_t      slide_angle        [GIL_MAX]={};
-          int32_t      slide_angle2       [GIL_MAX]={};
-          int32_t      disable_autoroll   [GIL_MAX]={}; //	DEFAULT = 0					;  0 = Autoroll  enabled	/ 1 = Autoroll  disabled
-          int32_t      surface_align      [GIL_MAX]={}; //	DEFAULT = 0					;  0 = Alignment disabled	/ 1 = Alignment enabled
-          int32_t      climb_heading_angle[GIL_MAX]={};
-          int32_t      climb_horiz_angle  [GIL_MAX]={};
-          int32_t      climb_ground_angle [GIL_MAX]={};
-          int32_t      fight_range_base   [GIL_MAX]={};
-          int32_t      fight_range_fist   [GIL_MAX]={};
-          int32_t      fight_range_g      [GIL_MAX]={};
-          int32_t      fight_range_1hs    [GIL_MAX]={};
-          int32_t      fight_range_1ha    [GIL_MAX]={};
-          int32_t      fight_range_2hs    [GIL_MAX]={};
-          int32_t      fight_range_2ha    [GIL_MAX]={};
-          int32_t      falldown_height    [GIL_MAX]={}; //									Wie tief Fallen ohne Schaden ?
-          int32_t      falldown_damage    [GIL_MAX]={}; //									Schaden für jeden weiteren angefangenen Meter.
-          int32_t      blood_disabled     [GIL_MAX]={}; //	DEFAULT = 0					;	Blut ganz ausschalten (z.B. bei Sekletten) ?
-          int32_t      blood_max_distance [GIL_MAX]={}; //	DEFAULT = 1000				;	Wie weit spritzt das Blut (in cm) ?
-          int32_t      blood_amount       [GIL_MAX]={}; //	DEFAULT = 10				;	Wie viel Blut ?
-          int32_t      blood_flow         [GIL_MAX]={}; //	DEFAULT = 0					;	Soll es sich langsam ausbreiten ?
-          std::string  blood_emitter      [GIL_MAX]={}; //	DEFAULT = "PFX_BLOOD"		;	Welcher Partikel-Emitter ?
-          std::string  blood_texture      [GIL_MAX]={}; //	DEFAULT = "ZBLOODSPLAT2.TGA";	Welche Textur ?
-          int32_t      turn_speed         [GIL_MAX]={}; //	DEFAULT = 150				;
+          int32_t  water_depth_knee   [GIL_MAX]={};
+          int32_t  water_depth_chest  [GIL_MAX]={};
+          int32_t  jumpup_height      [GIL_MAX]={};		//	DEFAULT = 200;
+          // int32_t  JUMPUP_FORCE       [GIL_MAX]={};
+          int32_t  swim_time          [GIL_MAX]={};
+          int32_t  dive_time          [GIL_MAX]={};
+          int32_t  step_height			  [GIL_MAX]={};
+          int32_t  jumplow_height     [GIL_MAX]={};
+          int32_t  jumpmid_height     [GIL_MAX]={};
+          int32_t  slide_angle        [GIL_MAX]={};
+          int32_t  slide_angle2       [GIL_MAX]={};
+          int32_t  disable_autoroll   [GIL_MAX]={}; //	DEFAULT = 0					;  0 = Autoroll  enabled	/ 1 = Autoroll  disabled
+          int32_t  surface_align      [GIL_MAX]={}; //	DEFAULT = 0					;  0 = Alignment disabled	/ 1 = Alignment enabled
+          int32_t  climb_heading_angle[GIL_MAX]={};
+          int32_t  climb_horiz_angle  [GIL_MAX]={};
+          int32_t  climb_ground_angle [GIL_MAX]={};
+          int32_t  fight_range_base   [GIL_MAX]={};
+          int32_t  fight_range_fist   [GIL_MAX]={};
+          int32_t  fight_range_g      [GIL_MAX]={};
+          int32_t  fight_range_1hs    [GIL_MAX]={};
+          int32_t  fight_range_1ha    [GIL_MAX]={};
+          int32_t  fight_range_2hs    [GIL_MAX]={};
+          int32_t  fight_range_2ha    [GIL_MAX]={};
+          int32_t  falldown_height    [GIL_MAX]={}; //									Wie tief Fallen ohne Schaden ?
+          int32_t  falldown_damage    [GIL_MAX]={}; //									Schaden für jeden weiteren angefangenen Meter.
+          int32_t  blood_disabled     [GIL_MAX]={}; //	DEFAULT = 0					;	Blut ganz ausschalten (z.B. bei Sekletten) ?
+          int32_t  blood_max_distance [GIL_MAX]={}; //	DEFAULT = 1000				;	Wie weit spritzt das Blut (in cm) ?
+          int32_t  blood_amount       [GIL_MAX]={}; //	DEFAULT = 10				;	Wie viel Blut ?
+          int32_t  blood_flow         [GIL_MAX]={}; //	DEFAULT = 0					;	Soll es sich langsam ausbreiten ?
+          ZString  blood_emitter      [GIL_MAX]={}; //	DEFAULT = "PFX_BLOOD"		;	Welcher Partikel-Emitter ?
+          ZString  blood_texture      [GIL_MAX]={}; //	DEFAULT = "ZBLOODSPLAT2.TGA";	Welche Textur ?
+          int32_t  turn_speed         [GIL_MAX]={}; //	DEFAULT = 150				;
           };
 
         struct C_FightAI : Instance {
@@ -815,320 +781,320 @@ namespace Daedalus
           };
 
         struct C_SVM : Instance {
-          std::string MILGreetings;
-          std::string PALGreetings;
-          std::string Weather;
-          std::string IGetYouStill;
-          std::string DieEnemy;
-          std::string DieMonster;
-          std::string Addon_DieMonster;
-          std::string Addon_DieMonster2;
-          std::string DirtyThief;
-          std::string HandsOff;
-          std::string SheepKiller;
-          std::string SheepKillerMonster;
-          std::string YouMurderer;
-          std::string DieStupidBeast;
-          std::string YouDareHitMe;
-          std::string YouAskedForIt;
-          std::string ThenIBeatYouOutOfHere;
-          std::string WhatDidYouDoInThere;
-          std::string WillYouStopFighting;
-          std::string KillEnemy;
-          std::string EnemyKilled;
-          std::string MonsterKilled;
-          std::string Addon_MonsterKilled;
-          std::string Addon_MonsterKilled2;
-          std::string ThiefDown;
-          std::string RumfummlerDown;
-          std::string SheepAttackerDown;
-          std::string KillMurderer;
-          std::string StupidBeastKilled;
-          std::string NeverHitMeAgain;
-          std::string YouBetterShouldHaveListened;
-          std::string GetUpAndBeGone;
-          std::string NeverEnterRoomAgain;
-          std::string ThereIsNoFightingHere;
-          std::string SpareMe;
-          std::string RunAway;
-          std::string Alarm;
-          std::string Guards;
-          std::string Help;
-          std::string GoodMonsterKill;
-          std::string GoodKill;
-          std::string notnow;
-          std::string RunCoward;
-          std::string GetOutOfHere;
-          std::string WhyAreYouInHere;
-          std::string YesGoOutOfHere;
-          std::string WhatsThisSupposedToBe;
-          std::string YouDisturbedMySlumber;
-          std::string ITookYourGold;
-          std::string ShitNoGold;
-          std::string ITakeYourWeapon;
-          std::string WhatAreYouDoing;
-          std::string LookingForTroubleAgain;
-          std::string StopMagic;
-          std::string ISaidStopMagic;
-          std::string WeaponDown;
-          std::string ISaidWeaponDown;
-          std::string WiseMove;
-          std::string NextTimeYoureInForIt;
-          std::string OhMyHead;
-          std::string TheresAFight;
-          std::string OhMyGodItsAFight;
-          std::string GoodVictory;
-          std::string NotBad;
-          std::string OhMyGodHesDown;
-          std::string CheerFriend01;
-          std::string CheerFriend02;
-          std::string CheerFriend03;
-          std::string Ooh01;
-          std::string Ooh02;
-          std::string Ooh03;
-          std::string WhatWasThat;
-          std::string GetOutOfMyBed;
-          std::string Awake;
-          std::string abs_commander;
-          std::string abs_monastery;
-          std::string abs_farm;
-          std::string abs_good;
-          std::string sheepkiller_crime;
-          std::string attack_crime;
-          std::string theft_crime;
-          std::string murder_crime;
-          std::string pal_city_crime;
-          std::string mil_city_crime;
-          std::string city_crime;
-          std::string mona_crime;
-          std::string farm_crime;
-          std::string oc_crime;
-          std::string toughguy_attacklost;
-          std::string toughguy_attackwon;
-          std::string toughguy_playerattack;
-          std::string gold_1000;
-          std::string gold_950;
-          std::string gold_900;
-          std::string gold_850;
-          std::string gold_800;
-          std::string gold_750;
-          std::string gold_700;
-          std::string gold_650;
-          std::string gold_600;
-          std::string gold_550;
-          std::string gold_500;
-          std::string gold_450;
-          std::string gold_400;
-          std::string gold_350;
-          std::string gold_300;
-          std::string gold_250;
-          std::string gold_200;
-          std::string gold_150;
-          std::string gold_100;
-          std::string gold_90;
-          std::string gold_80;
-          std::string gold_70;
-          std::string gold_60;
-          std::string gold_50;
-          std::string gold_40;
-          std::string gold_30;
-          std::string gold_20;
-          std::string gold_10;
-          std::string Smalltalk01;
-          std::string Smalltalk02;
-          std::string Smalltalk03;
-          std::string Smalltalk04;
-          std::string Smalltalk05;
-          std::string Smalltalk06;
-          std::string Smalltalk07;
-          std::string Smalltalk08;
-          std::string Smalltalk09;
-          std::string Smalltalk10;
-          std::string Smalltalk11;
-          std::string Smalltalk12;
-          std::string Smalltalk13;
-          std::string Smalltalk14;
-          std::string Smalltalk15;
-          std::string Smalltalk16;
-          std::string Smalltalk17;
-          std::string Smalltalk18;
-          std::string Smalltalk19;
-          std::string Smalltalk20;
-          std::string Smalltalk21;
-          std::string Smalltalk22;
-          std::string Smalltalk23;
-          std::string Smalltalk24;
-          std::string Smalltalk25;
-          std::string Smalltalk26;
-          std::string Smalltalk27;
-          std::string Smalltalk28;
-          std::string Smalltalk29;
-          std::string Smalltalk30;
-          std::string NoLearnNoPoints;
-          std::string NoLearnOverPersonalMAX;
-          std::string NoLearnYoureBetter;
-          std::string YouLearnedSomething;
-          std::string unterstadt;
-          std::string oberstadt;
-          std::string tempel;
-          std::string markt;
-          std::string galgen;
-          std::string kaserne;
-          std::string hafen;
-          std::string whereto;
-          std::string oberstadt_2_unterstadt;
-          std::string unterstadt_2_oberstadt;
-          std::string unterstadt_2_tempel;
-          std::string unterstadt_2_hafen;
-          std::string tempel_2_unterstadt;
-          std::string tempel_2_markt;
-          std::string tempel_2_galgen;
-          std::string markt_2_tempel;
-          std::string markt_2_kaserne;
-          std::string markt_2_galgen;
-          std::string galgen_2_tempel;
-          std::string galgen_2_markt;
-          std::string galgen_2_kaserne;
-          std::string kaserne_2_markt;
-          std::string kaserne_2_galgen;
-          std::string hafen_2_unterstadt;
-          std::string Dead;
-          std::string Aargh_1;
-          std::string Aargh_2;
-          std::string Aargh_3;
-          std::string addon_wrongarmor;
-          std::string addon_wrongarmor_sld;
-          std::string addon_wrongarmor_mil;
-          std::string addon_wrongarmor_kdf;
-          std::string addon_noarmor_bdt;
-          std::string addon_diebandit;
-          std::string addon_dirtypirate;
-          std::string SC_HeyTurnAround;
-          std::string SC_HeyTurnAround02;
-          std::string SC_HeyTurnAround03;
-          std::string SC_HeyTurnAround04;
-          std::string SC_HeyWaitASecond;
-          std::string DoesntWork;
-          std::string PickBroke;
-          std::string NeedKey;
-          std::string NoMorePicks;
-          std::string NoPickLockTalent;
-          std::string NoSweeping;
-          std::string picklockorkeymissing;
-          std::string keymissing;
-          std::string picklockmissing;
-          std::string neveropen;
-          std::string missingitem;
-          std::string dontknow;
-          std::string nothingtoget;
-          std::string nothingtoget02;
-          std::string nothingtoget03;
-          std::string healshrine;
-          std::string heallastshrine;
-          std::string irdoraththereyouare;
-          std::string scopensirdorathbook;
-          std::string scopenslastdoor;
-          std::string trade_1;
-          std::string trade_2;
-          std::string trade_3;
-          std::string verstehe;
-          std::string foundtreasure;
-          std::string cantunderstandthis;
-          std::string cantreadthis;
-          std::string stoneplate_1;
-          std::string stoneplate_2;
-          std::string stoneplate_3;
-          std::string cough;
-          std::string hui;
+          ZString MILGreetings;
+          ZString PALGreetings;
+          ZString Weather;
+          ZString IGetYouStill;
+          ZString DieEnemy;
+          ZString DieMonster;
+          ZString Addon_DieMonster;
+          ZString Addon_DieMonster2;
+          ZString DirtyThief;
+          ZString HandsOff;
+          ZString SheepKiller;
+          ZString SheepKillerMonster;
+          ZString YouMurderer;
+          ZString DieStupidBeast;
+          ZString YouDareHitMe;
+          ZString YouAskedForIt;
+          ZString ThenIBeatYouOutOfHere;
+          ZString WhatDidYouDoInThere;
+          ZString WillYouStopFighting;
+          ZString KillEnemy;
+          ZString EnemyKilled;
+          ZString MonsterKilled;
+          ZString Addon_MonsterKilled;
+          ZString Addon_MonsterKilled2;
+          ZString ThiefDown;
+          ZString RumfummlerDown;
+          ZString SheepAttackerDown;
+          ZString KillMurderer;
+          ZString StupidBeastKilled;
+          ZString NeverHitMeAgain;
+          ZString YouBetterShouldHaveListened;
+          ZString GetUpAndBeGone;
+          ZString NeverEnterRoomAgain;
+          ZString ThereIsNoFightingHere;
+          ZString SpareMe;
+          ZString RunAway;
+          ZString Alarm;
+          ZString Guards;
+          ZString Help;
+          ZString GoodMonsterKill;
+          ZString GoodKill;
+          ZString notnow;
+          ZString RunCoward;
+          ZString GetOutOfHere;
+          ZString WhyAreYouInHere;
+          ZString YesGoOutOfHere;
+          ZString WhatsThisSupposedToBe;
+          ZString YouDisturbedMySlumber;
+          ZString ITookYourGold;
+          ZString ShitNoGold;
+          ZString ITakeYourWeapon;
+          ZString WhatAreYouDoing;
+          ZString LookingForTroubleAgain;
+          ZString StopMagic;
+          ZString ISaidStopMagic;
+          ZString WeaponDown;
+          ZString ISaidWeaponDown;
+          ZString WiseMove;
+          ZString NextTimeYoureInForIt;
+          ZString OhMyHead;
+          ZString TheresAFight;
+          ZString OhMyGodItsAFight;
+          ZString GoodVictory;
+          ZString NotBad;
+          ZString OhMyGodHesDown;
+          ZString CheerFriend01;
+          ZString CheerFriend02;
+          ZString CheerFriend03;
+          ZString Ooh01;
+          ZString Ooh02;
+          ZString Ooh03;
+          ZString WhatWasThat;
+          ZString GetOutOfMyBed;
+          ZString Awake;
+          ZString abs_commander;
+          ZString abs_monastery;
+          ZString abs_farm;
+          ZString abs_good;
+          ZString sheepkiller_crime;
+          ZString attack_crime;
+          ZString theft_crime;
+          ZString murder_crime;
+          ZString pal_city_crime;
+          ZString mil_city_crime;
+          ZString city_crime;
+          ZString mona_crime;
+          ZString farm_crime;
+          ZString oc_crime;
+          ZString toughguy_attacklost;
+          ZString toughguy_attackwon;
+          ZString toughguy_playerattack;
+          ZString gold_1000;
+          ZString gold_950;
+          ZString gold_900;
+          ZString gold_850;
+          ZString gold_800;
+          ZString gold_750;
+          ZString gold_700;
+          ZString gold_650;
+          ZString gold_600;
+          ZString gold_550;
+          ZString gold_500;
+          ZString gold_450;
+          ZString gold_400;
+          ZString gold_350;
+          ZString gold_300;
+          ZString gold_250;
+          ZString gold_200;
+          ZString gold_150;
+          ZString gold_100;
+          ZString gold_90;
+          ZString gold_80;
+          ZString gold_70;
+          ZString gold_60;
+          ZString gold_50;
+          ZString gold_40;
+          ZString gold_30;
+          ZString gold_20;
+          ZString gold_10;
+          ZString Smalltalk01;
+          ZString Smalltalk02;
+          ZString Smalltalk03;
+          ZString Smalltalk04;
+          ZString Smalltalk05;
+          ZString Smalltalk06;
+          ZString Smalltalk07;
+          ZString Smalltalk08;
+          ZString Smalltalk09;
+          ZString Smalltalk10;
+          ZString Smalltalk11;
+          ZString Smalltalk12;
+          ZString Smalltalk13;
+          ZString Smalltalk14;
+          ZString Smalltalk15;
+          ZString Smalltalk16;
+          ZString Smalltalk17;
+          ZString Smalltalk18;
+          ZString Smalltalk19;
+          ZString Smalltalk20;
+          ZString Smalltalk21;
+          ZString Smalltalk22;
+          ZString Smalltalk23;
+          ZString Smalltalk24;
+          ZString Smalltalk25;
+          ZString Smalltalk26;
+          ZString Smalltalk27;
+          ZString Smalltalk28;
+          ZString Smalltalk29;
+          ZString Smalltalk30;
+          ZString NoLearnNoPoints;
+          ZString NoLearnOverPersonalMAX;
+          ZString NoLearnYoureBetter;
+          ZString YouLearnedSomething;
+          ZString unterstadt;
+          ZString oberstadt;
+          ZString tempel;
+          ZString markt;
+          ZString galgen;
+          ZString kaserne;
+          ZString hafen;
+          ZString whereto;
+          ZString oberstadt_2_unterstadt;
+          ZString unterstadt_2_oberstadt;
+          ZString unterstadt_2_tempel;
+          ZString unterstadt_2_hafen;
+          ZString tempel_2_unterstadt;
+          ZString tempel_2_markt;
+          ZString tempel_2_galgen;
+          ZString markt_2_tempel;
+          ZString markt_2_kaserne;
+          ZString markt_2_galgen;
+          ZString galgen_2_tempel;
+          ZString galgen_2_markt;
+          ZString galgen_2_kaserne;
+          ZString kaserne_2_markt;
+          ZString kaserne_2_galgen;
+          ZString hafen_2_unterstadt;
+          ZString Dead;
+          ZString Aargh_1;
+          ZString Aargh_2;
+          ZString Aargh_3;
+          ZString addon_wrongarmor;
+          ZString addon_wrongarmor_sld;
+          ZString addon_wrongarmor_mil;
+          ZString addon_wrongarmor_kdf;
+          ZString addon_noarmor_bdt;
+          ZString addon_diebandit;
+          ZString addon_dirtypirate;
+          ZString SC_HeyTurnAround;
+          ZString SC_HeyTurnAround02;
+          ZString SC_HeyTurnAround03;
+          ZString SC_HeyTurnAround04;
+          ZString SC_HeyWaitASecond;
+          ZString DoesntWork;
+          ZString PickBroke;
+          ZString NeedKey;
+          ZString NoMorePicks;
+          ZString NoPickLockTalent;
+          ZString NoSweeping;
+          ZString picklockorkeymissing;
+          ZString keymissing;
+          ZString picklockmissing;
+          ZString neveropen;
+          ZString missingitem;
+          ZString dontknow;
+          ZString nothingtoget;
+          ZString nothingtoget02;
+          ZString nothingtoget03;
+          ZString healshrine;
+          ZString heallastshrine;
+          ZString irdoraththereyouare;
+          ZString scopensirdorathbook;
+          ZString scopenslastdoor;
+          ZString trade_1;
+          ZString trade_2;
+          ZString trade_3;
+          ZString verstehe;
+          ZString foundtreasure;
+          ZString cantunderstandthis;
+          ZString cantreadthis;
+          ZString stoneplate_1;
+          ZString stoneplate_2;
+          ZString stoneplate_3;
+          ZString cough;
+          ZString hui;
           //--- notr
-          std::string Addon_ThisLittleBastard;
-          std::string addon_openadanostemple;
-          std::string attentat_addon_description;
-          std::string attentat_addon_description2;
-          std::string attentat_addon_pro;
-          std::string attentat_addon_contra;
-          std::string mine_addon_description;
-          std::string addon_summonancientghost;
-          std::string addon_ancientghost_notnear;
-          std::string addon_gold_description;
+          ZString Addon_ThisLittleBastard;
+          ZString addon_openadanostemple;
+          ZString attentat_addon_description;
+          ZString attentat_addon_description2;
+          ZString attentat_addon_pro;
+          ZString attentat_addon_contra;
+          ZString mine_addon_description;
+          ZString addon_summonancientghost;
+          ZString addon_ancientghost_notnear;
+          ZString addon_gold_description;
           //--- gothic1
-          std::string watchyouraim;
-          std::string watchyouraimangry;
-          std::string letsforgetourlittlefight;
-          std::string strange;
-          std::string diemortalenemy;
-          std::string nowwait;
-          std::string nowwaitintruder;
-          std::string youstillnothaveenough;
-          std::string youattackedmycharge;
-          std::string iwillteachyourespectforforeignproperty;
-          std::string youkilledoneofus;
-          std::string berzerk;
-          std::string youllbesorryforthis;
-          std::string yesyes;
-          std::string shitwhatamonster;
-          std::string wewillmeetagain;
-          std::string nevertrythatagain;
-          std::string itookyourore;
-          std::string shitnoore;
-          std::string youviolatedforbiddenterritory;
-          std::string youwannafoolme;
-          std::string whatdidyouinthere;
-          std::string intruderalert;
-          std::string behindyou;
-          std::string heyheyhey;
-          std::string cheerfight;
-          std::string cheerfriend;
-          std::string ooh;
-          std::string yeahwelldone;
-          std::string hedefeatedhim;
-          std::string hedeservedit;
-          std::string hekilledhim;
-          std::string itwasagoodfight;
-          std::string friendlygreetings;
-          std::string algreetings;
-          std::string magegreetings;
-          std::string sectgreetings;
-          std::string thereheis;
-          std::string nolearnovermax;
-          std::string nolearnyoualreadyknow;
-          std::string heyyou;
-          std::string whatdoyouwant;
-          std::string isaidwhatdoyouwant;
-          std::string makeway;
-          std::string outofmyway;
-          std::string youdeaforwhat;
-          std::string lookaway;
-          std::string okaykeepit;
-          std::string whatsthat;
-          std::string thatsmyweapon;
-          std::string giveittome;
-          std::string youcankeepthecrap;
-          std::string theykilledmyfriend;
-          std::string suckergotsome;
-          std::string suckerdefeatedebr;
-          std::string suckerdefeatedgur;
-          std::string suckerdefeatedmage;
-          std::string suckerdefeatednov_guard;
-          std::string suckerdefeatedvlk_guard;
-          std::string youdefeatedmycomrade;
-          std::string youdefeatednov_guard;
-          std::string youdefeatedvlk_guard;
-          std::string youstolefromme;
-          std::string youstolefromus;
-          std::string youstolefromebr;
-          std::string youstolefromgur;
-          std::string stolefrommage;
-          std::string youkilledmyfriend;
-          std::string youkilledebr;
-          std::string youkilledgur;
-          std::string youkilledmage;
-          std::string youkilledocfolk;
-          std::string youkilledncfolk;
-          std::string youkilledpsifolk;
-          std::string getthingsright;
-          std::string youdefeatedmewell;
-          std::string om;
+          ZString watchyouraim;
+          ZString watchyouraimangry;
+          ZString letsforgetourlittlefight;
+          ZString strange;
+          ZString diemortalenemy;
+          ZString nowwait;
+          ZString nowwaitintruder;
+          ZString youstillnothaveenough;
+          ZString youattackedmycharge;
+          ZString iwillteachyourespectforforeignproperty;
+          ZString youkilledoneofus;
+          ZString berzerk;
+          ZString youllbesorryforthis;
+          ZString yesyes;
+          ZString shitwhatamonster;
+          ZString wewillmeetagain;
+          ZString nevertrythatagain;
+          ZString itookyourore;
+          ZString shitnoore;
+          ZString youviolatedforbiddenterritory;
+          ZString youwannafoolme;
+          ZString whatdidyouinthere;
+          ZString intruderalert;
+          ZString behindyou;
+          ZString heyheyhey;
+          ZString cheerfight;
+          ZString cheerfriend;
+          ZString ooh;
+          ZString yeahwelldone;
+          ZString hedefeatedhim;
+          ZString hedeservedit;
+          ZString hekilledhim;
+          ZString itwasagoodfight;
+          ZString friendlygreetings;
+          ZString algreetings;
+          ZString magegreetings;
+          ZString sectgreetings;
+          ZString thereheis;
+          ZString nolearnovermax;
+          ZString nolearnyoualreadyknow;
+          ZString heyyou;
+          ZString whatdoyouwant;
+          ZString isaidwhatdoyouwant;
+          ZString makeway;
+          ZString outofmyway;
+          ZString youdeaforwhat;
+          ZString lookaway;
+          ZString okaykeepit;
+          ZString whatsthat;
+          ZString thatsmyweapon;
+          ZString giveittome;
+          ZString youcankeepthecrap;
+          ZString theykilledmyfriend;
+          ZString suckergotsome;
+          ZString suckerdefeatedebr;
+          ZString suckerdefeatedgur;
+          ZString suckerdefeatedmage;
+          ZString suckerdefeatednov_guard;
+          ZString suckerdefeatedvlk_guard;
+          ZString youdefeatedmycomrade;
+          ZString youdefeatednov_guard;
+          ZString youdefeatedvlk_guard;
+          ZString youstolefromme;
+          ZString youstolefromus;
+          ZString youstolefromebr;
+          ZString youstolefromgur;
+          ZString stolefrommage;
+          ZString youkilledmyfriend;
+          ZString youkilledebr;
+          ZString youkilledgur;
+          ZString youkilledmage;
+          ZString youkilledocfolk;
+          ZString youkilledncfolk;
+          ZString youkilledpsifolk;
+          ZString getthingsright;
+          ZString youdefeatedmewell;
+          ZString om;
           };
     }  // namespace GEngineClasses
 

@@ -11,17 +11,17 @@ namespace ZenLoad
 		*/
         enum EZenValueType
         {
-            ZVT_0 = 0,
+            ZVT_0      = 0,
             ZVT_STRING = 0x1,
-            ZVT_INT = 0x2,
-            ZVT_FLOAT = 0x3,
-            ZVT_BYTE = 0x4,
-            ZVT_WORD = 0x5,
-            ZVT_BOOL = 0x6,
-            ZVT_VEC3 = 0x7,
-            ZVT_COLOR = 0x8,
-            ZVT_RAW = 0x9,
-            ZVT_HASH = 0x12,
+            ZVT_INT    = 0x2,
+            ZVT_FLOAT  = 0x3,
+            ZVT_BYTE   = 0x4,
+            ZVT_WORD   = 0x5,
+            ZVT_BOOL   = 0x6,
+            ZVT_VEC3   = 0x7,
+            ZVT_COLOR  = 0x8,
+            ZVT_RAW    = 0x9,
+            ZVT_HASH   = 0x12,
             ZVT_10,
             ZVT_11,
             ZVT_12,
@@ -29,7 +29,7 @@ namespace ZenLoad
             ZVT_14,
             ZVT_15,
             ZVT_RAW_FLOAT = 0x10,
-            ZVT_ENUM = 0x11,
+            ZVT_ENUM      = 0x11,
         };
 
         ParserImpl(ZenParser* parser);

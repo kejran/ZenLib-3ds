@@ -35,7 +35,7 @@ void DATFile::readSymTable(ZenLoad::ZenParser& input) {
         if(b != 0xFF)  // FIXME: This happens at INSTANCE_HELP?
           s.name += b;
         b = input.readBinaryByte();
-        };
+        }
       }
 
     input.readBinaryRaw(&s.properties, sizeof(s.properties));
@@ -54,24 +54,8 @@ void DATFile::readSymTable(ZenLoad::ZenParser& input) {
 
         case EParType_String:
           s.strData.resize(s.properties.elemProps.count);
-          for(uint32_t j = 0; j < s.properties.elemProps.count; j++) {
-            uint8_t b = input.readBinaryByte();
-            while (b != 0x0A) {
-              if (b != 0xFF)  // FIXME: This happens at INSTANCE_HELP?
-                s.strData[j] += b;
-
-              b = input.readBinaryByte();
-              };
-
-            auto replace = [](std::string& searchSpace, const std::string& from, const std::string& to) {
-              size_t start_pos = 0;
-              while((start_pos = searchSpace.find(from, start_pos)) != std::string::npos) {
-                searchSpace.replace(start_pos, from.length(), to);
-                start_pos += to.length();
-                }
-              };
-            replace(s.strData[j], "\\n", "\n");
-            }
+          for(uint32_t j = 0; j < s.properties.elemProps.count; j++)
+            s.strData[j] = ZString(input);
           break;
 
         case EParType_Class:
@@ -362,7 +346,7 @@ std::vector<float>& PARSymbol::getDataContainer() {
   }
 
 template <>
-std::vector<std::string>& PARSymbol::getDataContainer() {
+std::vector<ZString>& PARSymbol::getDataContainer() {
   return this->strData;
   }
 }  // namespace Daedalus
@@ -371,8 +355,8 @@ int32_t& PARSymbol::getInt(size_t idx, void* baseAddr) {
   return getValue<int32_t>(idx, baseAddr);
   }
 
-std::string& PARSymbol::getString(size_t idx, void* baseAddr) {
-  return getValue<std::string>(idx, baseAddr);
+ZString& PARSymbol::getString(size_t idx, void* baseAddr) {
+  return getValue<ZString>(idx, baseAddr);
   }
 
 float& PARSymbol::getFloat(size_t idx, void* baseAddr) {

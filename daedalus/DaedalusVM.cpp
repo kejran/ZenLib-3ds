@@ -9,10 +9,6 @@
 #include <cassert>
 #include <algorithm>
 
-enum {
-  NUM_FAKE_STRING_SYMBOLS = 5
-  };
-
 using namespace ZenLoad;
 using namespace Daedalus;
 
@@ -23,14 +19,6 @@ DaedalusVM::DaedalusVM(const std::vector<uint8_t> data)
 DaedalusVM::DaedalusVM(const uint8_t* pDATFileData, size_t numBytes)
     : m_DATFile(pDATFileData, numBytes) {
   m_Stack.reserve(1024);
-  // Make fake-strings
-  for(size_t i = 0; i<NUM_FAKE_STRING_SYMBOLS; i++) {
-    auto symIndex = m_DATFile.addSymbol();
-    // make sure there is enough space for 1 string
-    m_DATFile.getSymbolByIndex(symIndex).strData.resize(1);
-    m_FakeStringSymbols.push(symIndex);
-    }
-
   m_SelfId   = m_DATFile.getSymbolIndexByName("self");
   m_OtherId  = m_DATFile.getSymbolIndexByName("other");
   m_VictimId = m_DATFile.getSymbolIndexByName("victim");
@@ -243,8 +231,8 @@ void DaedalusVM::eval(size_t PC) {
         //pushVar(size_t(op.symbol));
         break;  //TODO: Not sure about this
       case EParOp_AssignString: {
-        std::string& s1 = popString();
-        std::string& s2 = popString();
+        ZString& s1 = popStringVar();
+        ZString  s2 = popString();
         s1 = s2;
         break;
         }
@@ -349,28 +337,12 @@ uint32_t DaedalusVM::popVar(uint32_t& arrIdx) {
   return uint32_t(top.i32);
   }
 
-std::string DaedalusVM::popString(bool toUpper) {
-  uint32_t arr;
-  uint32_t idx = popVar(arr);
-
-  std::string s = m_DATFile.getSymbolByIndex(idx).getString(arr, getCurrentInstanceDataPtr());
-
-  if(toUpper)
-    std::transform(s.begin(), s.end(), s.begin(), ::toupper);
-
-  return s;
-  }
-
 void DaedalusVM::setReturn(int32_t v) {
   pushInt(v);
   }
 
-void DaedalusVM::setReturn(const std::string& v) {
+void DaedalusVM::setReturn(const ZString &v) {
   pushString(v);
-  }
-
-void DaedalusVM::setReturn(std::string &&v) {
-  pushString(std::move(v));
   }
 
 void DaedalusVM::setReturn(float f) {
@@ -411,10 +383,9 @@ float DaedalusVM::popFloat() {
   return top.f;
   }
 
-std::string& DaedalusVM::popString() {
-  static std::string err;
+ZString DaedalusVM::popString() {
   if(m_Stack.empty())
-    return err;
+    return ZString();
 
   auto top = m_Stack.back();
   m_Stack.pop_back();
@@ -423,7 +394,7 @@ std::string& DaedalusVM::popString() {
     return sym.getString(top.id,top.inst);
     }
 
-  return err;
+  return top.s;
   }
 
 int32_t &DaedalusVM::popIntVar() {
@@ -454,6 +425,21 @@ float &DaedalusVM::popFloatVar() {
   return err;
   }
 
+ZString &DaedalusVM::popStringVar() {
+  static ZString err;
+  if(m_Stack.empty())
+    return err;
+
+  auto top = m_Stack.back();
+  m_Stack.pop_back();
+  if(top.tag==EParOp_PushVar){
+    auto& sym = m_DATFile.getSymbolByIndex(size_t(top.i32));
+    return sym.getString(top.id,top.inst);
+    }
+
+  return err;
+  }
+
 float DaedalusVM::popFloatValue() {
   auto top = m_Stack.back();
   m_Stack.pop_back();
@@ -466,37 +452,13 @@ PARSymbol &DaedalusVM::popVar() {
   return m_DATFile.getSymbolByIndex(idx);
   }
 
-/*
-uint32_t DaedalusVM::popVar() {
-  uint32_t arr=0;
-  return popVar(arr);
-  }*/
-
 void DaedalusVM::pushVar(const char* symName) {
   size_t idx = m_DATFile.getSymbolIndexByName(symName);
   pushVar(idx);
   }
 
-void DaedalusVM::pushString(const std::string& str) {
-  size_t symIdx = m_FakeStringSymbols.front();
-  Daedalus::PARSymbol& s = m_DATFile.getSymbolByIndex(symIdx);
-  m_FakeStringSymbols.push(m_FakeStringSymbols.front());
-  m_FakeStringSymbols.pop();
-
-  s.getString(0) = str;
-
-  pushVar(symIdx, 0);
-  }
-
-void DaedalusVM::pushString(std::string &&str) {
-  size_t symIdx = m_FakeStringSymbols.front();
-  Daedalus::PARSymbol& s = m_DATFile.getSymbolByIndex(symIdx);
-  m_FakeStringSymbols.push(m_FakeStringSymbols.front());
-  m_FakeStringSymbols.pop();
-
-  s.getString(0) = std::move(str);
-
-  pushVar(symIdx, 0);
+void DaedalusVM::pushString(const ZString &value) {
+  m_Stack.emplace_back(value);
   }
 
 void DaedalusVM::setInstance(const char* instSymbol, GEngineClasses::Instance *h, EInstanceClass instanceClass) {
