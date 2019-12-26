@@ -124,6 +124,7 @@ bool FileIndex::getFileData(const char* file, std::vector<uint8_t>& data) const
     if (!exists) return false;
 
     PHYSFS_File* handle = PHYSFS_openRead(caseSensitivePath.c_str());
+    //PHYSFS_File* handle = PHYSFS_openRead(file);
     if (!handle)
     {
         LogInfo() << "Cannot read file " << file << ": " << PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode());
@@ -230,31 +231,30 @@ const std::string& FileIndex::findCaseSensitiveNameOf(const char* caseInsensitiv
 {
     assert(isFinalized());
 
-    auto it = m_FilenamesByUpperedFileNames.find(caseInsensitiveName);
+    //auto it = m_FilenamesByUpperedFileNames.find(caseInsensitiveName);
+    //if(it!=m_FilenamesByUpperedFileNames.end())
+    //  return it->second;
+
+    std::string upperedStr;
+    char        upperedC[64] = {};
+    char*       uppered      = upperedC;
+
+    if(std::strlen(caseInsensitiveName)<64){
+      std::strcpy(upperedC,caseInsensitiveName); // cheap upper-case
+      } else {
+      upperedStr = caseInsensitiveName;
+      uppered    = &upperedStr[0];
+      }
+
+    for(size_t i=0;uppered[i];++i) {
+      auto c = uppered[i];
+      if('a'<=c && c<='z')
+        uppered[i] = c+'A'-'a';
+      }
+
+    auto it = m_FilenamesByUpperedFileNames.find(uppered);
     if(it!=m_FilenamesByUpperedFileNames.end())
       return it->second;
-
-    for(size_t i=0;caseInsensitiveName[i];++i){
-      auto c = caseInsensitiveName[i];
-      if(!(c=='.' || c=='_' || c=='-' || c==' ' || ('A'<=c && c<='Z') || ('0'<=c && c<='9'))){
-        std::string upperedStr;
-        char        upperedC[64] = {};
-        char*       uppered      = upperedC;
-        if(std::strlen(caseInsensitiveName)<64){
-          std::strcpy(upperedC,caseInsensitiveName); // cheap upper-case
-          } else {
-          upperedStr = caseInsensitiveName;
-          uppered    = &upperedStr[0];
-          }
-        for(size_t i=0;uppered[i];++i)
-          uppered[i] = char(::toupper(uppered[i]));
-
-        it = m_FilenamesByUpperedFileNames.find(uppered);
-        if(it!=m_FilenamesByUpperedFileNames.end())
-          return it->second;
-        break;
-        }
-      }
 
     static const std::string nop;
     return nop;
