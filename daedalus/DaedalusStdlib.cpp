@@ -283,6 +283,41 @@ void Daedalus::registerGothicEngineClasses(DaedalusVM& vm) {
     REGISTER          (CFx_Base, secsPerDamage);
     }
 
+  if(classExists("C_ParticleFXEmitKey")) {
+    REGISTER(C_ParticleFXEmitKey,visName_S);
+    REGISTER(C_ParticleFXEmitKey,visSizeScale);
+    REGISTER(C_ParticleFXEmitKey,scaleDuration);
+    REGISTER(C_ParticleFXEmitKey,pfx_ppsValue);
+    REGISTER(C_ParticleFXEmitKey,pfx_ppsIsSmoothChg);
+    REGISTER(C_ParticleFXEmitKey,pfx_ppsIsLoopingChg);
+    REGISTER(C_ParticleFXEmitKey,pfx_scTime);
+    REGISTER(C_ParticleFXEmitKey,pfx_flyGravity_S);
+    REGISTER(C_ParticleFXEmitKey,pfx_shpDim_S);
+    REGISTER(C_ParticleFXEmitKey,pfx_shpIsVolumeChg);
+    REGISTER(C_ParticleFXEmitKey,pfx_shpScaleFPS);
+    REGISTER(C_ParticleFXEmitKey,pfx_shpDistribWalkSpeed);
+    REGISTER(C_ParticleFXEmitKey,pfx_shpOffsetVec_S);
+    REGISTER(C_ParticleFXEmitKey,pfx_shpDistribType_S);
+    REGISTER(C_ParticleFXEmitKey,pfx_dirMode_S);
+    REGISTER(C_ParticleFXEmitKey,pfx_dirFOR_S);
+    REGISTER(C_ParticleFXEmitKey,pfx_dirModeTargetFOR_S);
+    REGISTER(C_ParticleFXEmitKey,pfx_dirModeTargetPos_S);
+    REGISTER(C_ParticleFXEmitKey,pfx_velAvg);
+    REGISTER(C_ParticleFXEmitKey,pfx_lspPartAvg);
+    REGISTER(C_ParticleFXEmitKey,pfx_visAlphaStart);
+    REGISTER(C_ParticleFXEmitKey,lightPresetName);
+    REGISTER(C_ParticleFXEmitKey,lightRange);
+    REGISTER(C_ParticleFXEmitKey,sfxID);
+    REGISTER(C_ParticleFXEmitKey,sfxIsAmbient);
+    REGISTER(C_ParticleFXEmitKey,emCreateFXID);
+    REGISTER(C_ParticleFXEmitKey,emFlyGravity);
+    REGISTER(C_ParticleFXEmitKey,emSelfRotVel_S);
+    REGISTER(C_ParticleFXEmitKey,emTrjMode_S);
+    REGISTER(C_ParticleFXEmitKey,emTrjEaseVel);
+    REGISTER(C_ParticleFXEmitKey,emCheckCollision);
+    REGISTER(C_ParticleFXEmitKey,emFXLifeSpan);
+    }
+
   if(classExists("C_ParticleFX")) {
     REGISTER(C_ParticleFX, ppsValue);
     REGISTER(C_ParticleFX, ppsScaleKeys_S);

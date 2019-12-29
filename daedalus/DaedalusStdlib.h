@@ -298,6 +298,48 @@ namespace Daedalus
           float	      secsPerDamage=0.f;
           };
 
+        // particle effect related key vars
+        struct C_ParticleFXEmitKey : Instance {
+          // vars which influence all particles all time
+          ZString	visName_S;
+          float   visSizeScale=0.f;
+          float   scaleDuration=0.f;       // time to reach full scale at this key for relevant vars (size, alpha, etc.)
+
+          float   pfx_ppsValue=0.f;
+          int     pfx_ppsIsSmoothChg=0.f;  // changes pps smoothing of pfx if set to 1 and pfx pps scale keys are set
+          int     pfx_ppsIsLoopingChg=0.f; // changes looping of pfx if set to 1
+          float   pfx_scTime=0.f;
+          ZString	pfx_flyGravity_S;
+
+          // vars which influence particles at creation level only
+          ZString pfx_shpDim_S;
+          int     pfx_shpIsVolumeChg=0;    // changes volume rendering of pfx if set to 1
+          float   pfx_shpScaleFPS=0.f;
+          float   pfx_shpDistribWalkSpeed=0.f;
+          ZString pfx_shpOffsetVec_S;
+          ZString pfx_shpDistribType_S;
+          ZString pfx_dirMode_S;
+          ZString pfx_dirFOR_S;
+          ZString pfx_dirModeTargetFOR_S;
+          ZString pfx_dirModeTargetPos_S;
+          float   pfx_velAvg=0.f;
+          float   pfx_lspPartAvg=0.f;
+          float   pfx_visAlphaStart=0.f;
+
+          ZString	lightPresetName;
+          float   lightRange=0.f;
+          ZString	sfxID;
+          int     sfxIsAmbient=0;
+          ZString emCreateFXID;
+
+          float   emFlyGravity=0.f;
+          ZString emSelfRotVel_S;
+          ZString emTrjMode_S;
+          float   emTrjEaseVel=0.f;
+          int     emCheckCollision=0;
+          float   emFXLifeSpan=0.f;
+          };
+
         struct C_Menu : Instance
         {
             enum EFlags : int32_t
