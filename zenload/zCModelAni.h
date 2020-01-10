@@ -39,12 +39,6 @@ namespace ZenLoad
 
         uint32_t nodeChecksum;
     };
-
-    struct zCModelAniSample
-    {
-        ZMath::float4 rotation;  // Quaternion
-        ZMath::float3 position;
-    };
 }  // namespace ZenLoad
 
 // FIXME: COMPATIBILITY FOR MASTER - REMOVE LATER!

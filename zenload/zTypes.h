@@ -73,9 +73,9 @@ namespace ZenLoad
     {
         float v[3][3];
 
-        ZMath::float3 getUpVector() const { return ZMath::float3(v[0][1], v[1][1], v[2][1]); };
-        ZMath::float3 getRightVector() const { return ZMath::float3(v[0][0], v[1][0], v[2][0]); };
-        ZMath::float3 getAtVector() const { return ZMath::float3(v[0][2], v[1][2], v[2][2]); };
+        ZMath::float3 getUpVector()    const { return ZMath::float3(v[0][1], v[1][1], v[2][1]); }
+        ZMath::float3 getRightVector() const { return ZMath::float3(v[0][0], v[1][0], v[2][0]); }
+        ZMath::float3 getAtVector()    const { return ZMath::float3(v[0][2], v[1][2], v[2][2]); }
 
         void setAtVector(const ZMath::float3& a)
         {
@@ -112,6 +112,12 @@ namespace ZenLoad
 
             return m;
         }
+    };
+
+    struct zCModelAniSample
+    {
+        ZMath::float3 position;
+        ZMath::float4 rotation;  // Quaternion
     };
 
     /**
@@ -165,12 +171,6 @@ namespace ZenLoad
 
     struct zCEventManagerData : public ParsedZenObject
     {
-    };
-
-    struct zKeyFrame final
-    {
-      ZMath::float3 pos={};
-      ZMath::float4 rotation={};  // Quaternion
     };
 
     //#pragma pack(push, 1)
@@ -380,7 +380,7 @@ namespace ZenLoad
             float       moveSpeed=0;
             uint8_t     posLerpType=0;
             uint8_t     speedType=0;
-            std::vector<zKeyFrame> keyframes;
+            std::vector<zCModelAniSample> keyframes;
             std::string sfxOpenStart;
             std::string sfxOpenEnd;
             std::string sfxMoving;

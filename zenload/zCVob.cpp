@@ -411,8 +411,8 @@ static void read_zCVob_zCTrigger_zCMover(zCVobData &info, ZenParser &parser, Wor
     rd.readEntry("moveSpeed",     &info.zCMover.moveSpeed);
     rd.readEntry("posLerpType",   &info.zCMover.posLerpType);
     rd.readEntry("speedType",     &info.zCMover.speedType);
-    std::vector<zKeyFrame> fr(numKeyframes);
-    rd.readEntry("keyframes", &fr[0],sizeof(zKeyFrame)*numKeyframes,ZenLoad::ParserImpl::ZVT_RAW);
+    std::vector<zCModelAniSample> fr(numKeyframes);
+    rd.readEntry("keyframes", &fr[0],sizeof(zCModelAniSample)*numKeyframes,ZenLoad::ParserImpl::ZVT_RAW);
     info.zCMover.keyframes = std::move(fr);
     }
   rd.readEntry("sfxOpenStart",  &info.zCMover.sfxOpenStart);

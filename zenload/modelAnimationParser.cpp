@@ -102,9 +102,9 @@ namespace ZenLoad
         {
             zTMdl_AniSample sample;
             m_Zen.readBinaryRaw(&sample, sizeof(zTMdl_AniSample));
+            SampleUnpackQuat (sample.rotation, m_Samples[i].rotation);
             SampleUnpackTrans(sample.position, m_Samples[i].position, m_Header.samplePosScaler, m_Header.samplePosRangeMin);
             m_Samples[i].position *= m_Scale;
-            SampleUnpackQuat(sample.rotation, m_Samples[i].rotation);
         }
     }
 
