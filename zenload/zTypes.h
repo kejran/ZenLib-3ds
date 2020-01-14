@@ -343,8 +343,8 @@ namespace ZenLoad
         struct
         {
             std::string triggerTarget;
-            uint8_t     unknown0         =0;
-            uint8_t     unknown1         =0;
+            uint8_t     flags            =0;
+            uint8_t     filterFlags      =0;
             std::string respondToVobName;
             int32_t     numCanBeActivated=0;
             float       retriggerWaitSec =0;

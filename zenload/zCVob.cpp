@@ -220,8 +220,8 @@ static void read_zCVob_zCTrigger(zCVobData &info, ZenParser &parser, WorldVersio
   auto& rd = *parser.getImpl();
   info.vobType = zCVobData::VT_zCTrigger;
   rd.readEntry("triggerTarget",     &info.zCTrigger.triggerTarget);
-  rd.readEntry("flags",             &info.zCTrigger.unknown0, ZenLoad::ParserImpl::ZVT_RAW);
-  rd.readEntry("filterFlags",       &info.zCTrigger.unknown1, ZenLoad::ParserImpl::ZVT_RAW); //hash?
+  rd.readEntry("flags",             &info.zCTrigger.flags, ZenLoad::ParserImpl::ZVT_RAW);
+  rd.readEntry("filterFlags",       &info.zCTrigger.filterFlags, ZenLoad::ParserImpl::ZVT_RAW);
   rd.readEntry("respondToVobName",  &info.zCTrigger.respondToVobName);
   rd.readEntry("numCanBeActivated", &info.zCTrigger.numCanBeActivated);
   rd.readEntry("retriggerWaitSec",  &info.zCTrigger.retriggerWaitSec);
