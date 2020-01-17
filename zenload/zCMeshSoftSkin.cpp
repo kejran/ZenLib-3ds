@@ -11,8 +11,14 @@
 
 using namespace ZenLoad;
 
-static const uint16_t MSID_MESHSOFTSKIN = 0xE100;
-static const uint16_t MSID_MESHSOFTSKIN_END = 0xE110;
+enum MSID_CHUNK : uint16_t {
+  MSID_NONE             = 0,
+  MSID_MESHSOFTSKIN     = 0xE100,
+  MSID_MESHSOFTSKIN_END = 0xE110,
+
+  MSID_PROGMESH         = 0xB100,
+  MSID_PROGMESH_END     = 0xB1FF,
+  };
 
 void oBBox3d::load(ZenParser& parser)
 {
@@ -22,12 +28,9 @@ void oBBox3d::load(ZenParser& parser)
     parser.readBinaryRaw(&extends, sizeof(extends));
 
     uint16_t numChildren = parser.readBinaryWord();
-
-    for (uint16_t i = 0; i < numChildren; i++)
-    {
-        children.emplace_back();
-        children.back().load(parser);
-    }
+    children.resize(numChildren);
+    for(auto& i:children)
+      i.load(parser);
 }
 
 void oBBox3d::getAABB(ZMath::float3& min, ZMath::float3& max) const
@@ -69,69 +72,62 @@ void oBBox3d::getAABB(ZMath::float3& min, ZMath::float3& max) const
 /**
 * @brief Reads the mesh-object from the given binary stream
 */
-void zCMeshSoftSkin::readObjectData(ZenParser& parser)
-{
-    // Information about the whole file we are reading here
-    BinaryFileInfo fileInfo;
+void zCMeshSoftSkin::readObjectData(ZenParser& parser) {
+  // Information about a single chunk
+  BinaryChunkInfo chunkInfo;
 
-    // Information about a single chunk
-    BinaryChunkInfo chunkInfo;
+  // Read chunks until we left the virtual binary file or got to the end-chunk
+  // Each chunk starts with a header (BinaryChunkInfo) which gives information
+  // about what to do and how long the chunk is
+  bool doneReadingChunks = false;
+  while (!doneReadingChunks) {
+    // Read chunk header and calculate position of next chunk
+    parser.readStructure(chunkInfo);
 
-    // Read chunks until we left the virtual binary file or got to the end-chunk
-    // Each chunk starts with a header (BinaryChunkInfo) which gives information
-    // about what to do and how long the chunk is
-    bool doneReadingChunks = false;
-    while (!doneReadingChunks)
-    {
-        // Read chunk header and calculate position of next chunk
-        parser.readStructure(chunkInfo);
+    size_t chunkEnd = parser.getSeek() + chunkInfo.length;
 
-        size_t chunkEnd = parser.getSeek() + chunkInfo.length;
+    switch(MSID_CHUNK(chunkInfo.id)) {
+      case MSID_MESHSOFTSKIN: {
+        uint32_t version = parser.readBinaryDWord();
 
-        switch (chunkInfo.id)
-        {
-            case MSID_MESHSOFTSKIN:
-            {
-                uint32_t version = parser.readBinaryDWord();
+        m_Mesh.readObjectData(parser);
 
-                m_Mesh.readObjectData(parser);
+        uint32_t vertexWeightStreamSize = parser.readBinaryDWord();
 
-                uint32_t vertexWeightStreamSize = parser.readBinaryDWord();
+        m_VertexWeightStream.resize(vertexWeightStreamSize);
+        parser.readBinaryRaw(m_VertexWeightStream.data(), vertexWeightStreamSize);
 
-                m_VertexWeightStream.resize(vertexWeightStreamSize);
-                parser.readBinaryRaw(m_VertexWeightStream.data(), vertexWeightStreamSize);
+        uint32_t numNodeWedgeNormals = parser.readBinaryDWord();
+        std::vector<zTNodeWedgeNormal> nodeWedgeNormals(numNodeWedgeNormals);
+        parser.readBinaryRaw(nodeWedgeNormals.data(), numNodeWedgeNormals * sizeof(zTNodeWedgeNormal));
 
-                uint32_t numNodeWedgeNormals = parser.readBinaryDWord();
-                std::vector<zTNodeWedgeNormal> nodeWedgeNormals(numNodeWedgeNormals);
+        uint16_t numNodes = parser.readBinaryWord();
+        std::vector<int32_t> nodeList(numNodes);
+        parser.readBinaryRaw(nodeList.data(), numNodes * sizeof(int32_t));
 
-                if (numNodeWedgeNormals > 0)
-                    parser.readBinaryRaw(nodeWedgeNormals.data(), numNodeWedgeNormals * sizeof(zTNodeWedgeNormal));
+        m_BBoxesByNodes.reserve(numNodes);
+        for(auto& i:m_BBoxesByNodes)
+          i.load(parser);
 
-                uint16_t numNodes = parser.readBinaryWord();
-                std::vector<int32_t> nodeList(numNodes);
-                parser.readBinaryRaw(nodeList.data(), numNodes * sizeof(int32_t));
-
-                for (uint16_t i = 0; i < numNodes; i++)
-                {
-                    m_BBoxesByNodes.emplace_back();
-                    m_BBoxesByNodes.back().load(parser);
-                }
-
-                updateBboxTotal();
-                // Chunksize seems wrong, can't skip here!
-                //parser.setSeek(chunkEnd); // Skip chunk
-            }
-            break;
-
-            case MSID_MESHSOFTSKIN_END:
-                doneReadingChunks = true;
-                break;
-
-            default:
-                parser.setSeek(chunkEnd);  // Skip chunk
+        updateBboxTotal();
+        parser.setSeek(chunkEnd); // Skip chunk
+        break;
         }
+
+      case MSID_MESHSOFTSKIN_END:
+        doneReadingChunks = true;
+        break;
+
+      case MSID_PROGMESH:
+      case MSID_PROGMESH_END:
+        parser.setSeek(chunkEnd);    // Not supported: skip chunk
+        break;
+
+      default:
+        parser.setSeek(chunkEnd);  // Skip chunk
+      }
     }
-}
+  }
 
 /**
 * @brief Creates packed submesh-data

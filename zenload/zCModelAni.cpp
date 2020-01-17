@@ -11,9 +11,6 @@
 
 using namespace ZenLoad;
 
-static const uint16_t MSID_MESHSOFTSKIN = 0xE100;
-static const uint16_t MSID_MESHSOFTSKIN_END = 0xE110;
-
 static const uint16_t MSID_MODELANI = 0xA000;
 static const uint16_t MSID_MAN_HEADER = 0xA020;
 static const uint16_t MSID_MAN_SOURCE = 0xA010;
@@ -170,18 +167,15 @@ void zCModelAni::readObjectData(ZenParser& parser)
                 parser.readBinaryRaw(m_NodeIndexList.data(), m_NodeIndexList.size() * sizeof(uint32_t));
 
                 uint32_t numSamples = m_ModelAniHeader.numNodes * m_ModelAniHeader.numFrames;
-                zTMdl_AniSample* qSamples = new zTMdl_AniSample[numSamples];
                 m_AniSamples.resize(numSamples);
-
-                parser.readBinaryRaw(qSamples, sizeof(zTMdl_AniSample) * numSamples);
 
                 for (size_t i = 0; i < numSamples; i++)
                 {
-                    SampleUnpackTrans(qSamples[i].position, m_AniSamples[i].position, m_ModelAniHeader.samplePosScaler, m_ModelAniHeader.samplePosRangeMin);
-                    SampleUnpackQuat(qSamples[i].rotation, m_AniSamples[i].rotation);
+                    zTMdl_AniSample smp={};
+                    parser.readBinaryRaw(&smp, sizeof(zTMdl_AniSample));
+                    SampleUnpackTrans(smp.position, m_AniSamples[i].position, m_ModelAniHeader.samplePosScaler, m_ModelAniHeader.samplePosRangeMin);
+                    SampleUnpackQuat(smp.rotation, m_AniSamples[i].rotation);
                 }
-
-                delete[] qSamples;
             }
             break;
             default:
