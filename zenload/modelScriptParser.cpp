@@ -552,9 +552,9 @@ EFightMode MdsParser::readFMode() {
     return FM_NONE;
   if(s=="FIST")
     return FM_FIST;
-  if(s=="1H")
+  if(s=="1H" || s=="1h")
     return FM_1H;
-  if(s=="2H")
+  if(s=="2H" || s=="2h")
     return FM_2H;
   if(s=="BOW")
     return FM_BOW;
