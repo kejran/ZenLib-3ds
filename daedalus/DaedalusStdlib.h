@@ -90,8 +90,9 @@ namespace Daedalus
           };
 
         // Music transition types
-        enum ETransitionType
+        enum ETransitionType : int32_t
         {
+            TRANSITION_TYPE_NULL = 0,
             TRANSITION_TYPE_NONE = 1,
             TRANSITION_TYPE_GROOVE = 2,
             TRANSITION_TYPE_FILL = 3,
@@ -101,8 +102,9 @@ namespace Daedalus
             TRANSITION_TYPE_ENDANDINTRO = 7
         };
 
-        enum ESubTransitionType
+        enum ESubTransitionType : int32_t
         {
+            TRANSITION_SUB_TYPE_NULL = 0,
             TRANSITION_SUB_TYPE_IMMEDIATE = 1,
             TRANSITION_SUB_TYPE_BEAT = 2,
             TRANSITION_SUB_TYPE_MEASURE = 3
@@ -739,13 +741,13 @@ namespace Daedalus
         };
 
         struct C_MusicTheme : Instance {
-          ZString file;
-          float   vol=0.f;
-          int32_t loop=0;
-          float   reverbMix=0;
-          float   reverbTime=0;
-          int32_t transType=0;
-          int32_t transSubType=0;
+          ZString            file;
+          float              vol=0.f;
+          int32_t            loop=0;
+          float              reverbMix=0;
+          float              reverbTime=0;
+          ETransitionType    transType=TRANSITION_TYPE_NULL;
+          ESubTransitionType transSubType=TRANSITION_SUB_TYPE_NULL;
           };
 
         struct C_GilValues : Instance {
