@@ -122,12 +122,11 @@ namespace ZMath
 		*/
         uint32_t toABGR8()
         {
-            unsigned char b[] = {static_cast<unsigned char>(w * 255.0f),
-                                 static_cast<unsigned char>(z * 255.0f),
-                                 static_cast<unsigned char>(y * 255.0f),
-                                 static_cast<unsigned char>(x * 255.0f)};
-
-            return *reinterpret_cast<uint32_t*>(b);
+            uint32_t a = uint32_t(w*255.f);
+            uint32_t b = uint32_t(z*255.f);
+            uint32_t g = uint32_t(y*255.f);
+            uint32_t r = uint32_t(x*255.f);
+            return (a << 24) | (b << 16) | (g << 8) | r;
         }
 
         std::string toString() const
