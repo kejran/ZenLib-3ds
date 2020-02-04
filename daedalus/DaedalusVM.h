@@ -96,7 +96,7 @@ class DaedalusVM {
       Stk(int32_t i):i32(i){}
       Stk(float   f):f(f){}
       Stk(const ZString& s):s(s){}
-      Stk(void* inst,int32_t i,size_t id):i32(i),tag(EParOp_PushVar),id(id),inst(inst){}
+      Stk(void* inst,int32_t i,uint32_t id):i32(i),tag(EParOp_PushVar),id(id),inst(inst){}
 
       union {
         int32_t i32;

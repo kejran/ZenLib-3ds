@@ -119,9 +119,6 @@ namespace ZenLoad
 
         auto x = {(fn(d), 0)...};
         (void)x;
-
-        //auto values = std::make_tuple(d...);
-        //Utils::for_each_in_tuple(values, );
     }
 
     template <typename S>
