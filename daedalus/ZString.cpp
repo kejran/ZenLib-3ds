@@ -176,12 +176,12 @@ ZString ZString::toStr(int64_t v) {
     return strFromIntCache(uint8_t(v));
 
   char s[32]={};
-  std::snprintf(s,sizeof(s),"%lld",v);
+  std::snprintf(s,sizeof(s),"%lld",static_cast<long long int>(v));
   return ZString(s);
   }
 
 ZString ZString::toStr(float v) {
   char s[32]={};
-  std::snprintf(s,sizeof(s),"%f",v);
+  std::snprintf(s,sizeof(s),"%f",double(v));
   return ZString(s);
   }
