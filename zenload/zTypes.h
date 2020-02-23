@@ -43,6 +43,15 @@ namespace ZenLoad
         MT_TOOGLE_ENABLED
     };
 
+    enum MoverBehavior : uint8_t
+    {
+        STATE_TOGGLE,
+        STATE_TRIGGER_CTRL,
+        STATE_OPEN_TIMED,
+        NSTATE_LOOP,
+        NSTATE_SINGLE_KEYS,
+    };
+
     using SectorIndex = uint32_t;
     enum : uint32_t { SECTOR_INDEX_INVALID = uint32_t(-1) };
 
@@ -136,29 +145,29 @@ namespace ZenLoad
     struct zCMaterialData : public ParsedZenObject
     {
         std::string matName;
-        uint8_t matGroup;
-        uint32_t color;
-        float smoothAngle;
+        uint8_t     matGroup=0;
+        uint32_t    color=0xFFFFFFFF;
+        float       smoothAngle=0.f;
         std::string texture;
         std::string texScale;
-        float texAniFPS;
-        uint8_t texAniMapMode;
+        float       texAniFPS=0.f;
+        uint8_t     texAniMapMode=0;
         std::string texAniMapDir;
-        bool noCollDet;
-        bool noLighmap;
-        uint8_t loadDontCollapse;
+        bool        noCollDet=0;
+        bool        noLighmap=0;
+        uint8_t     loadDontCollapse=0;
         std::string detailObject;
-        float detailTextureScale;
-        uint8_t forceOccluder;
-        uint8_t environmentMapping;
-        float environmentalMappingStrength;
-        uint8_t waveMode;
-        uint8_t waveSpeed;
-        float waveMaxAmplitude;
-        float waveGridSize;
-        uint8_t ignoreSun;
-        uint8_t alphaFunc;
-        ZMath::float2 defaultMapping;
+        float       detailTextureScale=0.f;
+        uint8_t     forceOccluder=0;
+        uint8_t     environmentMapping=0;
+        float       environmentalMappingStrength=0.f;
+        uint8_t     waveMode=0;
+        uint8_t     waveSpeed=0;
+        float       waveMaxAmplitude=0.f;
+        float       waveGridSize=0.f;
+        uint8_t     ignoreSun=0;
+        uint8_t     alphaFunc=0;
+        ZMath::float2 defaultMapping={};
     };
 
     struct zCVisualData : public ParsedZenObject
@@ -371,24 +380,24 @@ namespace ZenLoad
 
         struct
         {
-            uint8_t     moverBehavior=0;
-            float       touchBlockerDamage=0;
-            float       stayOpenTimeSec=0;
-            bool        moverLocked=false;
-            bool        autoLinkEnable=false;
-            bool        autoRotate=false;
-            float       moveSpeed=0;
-            uint8_t     posLerpType=0;
-            uint8_t     speedType=0;
+            MoverBehavior moverBehavior=MoverBehavior::NSTATE_LOOP;
+            float         touchBlockerDamage=0;
+            float         stayOpenTimeSec=0;
+            bool          moverLocked=false;
+            bool          autoLinkEnable=false;
+            bool          autoRotate=false;
+            float         moveSpeed=0;
+            uint8_t       posLerpType=0;
+            uint8_t       speedType=0;
             std::vector<zCModelAniSample> keyframes;
-            std::string sfxOpenStart;
-            std::string sfxOpenEnd;
-            std::string sfxMoving;
-            std::string sfxCloseStart;
-            std::string sfxCloseEnd;
-            std::string sfxLock;
-            std::string sfxUnlock;
-            std::string sfxUseLocked;
+            std::string   sfxOpenStart;
+            std::string   sfxOpenEnd;
+            std::string   sfxMoving;
+            std::string   sfxCloseStart;
+            std::string   sfxCloseEnd;
+            std::string   sfxLock;
+            std::string   sfxUnlock;
+            std::string   sfxUseLocked;
         } zCMover;
 
         struct

@@ -399,7 +399,7 @@ static void read_zCVob_zCTrigger_zCMover(zCVobData &info, ZenParser &parser, Wor
 
   auto& rd = *parser.getImpl();
   info.vobType = zCVobData::VT_zCMover;
-  rd.readEntry("moverBehavior",     &info.zCMover.moverBehavior);
+  rd.readEntry("moverBehavior",     &reinterpret_cast<uint8_t&>(info.zCMover.moverBehavior));
   rd.readEntry("touchBlockerDamage",&info.zCMover.touchBlockerDamage);
   rd.readEntry("stayOpenTimeSec",   &info.zCMover.stayOpenTimeSec);
   rd.readEntry("moverLocked",       &info.zCMover.moverLocked);
