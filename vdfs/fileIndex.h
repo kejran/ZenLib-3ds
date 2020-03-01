@@ -65,23 +65,5 @@ namespace VDFS
          */
         static int64_t getLastModTime(const std::u16string& name);
         static int64_t getLastModTime(const std::string& name);
-
-    private:
-        /**
-         * @return Whether this fileindex has been finalized
-         */
-        bool isFinalized() const;
-
-        /**
-         * Updates the cache used by findCaseSensitiveNameOf
-         */
-        void updateUpperedFilenamesMap();
-
-        /**
-         * @return Case-sensitive version of the given case-insensitive filename. Empty string if not found.
-         */
-        const std::string &findCaseSensitiveNameOf(const char *caseInsensitiveName) const;
-
-        std::map<std::string, std::string> m_FilenamesByUpperedFileNames;
     };
 }  // namespace VDFS

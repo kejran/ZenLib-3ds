@@ -75,14 +75,6 @@ bool FileIndex::loadVDF(const std::u16string &vdf, const std::string &mountPoint
 */
 bool FileIndex::loadVDF(const std::string& vdf, const std::string& mountPoint)
 {
-    assert(!isFinalized());
-
-    if (isFinalized())
-    {
-        LogWarn() << "Cannot load new VDFS-archives into finalized index!";
-        return false;
-    }
-
     if (!PHYSFS_mount(vdf.c_str(), mountPoint.c_str(), 1))
     {
         LogInfo() << "Couldn't load VDF-Archive " << vdf << ": " << PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode());
@@ -116,20 +108,26 @@ bool FileIndex::getFileData(const std::string& file, std::vector<uint8_t>& data)
 */
 bool FileIndex::getFileData(const char* file, std::vector<uint8_t>& data) const
 {
-    assert(isFinalized());
+    std::string upperedStr;
+    char        upperedC[64] = {};
+    char*       uppered      = upperedC;
 
-    const std::string& caseSensitivePath = findCaseSensitiveNameOf(file);
-    bool exists = caseSensitivePath != "";
+    if(std::strlen(file)<64){
+      std::strcpy(upperedC,file); // cheap upper-case
+      } else {
+      upperedStr = file;
+      uppered    = &upperedStr[0];
+      }
 
-    if (!exists) return false;
+    for(size_t i=0;uppered[i];++i) {
+      auto c = uppered[i];
+      if('a'<=c && c<='z')
+        uppered[i] = c+'A'-'a';
+      }
 
-    PHYSFS_File* handle = PHYSFS_openRead(caseSensitivePath.c_str());
-    //PHYSFS_File* handle = PHYSFS_openRead(file);
-    if (!handle)
-    {
-        LogInfo() << "Cannot read file " << file << ": " << PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode());
+    PHYSFS_File* handle = PHYSFS_openRead(uppered);
+    if(handle==nullptr)
         return false;
-    }
 
     auto length = PHYSFS_fileLength(handle);
     data.resize(length);
@@ -143,9 +141,26 @@ bool FileIndex::getFileData(const char* file, std::vector<uint8_t>& data) const
     return true;
 }
 
-bool FileIndex::hasFile(const std::string& name) const
+bool FileIndex::hasFile(const std::string& file) const
 {
-    return !findCaseSensitiveNameOf(name.c_str()).empty();
+    std::string upperedStr;
+    char        upperedC[64] = {};
+    char*       uppered      = upperedC;
+
+    if(file.size()<64){
+      std::strcpy(upperedC,file.c_str()); // cheap upper-case
+      } else {
+      upperedStr = file;
+      uppered    = &upperedStr[0];
+      }
+
+    for(size_t i=0;uppered[i];++i) {
+      auto c = uppered[i];
+      if('a'<=c && c<='z')
+        uppered[i] = c+'A'-'a';
+      }
+    PHYSFS_Stat st={};
+    return PHYSFS_stat(uppered,&st)!=0;
 }
 
 int64_t FileIndex::getLastModTime(const std::u16string &vdf)
@@ -213,60 +228,6 @@ std::vector<std::string> FileIndex::getKnownFiles(const std::string& path) const
     return vec;
 }
 
-void FileIndex::updateUpperedFilenamesMap()
-{
-    std::vector<std::string> files = getKnownFiles();
-
-    m_FilenamesByUpperedFileNames.clear();
-    for (const std::string& file : files)
-    {
-        std::string uppered = file;
-        std::transform(uppered.begin(), uppered.end(), uppered.begin(), ::toupper);
-
-        m_FilenamesByUpperedFileNames[uppered] = file;
-    }
-}
-
-const std::string& FileIndex::findCaseSensitiveNameOf(const char* caseInsensitiveName) const
-{
-    assert(isFinalized());
-
-    //auto it = m_FilenamesByUpperedFileNames.find(caseInsensitiveName);
-    //if(it!=m_FilenamesByUpperedFileNames.end())
-    //  return it->second;
-
-    std::string upperedStr;
-    char        upperedC[64] = {};
-    char*       uppered      = upperedC;
-
-    if(std::strlen(caseInsensitiveName)<64){
-      std::strcpy(upperedC,caseInsensitiveName); // cheap upper-case
-      } else {
-      upperedStr = caseInsensitiveName;
-      uppered    = &upperedStr[0];
-      }
-
-    for(size_t i=0;uppered[i];++i) {
-      auto c = uppered[i];
-      if('a'<=c && c<='z')
-        uppered[i] = c+'A'-'a';
-      }
-
-    auto it = m_FilenamesByUpperedFileNames.find(uppered);
-    if(it!=m_FilenamesByUpperedFileNames.end())
-      return it->second;
-
-    static const std::string nop;
-    return nop;
-}
-
 void FileIndex::finalizeLoad()
 {
-    // Must be called here so opening files will actually work
-    updateUpperedFilenamesMap();
-}
-
-bool FileIndex::isFinalized() const
-{
-    return !m_FilenamesByUpperedFileNames.empty();
 }
