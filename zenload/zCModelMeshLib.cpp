@@ -90,7 +90,6 @@ void zCModelMeshLib::loadMDM(ZenParser& parser)
             case MLID_MODELMESH:
             {
                 uint32_t version = parser.readBinaryDWord();
-
                 parser.setSeek(chunkEnd);  // Skip chunk
             }
             break;
@@ -172,7 +171,7 @@ void zCModelMeshLib::loadMDH(ZenParser& parser, float scale)
                 uint16_t numNodes = parser.readBinaryWord();
                 m_Nodes.resize(numNodes);
 
-                for (int i = 0; i < numNodes; i++)
+                for (uint16_t i = 0; i < numNodes; i++)
                 {
                     m_Nodes[i].name = parser.readLine(false);
                     m_Nodes[i].parentIndex = parser.readBinaryWord();
@@ -181,9 +180,6 @@ void zCModelMeshLib::loadMDH(ZenParser& parser, float scale)
                     {
                         if (m_Nodes[i].parentIndex >= numNodes)
                             LogWarn() << "MSH-Parse fail: parentIndex >= numNodes";
-
-                        ModelNode* parent = &m_Nodes[m_Nodes[i].parentIndex];
-                        parent->childIndices.push_back(i);
                     }
                     else
                     {

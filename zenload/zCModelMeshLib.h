@@ -23,7 +23,7 @@ namespace ZenLoad
         ZMath::Matrix transformLocal;
         ZMath::Matrix transformBindPoseDebug;  // "Global"
 
-        std::vector<uint16_t> childIndices;
+        //std::vector<uint16_t> childIndices;
     };
 
     class ZenParser;

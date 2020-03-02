@@ -124,7 +124,7 @@ void zCProgMeshProto::readObjectData(ZenParser& parser)
                 // Read every stored material
                 for (uint32_t i = 0; i < numSubmeshes; i++)
                 {
-                    p2.readLine(false);  // Read unused material name (Stored a second time later)
+                    std::string mname = p2.readLine(false);  // Read unused material name (Stored a second time later)
 
                     // Skip chunk headers - we know these are zCMaterial
                     uint32_t chunksize = p2.readBinaryDWord();
