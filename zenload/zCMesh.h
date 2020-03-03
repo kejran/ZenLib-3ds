@@ -75,7 +75,7 @@ namespace ZenLoad
         /**
 		 * @brief getter for the boudingboxes
 		 */
-        void getBoundingBox(ZMath::float3& min, ZMath::float3& max)
+        void getBoundingBox(ZMath::float3& min, ZMath::float3& max) const
         {
             min = m_BBMin;
             max = m_BBMax;
