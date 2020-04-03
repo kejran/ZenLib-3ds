@@ -264,6 +264,7 @@ MdsParser::Chunk MdsParser::parse() {
         break;
       case CHUNK_ANI_BLEND:
         beginArgs();
+        readAniBlend();
         endArgs();
         break;
       case CHUNK_MESH_AND_TREE:
@@ -393,6 +394,13 @@ void MdsParser::readAniAlias() {
   alias.m_Flags    = makeAniFlags(readKeyword());
   alias.m_Alias    = readStr();
   alias.m_Dir      = makeAniDir(readKeyword());
+  }
+
+void MdsParser::readAniBlend() {
+  blend.m_Name     = readStr();
+  blend.m_Next     = readStr();
+  blend.m_BlendIn  = readFloat();
+  blend.m_BlendOut = readFloat();
   }
 
 void MdsParser::readAniDisable() {

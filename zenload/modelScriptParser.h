@@ -55,6 +55,7 @@ namespace ZenLoad {
       zCModelScriptAni                          ani;
       zCModelScriptAniAlias                     alias;
       zCModelScriptAniCombine                   comb;
+      zCModelScriptAniBlend                     blend;
       zCModelScriptAniDisable                   disable;
       std::vector<zCModelScriptEventSfx>        sfx, gfx;
       std::vector<zCModelScriptEventPfx>        pfx;
@@ -79,6 +80,7 @@ namespace ZenLoad {
       void                readRegisterMesh();
       void                readAni();
       void                readAniAlias();
+      void                readAniBlend();
       void                readAniDisable();
       void                readSfx(std::vector<zCModelScriptEventSfx>& out);
       void                readPfx();
