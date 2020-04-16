@@ -85,10 +85,12 @@ void ParserImplBinary::readEntry(const char* /*expectedName*/, void* target, siz
         // 32-bit
         case ZVT_INT:
         case ZVT_FLOAT:
-        case ZVT_WORD:
         case ZVT_VEC3:
         case ZVT_COLOR:
             size = sizeof(uint32_t);
+            break;
+        case ZVT_WORD:
+            size = sizeof(int16_t);
             break;
 
         // Raw
