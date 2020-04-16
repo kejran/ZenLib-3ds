@@ -191,9 +191,6 @@ void DaedalusVM::eval(size_t PC) {
         {
         CallStackFrame frame(*this, op.address, CallStackFrame::Address);
         eval(size_t(op.address));
-
-        if(frame.hasReturnVal && frame.prevStackGuard==m_Stack.size())
-          pushInt(0);
         }
 
         m_Instance = currentInstance;
@@ -574,23 +571,22 @@ PARSymbol &DaedalusVM::globalItem() {
   return m_DATFile.getSymbolByIndex(m_ItemId);
   }
 
-int32_t DaedalusVM::runFunctionBySymIndex(size_t symIdx, bool clearDataStack) {
+int32_t DaedalusVM::runFunctionBySymIndex(size_t symIdx) {
   if(symIdx==size_t(-1))
     return 0;
 
-  if(clearDataStack)
-    m_Stack.clear();
-
+  bool hasRet=false;
+  {
   CallStackFrame frame(*this, int32_t(symIdx), CallStackFrame::SymbolIndex);
-  if(frame.address == 0)
+  if(frame.address == 0) {
     return -1;
-
+    }
   // Execute the instructions
   eval(frame.address);
+  hasRet = frame.hasReturnVal;
+  }
 
-  int32_t ret = 0;
-  if(frame.hasReturnVal)
-    ret = popDataValue();
+  int32_t ret = hasRet ? popDataValue() : 0;
   return ret;
   }
 
@@ -645,6 +641,23 @@ DaedalusVM::CallStackFrame::CallStackFrame(DaedalusVM& vm, int32_t addressOrInde
   }
 
 DaedalusVM::CallStackFrame::~CallStackFrame() {
+  // adjust stack
+  size_t expSize = vm.m_StackGuard + (hasReturnVal ? 1 : 0);
+  if(hasReturnVal && prevStackGuard==vm.m_Stack.size())
+    vm.pushInt(0);
+
+  if(vm.m_Stack.size()>expSize) {
+    if(hasReturnVal) {
+      Stk top = vm.m_Stack.back();
+      while(vm.m_Stack.size()>=expSize)
+        vm.m_Stack.pop_back();
+      vm.m_Stack.push_back(top);
+      } else {
+      }
+    while(vm.m_Stack.size()>expSize)
+      vm.m_Stack.pop_back();
+    }
+
   vm.m_CallStack  = calee;
   vm.m_StackGuard = prevStackGuard;
   }
