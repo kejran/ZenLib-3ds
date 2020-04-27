@@ -273,7 +273,7 @@ namespace Daedalus
           ZString     emTrjEaseFunc_S;
           float     	emTrjEaseVel=0.f;
           float	      emTrjDynUpdateDelay=0.f;
-          int32_t     emTrjDynUpdateTargetOnly=0.f;
+          int32_t     emTrjDynUpdateTargetOnly=0;
           ZString   	emFXCreate_S;
           ZString   	emFXInvestOrigin_S;
           ZString   	emFXInvestTarget_S;
@@ -308,8 +308,8 @@ namespace Daedalus
           float   scaleDuration=0.f;       // time to reach full scale at this key for relevant vars (size, alpha, etc.)
 
           float   pfx_ppsValue=0.f;
-          int     pfx_ppsIsSmoothChg=0.f;  // changes pps smoothing of pfx if set to 1 and pfx pps scale keys are set
-          int     pfx_ppsIsLoopingChg=0.f; // changes looping of pfx if set to 1
+          int     pfx_ppsIsSmoothChg=0;  // changes pps smoothing of pfx if set to 1 and pfx pps scale keys are set
+          int     pfx_ppsIsLoopingChg=0; // changes looping of pfx if set to 1
           float   pfx_scTime=0.f;
           ZString	pfx_flyGravity_S;
 

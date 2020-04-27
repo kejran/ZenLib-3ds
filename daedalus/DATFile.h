@@ -8,6 +8,7 @@
 #include <utils/logger.h>
 #include <cassert>
 #include <cstddef>
+#include <algorithm>
 
 #include "ZString.h"
 
@@ -384,7 +385,7 @@ class DATFile {
     static ptrdiff_t offsetOf(T M::* field){
       char        tmp = 0;
       const char* f   = reinterpret_cast<const char*>(&(reinterpret_cast<M*>(&tmp)->*field));
-      return reinterpret_cast<ptrdiff_t>(f-&tmp);
+      return static_cast<ptrdiff_t>(f-&tmp);
       }
 
     static int compareNoCase(const char* a,const char* b);

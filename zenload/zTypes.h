@@ -182,6 +182,12 @@ namespace ZenLoad
     {
     };
 
+    struct TriggerListEntry
+    {
+        std::string triggerTarget;
+        float       fireDelay=0;
+    };
+
     //#pragma pack(push, 1)
     /**
      * @brief Data of zCVob
@@ -363,14 +369,9 @@ namespace ZenLoad
 
         struct
         {
-            struct Entry
-            {
-                std::string triggerTarget;
-                float       fireDelay=0;
-            };
 
-            int32_t            listProcess=0;
-            std::vector<Entry> list;
+            int32_t                       listProcess=0;
+            std::vector<TriggerListEntry> list;
         } zCTriggerList;
 
         struct

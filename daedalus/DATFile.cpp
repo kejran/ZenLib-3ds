@@ -5,6 +5,7 @@
 #include "DATFile.h"
 #include <algorithm>
 #include <map>
+#include <cctype>
 #include <utils/logger.h>
 
 using namespace ZenLoad;
