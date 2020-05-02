@@ -32,6 +32,27 @@ struct packedVobData {
   };
 #pragma pack(pop)
 
+static void read_zCDecal(zCVobData &info, ZenParser &parser, WorldVersion version) {
+  auto& d  = info.visualChunk.zCDecal;
+  auto& rd = *parser.getImpl();
+  rd.readEntry("", &d.name);
+  rd.readEntry("", &d.decalDim, sizeof(d.decalDim), ParserImpl::ZVT_RAW_FLOAT);
+  rd.readEntry("", &d.decalOffset, sizeof(d.decalOffset), ParserImpl::ZVT_RAW_FLOAT);
+  rd.readEntry("", &d.decal2Sided);
+  rd.readEntry("", &d.decalAlphaFunc);
+  rd.readEntry("", &d.decalTexAniFPS);
+  if(version != WorldVersion::VERSION_G1_08k) {
+    rd.readEntry("", &d.decalAlphaWeight);
+    rd.readEntry("", &d.ignoreDayLight);
+    }
+  }
+
+static void read_Visual(zCVobData &info, ZenParser &parser,
+                        WorldVersion version, const ZenParser::ChunkHeader &header) {
+  if(header.classname == "zCDecal")
+    return read_zCDecal(info,parser,version);
+  }
+
 static void read_zCVob(zCVobData &info, ZenParser &parser, WorldVersion version) {
   info.vobType        = zCVobData::VT_zCVob;
   info.rotationMatrix = ZMath::Matrix::CreateIdentity();
@@ -71,10 +92,11 @@ static void read_zCVob(zCVobData &info, ZenParser &parser, WorldVersion version)
       parser.getImpl()->readEntry("", &info.visual, 0, ZenLoad::ParserImpl::ZVT_STRING);
 
     if(pd.bitfield.hasRelevantVisualObject) {
-      // Skip visual-chunk
-      ZenParser::ChunkHeader tmph;
-      parser.readChunkStart(tmph);
-      parser.skipChunk();
+      ZenParser::ChunkHeader hdr;
+      parser.readChunkStart(hdr);
+      read_Visual(info,parser,version,hdr);
+      if(!parser.readChunkEnd())
+        parser.skipChunk();
       }
 
     if(pd.bitfield.hasAIObject) {
@@ -83,27 +105,6 @@ static void read_zCVob(zCVobData &info, ZenParser &parser, WorldVersion version)
       parser.readChunkStart(tmph);
       parser.skipChunk();
       }
-
-    /*
-    info.properties.insert(std::make_pair("PresetName", info.presetName));
-    info.properties.insert(std::make_pair("BBoxMin", info.bbox[0].toString()));
-    info.properties.insert(std::make_pair("BBoxMax", info.bbox[1].toString()));
-    info.properties.insert(std::make_pair("RotationMatrix", info.rotationMatrix.toString()));
-    info.properties.insert(std::make_pair("Position", info.position.toString()));
-    info.properties.insert(std::make_pair("VobName", info.vobName));
-    info.properties.insert(std::make_pair("VisualName", info.visual));
-    info.properties.insert(std::make_pair("ShowVisual", std::to_string(info.showVisual ? 1 : 0)));
-    info.properties.insert(std::make_pair("VisualCamAlign", std::to_string(info.visualCamAlign)));
-    info.properties.insert(std::make_pair("VisualAniMode", std::to_string(info.visualAniMode)));
-    info.properties.insert(std::make_pair("VisualAniModeStrength", std::to_string(info.visualAniModeStrength)));
-    info.properties.insert(std::make_pair("VobFarClipScale", std::to_string(info.vobFarClipScale)));
-    info.properties.insert(std::make_pair("CollisionDetectionStatic", std::to_string(info.cdStatic ? 1 : 0)));
-    info.properties.insert(std::make_pair("CollisionDetectionDyn", std::to_string(info.cdDyn ? 1 : 0)));
-    info.properties.insert(std::make_pair("StaticVob", std::to_string(info.staticVob ? 1 : 0)));
-    info.properties.insert(std::make_pair("DynamicShadow", std::to_string(info.dynamicShadow ? 1 : 0)));
-    info.properties.insert(std::make_pair("zBias", std::to_string(info.zBias)));
-    info.properties.insert(std::make_pair("IsAmbient", std::to_string(info.isAmbient ? 1 : 0)));
-    */
     } else {
     ReadObjectProperties(parser, info.properties, Prop("PresetName", info.presetName));
 
@@ -143,25 +144,23 @@ static void read_zCVob(zCVobData &info, ZenParser &parser, WorldVersion version)
       }
 
     // Skip visual-chunk
-    ZenParser::ChunkHeader tmph;
-    parser.readChunkStart(tmph);
-    parser.skipChunk();
-
+    {
     // Skip ai-chunk
+    ZenParser::ChunkHeader tmph;
     parser.readChunkStart(tmph);
     parser.skipChunk();
     }
 
+    {
+    // Skip ai-chunk
+    ZenParser::ChunkHeader tmph;
+    parser.readChunkStart(tmph);
+    parser.skipChunk();
+    }
+    }
+
   // Generate world-matrix
   info.worldMatrix = info.rotationMatrix3x3.toMatrix(info.position);
-  /*// Skip visual-chunk
-  ZenParser::ChunkHeader tmph;
-  parser.readChunkStart(tmph);
-  parser.skipChunk();
-
-  // Skip ai-chunk
-  parser.readChunkStart(tmph);
-  parser.skipChunk();*/
   }
 
 static void read_zCVobLevelCompo(zCVobData &info, ZenParser &parser, WorldVersion version) {

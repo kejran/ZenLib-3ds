@@ -255,6 +255,21 @@ namespace ZenLoad
 
         bool physicsEnabled;
 
+        struct
+        {
+          struct
+          {
+            std::string   name;
+            ZMath::float2 decalDim         = {};
+            ZMath::float2 decalOffset      = {};
+            bool          decal2Sided      = false;
+            uint8_t       decalAlphaFunc   = 0;
+            float         decalTexAniFPS   = 0;
+            uint8_t       decalAlphaWeight = 0;
+            bool          ignoreDayLight   = 0;
+          } zCDecal;
+        } visualChunk;
+
         // Sub-classes
         struct
         {
@@ -330,12 +345,12 @@ namespace ZenLoad
 
         struct
         {
-            bool enabled;
-            uint32_t priority;
-            bool ellipsoid;
-            float reverbLevel;
-            float volumeLevel;
-            bool loop;
+            bool     enabled=true;
+            uint32_t priority=0;
+            bool     ellipsoid=false;
+            float    reverbLevel=0;
+            float    volumeLevel=0;
+            bool     loop=false;
         } oCZoneMusic;
 
         struct
