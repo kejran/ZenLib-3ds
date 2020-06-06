@@ -373,8 +373,8 @@ class DATFile {
       if(checkIfExists && !hasSymbolName(name))
         return;
       auto& parSymbol                = getSymbolByName(name);
-      parSymbol.classMemberOffset    = offsetOf(field);
-      parSymbol.classMemberArraySize = std::max<size_t>(1u,std::extent<T>());
+      parSymbol.classMemberOffset    = int32_t(offsetOf(field));
+      parSymbol.classMemberArraySize = std::max<uint32_t>(1u,std::extent<T>());
       }
 
   private:

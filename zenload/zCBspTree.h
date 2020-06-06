@@ -228,7 +228,7 @@ namespace ZenLoad
 
 
               if((flags & FLAG_FRONT)!=0) {
-                front=info.nodes.size();
+                front=uint32_t(info.nodes.size());
                 info.nodes.emplace_back();
                 }
               // Read front node
@@ -236,7 +236,7 @@ namespace ZenLoad
                 // Assign index and add actual node
                 info.nodes[idx].front = front;
                 // Set new nodes parent
-                info.nodes[front].parent = idx;
+                info.nodes[front].parent = uint32_t(idx);
 
                 // If this is a leaf, add it to the leaf-list
                 if((flags & FLAG_FRONT_IS_LEAF)!=0)
@@ -247,7 +247,7 @@ namespace ZenLoad
                 }
 
               if((flags & FLAG_BACK)!=0) {
-                back=info.nodes.size();
+                back=uint32_t(info.nodes.size());
                 info.nodes.emplace_back();
                 }
               // Read back node
@@ -255,7 +255,7 @@ namespace ZenLoad
                 // Assign index and add actual node
                 info.nodes[idx].back = back;
                 // Set new nodes parent
-                info.nodes[back].parent = idx;
+                info.nodes[back].parent = uint32_t(idx);
 
                 // If this is a leaf, add it to the leaf-list
                 if((flags & FLAG_BACK_IS_LEAF) != 0)
@@ -276,7 +276,7 @@ namespace ZenLoad
             for(size_t i = 0; i < info.sectors.size(); i++)
             {
                 if(info.sectors[i].name == sectorname)
-                    return i;
+                    return SectorIndex(i);
             }
 
             return SECTOR_INDEX_INVALID;
