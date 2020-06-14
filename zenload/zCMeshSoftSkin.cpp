@@ -247,6 +247,9 @@ void zCMeshSoftSkin::updateBboxTotal()
         m_BBoxTotal[1].y = std::max(m_BBoxTotal[1].y, max.y);
         m_BBoxTotal[1].z = std::max(m_BBoxTotal[1].z, max.z);
     }
+
+    if(m_BBoxesByNodes.size()==0)
+      m_Mesh.getBoundingBox(m_BBoxTotal[0],m_BBoxTotal[1]);
 }
 
 void zCMeshSoftSkin::getAABBTotal(ZMath::float3& min, ZMath::float3& max) const
