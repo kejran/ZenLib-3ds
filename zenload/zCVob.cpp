@@ -297,7 +297,12 @@ static void read_zCVob_oCMOB_oCMobInter_oCMobBed(zCVobData &info, ZenParser &par
 
 static void read_zCVob_oCMOB_oCMobInter_oCMobDoor(zCVobData &info, ZenParser &parser, WorldVersion version) {
   read_zCVob_oCMOB_oCMobInter(info,parser,version);
+
+  auto& rd = *parser.getImpl();
   info.vobType = zCVobData::VT_oCMobDoor;
+  rd.readEntry("locked", &info.oCMobLockable.locked);
+  rd.readEntry("keyInstance", &info.oCMobLockable.keyInstance);
+  rd.readEntry("pickLockStr", &info.oCMobLockable.pickLockStr);
   }
 
 static void read_zCVob_oCMOB_oCMobInter_oCMobFire(zCVobData &info, ZenParser &parser, WorldVersion version) {
@@ -325,9 +330,9 @@ static void read_zCVob_oCMOB_oCMobInter_oCMobContainer(zCVobData &info, ZenParse
 
   auto& rd = *parser.getImpl();
   info.vobType = zCVobData::VT_oCMobContainer;
-  rd.readEntry("locked", &info.oCMobContainer.locked);
-  rd.readEntry("keyInstance", &info.oCMobContainer.keyInstance);
-  rd.readEntry("pickLockStr", &info.oCMobContainer.pickLockStr);
+  rd.readEntry("locked", &info.oCMobLockable.locked);
+  rd.readEntry("keyInstance", &info.oCMobLockable.keyInstance);
+  rd.readEntry("pickLockStr", &info.oCMobLockable.pickLockStr);
   rd.readEntry("contains", &info.oCMobContainer.contains);
   }
 

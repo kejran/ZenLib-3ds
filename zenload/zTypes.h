@@ -307,6 +307,11 @@ namespace ZenLoad
             std::string keyInstance;
             std::string pickLockStr;
             std::string contains;
+        } oCMobLockable;
+
+        struct
+        {
+            std::string contains;
         } oCMobContainer;
 
         struct
