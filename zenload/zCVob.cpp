@@ -446,6 +446,15 @@ static void read_zCVob_zCTrigger_zCTriggerWorldStart(zCVobData &info, ZenParser 
   rd.readEntry("fireOnlyFirstTime", &info.oCTriggerWorldStart.fireOnlyFirstTime);
   }
 
+static void read_zCVob_zCPFXControler(zCVobData &info, ZenParser &parser, WorldVersion version) {
+  read_zCVob(info,parser,version);
+  auto& rd = *parser.getImpl();
+  info.vobType = zCVobData::VT_zCPFXControler;
+  rd.readEntry("pfxName",         &info.zCPFXControler.pfxName);
+  rd.readEntry("killVobWhenDone", &info.zCPFXControler.killVobWhenDone);
+  rd.readEntry("pfxStartOn",      &info.zCPFXControler.pfxStartOn);
+  }
+
 static void readObjectData(zCVobData &info, ZenParser &parser,
                            WorldVersion version, const ZenParser::ChunkHeader &header) {
   info.objectClass = header.classname;
@@ -477,7 +486,7 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
     return read_zCVob_oCMOB_oCMobInter_oCMobDoor(info,parser,version);
 
   if(header.classname == "zCPFXControler:zCVob")
-    return read_zCVob(info,parser,version);
+    return read_zCVob_zCPFXControler(info,parser,version);
   if(header.classname == "zCVobAnimate:zCVob")
     return read_zCVob(info,parser,version);
   if(header.classname == "zCVobLensFlare:zCVob")
@@ -524,7 +533,13 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
     return read_zCVob_zCTrigger_oCTriggerChangeLevel(info,parser,version);
   if(header.classname == "zCTriggerWorldStart:zCVob")
     return read_zCVob_zCTrigger_zCTriggerWorldStart(info,parser,version);
-  // LogInfo() << "skip: \"" << header.classname << "\"";
+  if(header.classname == "zCCSCamera:zCVob")
+    return read_zCVob(info,parser,version);
+  if(header.classname == "oCTouchDamage:zCTouchDamage:zCVob")
+    return read_zCVob(info,parser,version);
+  if(header.classname == "zCEarthquake:zCVob")
+    return read_zCVob(info,parser,version);
+  //LogInfo() << "skip: \"" << header.classname << "\"";
   }
 
 void zCVob::readObjectData(zCVobData &info, ZenParser &parser,

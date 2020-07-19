@@ -222,7 +222,8 @@ namespace ZenLoad
             VT_oCTriggerWorldStart,
             VT_zCMover,
             VT_zCVobStartpoint,
-            VT_zCVobSpot
+            VT_zCVobSpot,
+            VT_zCPFXControler,
         };
 
         EVobType vobType;
@@ -432,6 +433,13 @@ namespace ZenLoad
             std::string triggerTarget;
             bool        fireOnlyFirstTime;
         } oCTriggerWorldStart;
+
+        struct
+        {
+            std::string pfxName;
+            bool        killVobWhenDone = true;
+            bool        pfxStartOn      = true;
+        } zCPFXControler;
 
         std::vector<zCVobData> childVobs;
     };
