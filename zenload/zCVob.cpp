@@ -455,6 +455,26 @@ static void read_zCVob_zCPFXControler(zCVobData &info, ZenParser &parser, WorldV
   rd.readEntry("pfxStartOn",      &info.zCPFXControler.pfxStartOn);
   }
 
+static void read_zCVob_oCTouchDamage(zCVobData &info, ZenParser &parser, WorldVersion version) {
+  read_zCVob(info,parser,version);
+  auto& rd = *parser.getImpl();
+  info.vobType = zCVobData::VT_oCTouchDamage;
+  rd.readEntry("damage",  &info.oCTouchDamage.damage);
+
+  rd.readEntry("Barrier", &info.oCTouchDamage.touchDamage.barrier);
+  rd.readEntry("Blunt",   &info.oCTouchDamage.touchDamage.blunt);
+  rd.readEntry("Edge",    &info.oCTouchDamage.touchDamage.edge);
+  rd.readEntry("Fire",    &info.oCTouchDamage.touchDamage.fire);
+  rd.readEntry("Fly",     &info.oCTouchDamage.touchDamage.fly);
+  rd.readEntry("Magic",   &info.oCTouchDamage.touchDamage.magic);
+  rd.readEntry("Point",   &info.oCTouchDamage.touchDamage.point);
+  rd.readEntry("Fall",    &info.oCTouchDamage.touchDamage.fall);
+
+  rd.readEntry("damageRepeatDelaySec", &info.oCTouchDamage.damageRepeatDelaySec);
+  rd.readEntry("damageVolDownScale",   &info.oCTouchDamage.damageVolDownScale);
+  rd.readEntry("damageCollType",       &info.oCTouchDamage.damageCollType);
+  }
+
 static void readObjectData(zCVobData &info, ZenParser &parser,
                            WorldVersion version, const ZenParser::ChunkHeader &header) {
   info.objectClass = header.classname;
@@ -536,7 +556,7 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
   if(header.classname == "zCCSCamera:zCVob")
     return read_zCVob(info,parser,version);
   if(header.classname == "oCTouchDamage:zCTouchDamage:zCVob")
-    return read_zCVob(info,parser,version);
+    return read_zCVob_oCTouchDamage(info,parser,version);
   if(header.classname == "zCEarthquake:zCVob")
     return read_zCVob(info,parser,version);
   //LogInfo() << "skip: \"" << header.classname << "\"";

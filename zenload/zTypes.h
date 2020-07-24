@@ -224,6 +224,7 @@ namespace ZenLoad
             VT_zCVobStartpoint,
             VT_zCVobSpot,
             VT_zCPFXControler,
+            VT_oCTouchDamage,
         };
 
         EVobType vobType;
@@ -440,6 +441,26 @@ namespace ZenLoad
             bool        killVobWhenDone = true;
             bool        pfxStartOn      = true;
         } zCPFXControler;
+
+        struct
+        {
+          float damage = 0;
+
+          struct TouchDamage {
+            bool barrier = false;
+            bool blunt   = false;
+            bool edge    = false;
+            bool fire    = false;
+            bool fly     = false;
+            bool magic   = false;
+            bool point   = false;
+            bool fall    = false;
+            } touchDamage;
+
+          float damageRepeatDelaySec = 0;
+          float damageVolDownScale   = 0;
+          int   damageCollType       = 0;
+        } oCTouchDamage;
 
         std::vector<zCVobData> childVobs;
     };
