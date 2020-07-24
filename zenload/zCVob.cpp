@@ -339,7 +339,7 @@ static void read_zCVob_oCMOB_oCMobInter_oCMobContainer(zCVobData &info, ZenParse
 static void read_zCVob_zCVobLight(zCVobData &info, ZenParser &parser, WorldVersion version) {
   read_zCVob(info,parser,version);
 
-  auto& rd = *parser.getImpl();
+  auto&  rd = *parser.getImpl();
   info.vobType = zCVobData::VT_zCVobLight;
   rd.readEntry("lightPresetInUse", &info.zCVobLight.lightPresetInUse);
   rd.readEntry("lightType", &info.zCVobLight.lightType);
@@ -349,6 +349,64 @@ static void read_zCVob_zCVobLight(zCVobData &info, ZenParser &parser, WorldVersi
   rd.readEntry("lightStatic", &info.zCVobLight.lightStatic);
   rd.readEntry("lightQuality", &info.zCVobLight.lightQuality);
   rd.readEntry("lensflareFX", &info.zCVobLight.lensflareFX);
+
+  if(info.zCVobLight.lightStatic)
+    return;
+
+  std::string rangeAniScale, colorAniList;
+  rd.readEntry("turnedOn",&info.zCVobLight.dynamic.turnedOn);
+  rd.readEntry("rangeAniScale",&rangeAniScale);
+  rd.readEntry("rangeAniFPS", &info.zCVobLight.dynamic.rangeAniFPS);
+  rd.readEntry("rangeAniSmooth", &info.zCVobLight.dynamic.rangeAniSmooth);
+  rd.readEntry("colorAniList", &colorAniList);
+  rd.readEntry("colorAniFPS", &info.zCVobLight.dynamic.colorAniListFPS);
+  rd.readEntry("colorAniSmooth", &info.zCVobLight.dynamic.colorAniSmooth);
+  if(version!=WorldVersion::VERSION_G1_08k)
+    rd.readEntry("canMove", &info.zCVobLight.dynamic.canMove);
+
+  const char* str = nullptr;
+  str  = colorAniList.c_str();
+  while(str!=nullptr && *str!='\0') {
+    while(*str!='\0') {
+      if(*str=='(') {
+        ++str;
+        break;
+        }
+      ++str;
+      }
+    if(*str=='\0')
+      break;
+
+    uint32_t color = 0;
+    for(int i=0; i<3; ++i) {
+      char* next=nullptr;
+      long v = std::strtol(str,&next,10);
+      if(str==next) {
+        break;
+        }
+      str = next;
+      color |= (v << (8*i));
+      }
+
+    info.zCVobLight.dynamic.colorAniList.push_back(color);
+    while(*str!='\0') {
+      if(*str==')') {
+        ++str;
+        break;
+        }
+      ++str;
+      }
+    }
+
+  str = rangeAniScale.c_str();
+  while(true) {
+    char* next=nullptr;
+    float f = std::strtof(str,&next);
+    if(str==next)
+      break;
+    info.zCVobLight.dynamic.rangeAniScale.push_back(f);
+    str = next;
+    }
   }
 
 static void read_zCVob_zCVobSound(zCVobData &info, ZenParser &parser, WorldVersion version) {
@@ -477,7 +535,6 @@ static void read_zCVob_oCTouchDamage(zCVobData &info, ZenParser &parser, WorldVe
 
 static void readObjectData(zCVobData &info, ZenParser &parser,
                            WorldVersion version, const ZenParser::ChunkHeader &header) {
-  info.objectClass = header.classname;
   if(header.classname == "zCVob")
     return read_zCVob(info,parser,version);
   if(header.classname == "zCVobLevelCompo:zCVob")

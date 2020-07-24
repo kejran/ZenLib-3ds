@@ -36,6 +36,7 @@ namespace ZenLoad
             // Read vob data, followed by the count of the children of this vob
             target.emplace_back();
             zCVob::readObjectData(target.back(), parser, worldversion, header);
+            target.back().objectClass = std::move(header.classname);
 
             // Read how many vobs this one has as child
             parser.getImpl()->readEntry("", &numChildren, sizeof(numChildren), ZenLoad::ParserImpl::ZVT_INT);

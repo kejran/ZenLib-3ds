@@ -326,6 +326,16 @@ namespace ZenLoad
             bool lightStatic;
             uint32_t lightQuality;
             std::string lensflareFX;
+            struct {
+              bool                  turnedOn = false;
+              std::vector<float>    rangeAniScale;
+              float                 rangeAniFPS = 0;
+              bool                  rangeAniSmooth = true;
+              std::vector<uint32_t> colorAniList;
+              float                 colorAniListFPS = true;
+              bool                  colorAniSmooth = true;
+              bool                  canMove = true;
+              } dynamic;
         } zCVobLight;
 
         struct
@@ -446,7 +456,7 @@ namespace ZenLoad
         {
           float damage = 0;
 
-          struct TouchDamage {
+          struct {
             bool barrier = false;
             bool blunt   = false;
             bool edge    = false;
