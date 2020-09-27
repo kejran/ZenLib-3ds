@@ -277,12 +277,6 @@ void zCModelMeshLib::packMesh(PackedSkeletalMesh& mesh, float scale) const
     mesh.bbox[1].x = std::max(mesh.bbox[1].x, m_BBox[1].x);
     mesh.bbox[1].y = std::max(mesh.bbox[1].y, m_BBox[1].y);
     mesh.bbox[1].z = std::max(mesh.bbox[1].z, m_BBox[1].z);
-
-    // TODO: Implement node-attachments!
-    /*for(const auto& m : m_NodeAttachments)
-	{
-		m.packMesh(mesh, scale);
-	}*/
 }
 
 size_t zCModelMeshLib::findNodeIndex(const std::string& nodeName) const

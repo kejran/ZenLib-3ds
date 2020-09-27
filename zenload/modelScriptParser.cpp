@@ -240,6 +240,11 @@ MdsParser::Chunk MdsParser::parse() {
         break;
       case CHUNK_ERROR:
         break;
+      case CHUNK_MLID_MODELMESH:
+      case CHUNK_MLID_MDM_SOURCE:
+      case CHUNK_MLID_MDM_NODEMESHES:
+      case CHUNK_MLID_MDM_SOFSKINLIST:
+        break;
       case CHUNK_SOURCE:
         break;
       case CHUNK_MODEL_SCRIPT:

@@ -15,6 +15,10 @@ namespace ZenLoad {
       enum Chunk {
         CHUNK_EOF                      = 0,
         CHUNK_ERROR                    = -1,
+        CHUNK_MLID_MODELMESH           = 0xD000,
+        CHUNK_MLID_MDM_SOURCE          = 0xD010,
+        CHUNK_MLID_MDM_NODEMESHES      = 0xD020,
+        CHUNK_MLID_MDM_SOFSKINLIST     = 0xD030,
         CHUNK_MODEL_SCRIPT             = 0xF000,
         CHUNK_MODEL_SCRIPT_END         = 0xFFFF,
         CHUNK_SOURCE                   = 0xF100,

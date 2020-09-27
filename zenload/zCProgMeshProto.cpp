@@ -300,4 +300,5 @@ void zCProgMeshProto::packMesh(PackedMesh& mesh, float scale) const
 
     mesh.bbox[0] = m_BBMin * scale;
     mesh.bbox[1] = m_BBMax * scale;
+    mesh.isUsingAlphaTest = m_IsUsingAlphaTest;
 }

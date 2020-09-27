@@ -838,6 +838,7 @@ namespace ZenLoad
         std::vector<WorldVertex> vertices;
         std::vector<SubMesh> subMeshes;
         ZMath::float3 bbox[2];
+        bool          isUsingAlphaTest = false;
     };
 
     struct PackedSkeletalMesh
