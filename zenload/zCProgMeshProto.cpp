@@ -150,7 +150,7 @@ void zCProgMeshProto::readObjectData(ZenParser& parser)
                 }
                 else
                 {
-                    m_IsUsingAlphaTest = false;
+                    m_IsUsingAlphaTest = true;
                 }
 
                 // Read boundingbox
