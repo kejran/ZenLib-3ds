@@ -9,6 +9,12 @@ static std::shared_ptr<std::string> emptyStr() {
   return v;
   }
 
+static std::shared_ptr<std::string> strFrmChr(std::string&& s) {
+  if(s.empty())
+    return emptyStr();
+  return std::make_shared<std::string>(std::move(s));
+  }
+
 static ZString strFromIntCache(uint8_t v){
   static ZString intCache[256];
   if(intCache[v].empty()){
@@ -30,11 +36,11 @@ ZString::ZString(const char* s) {
   }
 
 ZString::ZString(std::string&& s)
-  :val(std::make_shared<std::string>(std::move(s))){
+  :val(strFrmChr(std::move(s))){
   }
 
 ZString::ZString(std::unique_ptr<char[]>&& s)
-  :val(std::make_shared<std::string>(s.get())){
+  :val(strFrmChr(s.get())){
   }
 
 ZString::ZString(ZenLoad::ZenParser &input) {
