@@ -44,7 +44,7 @@ bool ParserImplASCII::readChunkStart(ZenParser::ChunkHeader& header)
         }
 
         // Save chunks starting-position (right after chunk-header)
-        header.startPosition = m_pParser->m_Seek;
+        header.startPosition = uint32_t(m_pParser->m_Seek);
 
         // Parse chunk-header
         std::string vobDescriptor(reinterpret_cast<const char*>(&m_pParser->m_Data[m_pParser->m_Seek]), tmpSeek - m_pParser->m_Seek);

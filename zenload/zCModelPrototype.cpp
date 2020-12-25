@@ -162,10 +162,10 @@ void zCModelPrototype::readObjectData(ZenParser& parser)
 
         Animation ani;
         ani.animationName = args[(int)EIdxAni::name];
-        ani.layer = atoi(args[(int)EIdxAni::layer].c_str());
+        ani.layer         = atoi(args[(int)EIdxAni::layer].c_str());
         ani.nextAnimation = args[(int)EIdxAni::nextAni];
-        ani.blendIn = atof(args[(int)EIdxAni::blendIn].c_str());
-        ani.blendOut = atof(args[(int)EIdxAni::blendOut].c_str());
+        ani.blendIn       = float(atof(args[(int)EIdxAni::blendIn].c_str()));
+        ani.blendOut      = float(atof(args[(int)EIdxAni::blendOut].c_str()));
 
         ani.ascName = args[(int)EIdxAni::ASC_Name];
         ani.aniReversed = args[(int)EIdxAni::aniDir] == "R";

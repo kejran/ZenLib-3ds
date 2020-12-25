@@ -127,9 +127,11 @@ void zCProgMeshProto::readObjectData(ZenParser& parser)
                     std::string mname = p2.readLine(false);  // Read unused material name (Stored a second time later)
 
                     // Skip chunk headers - we know these are zCMaterial
-                    uint32_t chunksize = p2.readBinaryDWord();
-                    uint16_t version = p2.readBinaryWord();
+                    uint32_t chunksize   = p2.readBinaryDWord();
+                    uint16_t version     = p2.readBinaryWord();
                     uint32_t objectIndex = p2.readBinaryDWord();
+                    (void)chunksize;
+                    (void)objectIndex;
 
                     p2.skipSpaces();
 
@@ -236,7 +238,7 @@ void ZenLoad::zCProgMeshProto::packVertices(std::vector<WorldVertex>& vxs, std::
     {
         const SubMesh& sm = m_SubMeshes[s];
 
-        unsigned int meshVxStart = vxs.size();
+        uint32_t meshVxStart = uint32_t(vxs.size());
 
         // Get data
         for (size_t i = 0; i < sm.m_WedgeList.size(); i++)
@@ -253,7 +255,7 @@ void ZenLoad::zCProgMeshProto::packVertices(std::vector<WorldVertex>& vxs, std::
         }
 
         // Mark when the submesh starts
-        submeshIndexStarts.push_back(ixs.size());
+        submeshIndexStarts.push_back(uint32_t(ixs.size()));
 
         // And get the indices
         for (size_t i = 0; i < sm.m_TriangleList.size(); i++)

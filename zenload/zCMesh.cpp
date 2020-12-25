@@ -494,14 +494,13 @@ void zCMesh::packMesh(PackedMesh& mesh, float scale, bool removeDoubles)
                 vx.Normal = m_Features[featidx].vertNormal;
 
                 // Add index to this very vertex
-                newIndices.push_back(newVertices.size());
-
+                newIndices .push_back(uint32_t(newVertices.size()));
                 newVertices.push_back(vx);
             }
             else
             {
                 // Simply put an index to the existing new vertex
-                newIndices.push_back((*it).second);
+                newIndices.push_back(uint32_t((*it).second));
             }
 
             // Store what this new index was before
@@ -527,7 +526,7 @@ void zCMesh::packMesh(PackedMesh& mesh, float scale, bool removeDoubles)
             vx.Normal = m_Features[featidx].vertNormal;
 
             newVertices.push_back(vx);
-            newIndices.push_back(newVertices.size() - 1);
+            newIndices.push_back(uint32_t(newVertices.size() - 1));
         }
     }
 
@@ -536,7 +535,7 @@ void zCMesh::packMesh(PackedMesh& mesh, float scale, bool removeDoubles)
     std::unordered_map<uint32_t, uint32_t> newMaterialSlotsByMatIndex;
     for (size_t i = 0, end = m_Materials.size(); i < end; i++)
     {
-        materialsByTexture[m_Materials[i].texture] = i;
+        materialsByTexture[m_Materials[i].texture] = uint32_t(i);
     }
 
     // Assign materials to packed mesh

@@ -53,7 +53,7 @@ bool ParserImplBinSafe::readChunkStart(ZenParser::ChunkHeader& header)
         }
 
         // Save chunks starting-position (right after chunk-header)
-        header.startPosition = m_pParser->m_Seek;
+        header.startPosition = uint32_t(m_pParser->m_Seek);
 
         std::string name;
         std::string className;

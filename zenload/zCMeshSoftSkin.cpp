@@ -182,7 +182,7 @@ void zCMeshSoftSkin::packMesh(PackedSkeletalMesh& mesh, float scale) const
     {
         const zCProgMeshProto::SubMesh& sm = m_Mesh.getSubmesh(s);
 
-        unsigned int meshVxStart = mesh.vertices.size();
+        uint32_t meshVxStart = uint32_t(mesh.vertices.size());
 
         // Get data
         for (size_t i = 0; i < sm.m_WedgeList.size(); i++)
@@ -198,7 +198,7 @@ void zCMeshSoftSkin::packMesh(PackedSkeletalMesh& mesh, float scale) const
         }
 
         // Mark when the submesh starts
-        submeshIndexStarts.push_back(indices.size());
+        submeshIndexStarts.push_back(uint32_t(indices.size()));
 
         // And get the indices
         for (size_t i = 0; i < sm.m_TriangleList.size(); i++)

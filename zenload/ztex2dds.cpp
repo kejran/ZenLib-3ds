@@ -112,7 +112,6 @@ namespace ZenLoad
         ZTEX_FILE_HEADER ZTexHeader;
         uint32_t BytesRead = 0;
         uint32_t DdsMagic;
-        uint32_t BytesWritten;
         DDSURFACEDESC2 DdsHeader;
         int MipmapCount;
         int MipmapLevel;

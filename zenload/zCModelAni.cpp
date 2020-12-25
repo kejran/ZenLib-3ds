@@ -109,7 +109,7 @@ zCModelAni::zCModelAni(const std::string& fileName, const VDFS::FileIndex& fileI
 void zCModelAni::readObjectData(ZenParser& parser)
 {
     // Information about the whole file we are reading here
-    BinaryFileInfo fileInfo;
+    // BinaryFileInfo fileInfo;
 
     // Information about a single chunk
     BinaryChunkInfo chunkInfo;

@@ -69,7 +69,7 @@ zCModelMeshLib::zCModelMeshLib(const std::string& fileName, const VDFS::FileInde
 void zCModelMeshLib::loadMDM(ZenParser& parser)
 {
     // Information about the whole file we are reading here
-    BinaryFileInfo fileInfo;
+    // BinaryFileInfo fileInfo;
 
     // Information about a single chunk
     BinaryChunkInfo chunkInfo;
@@ -144,7 +144,7 @@ void zCModelMeshLib::loadMDM(ZenParser& parser)
 void zCModelMeshLib::loadMDH(ZenParser& parser, float scale)
 {
     // Information about the whole file we are reading here
-    BinaryFileInfo fileInfo;
+    // BinaryFileInfo fileInfo;
 
     // Information about a single chunk
     BinaryChunkInfo chunkInfo;
