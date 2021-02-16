@@ -337,17 +337,17 @@ namespace Daedalus
 {
 // getDataContainer specializations
 template <>
-std::vector<int32_t>& PARSymbol::getDataContainer() {
+DataContainer<int32_t>& PARSymbol::getDataContainer() {
   return this->intData;
   }
 
 template <>
-std::vector<float>& PARSymbol::getDataContainer() {
+DataContainer<float>& PARSymbol::getDataContainer() {
   return this->floatData;
   }
 
 template <>
-std::vector<ZString>& PARSymbol::getDataContainer() {
+DataContainer<ZString>& PARSymbol::getDataContainer() {
   return this->strData;
   }
 }  // namespace Daedalus

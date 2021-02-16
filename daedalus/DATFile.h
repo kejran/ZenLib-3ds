@@ -181,6 +181,62 @@ enum EParOp : uint8_t
   EParOp_PushArrayVar = 245  // EParOp_PushVar + EParOp_Array
   };
 
+template<class T>
+class DataContainer final {
+  public:
+    DataContainer() = default;
+    DataContainer(DataContainer&& oth)
+      : val0(oth.val0), val(std::move(oth.val)), sz(oth.sz) {
+      oth.sz = 0;
+      }
+
+    DataContainer& operator = (DataContainer&& oth) {
+      val0 = oth.val0;
+      std::swap(val,oth.val);
+      std::swap(sz,oth.sz);
+      return *this;
+      }
+
+    DataContainer& operator = (const DataContainer& oth) {
+      if(this==&oth)
+        return *this;
+      if(oth.sz>1)
+        val.reset(new T[oth.sz]); else
+        val.reset(nullptr);
+      const T* src = oth.data();
+      T*       dst = this->data();
+      for(size_t i=0; i<oth.sz; ++i)
+        dst[i] = src[i];
+      sz = oth.sz;
+      return *this;
+      }
+
+    size_t   size() const { return sz; }
+    T&       operator[](size_t i) { return sz<=1 ? val0 : val[i]; }
+
+    T*       data()       { return sz<=1 ? &val0 : val.get(); }
+    const T* data() const { return sz<=1 ? &val0 : val.get(); }
+
+    void     resize(size_t size) {
+      if(size>1) {
+        std::unique_ptr<T[]> n{new T[size]};
+        T*                   d = data();
+        for(size_t i=0; i<size && i<sz; ++i)
+          n[i] = d[i];
+        val = std::move(n);
+        } else {
+        if(sz>0)
+          val0 = (*this)[0];
+        val.reset(nullptr);
+        }
+      sz = size;
+      }
+  private:
+    T                    val0 = 0;
+    std::unique_ptr<T[]> val;
+    size_t               sz = 0;
+  };
+
 struct PARSymbol {
   PARSymbol() = default;
 
@@ -236,9 +292,9 @@ struct PARSymbol {
 
   Properties               properties={};
   std::string              name;
-  std::vector<float>       floatData;
-  std::vector<int32_t>     intData;
-  std::vector<ZString>     strData;
+  DataContainer<float>     floatData;
+  DataContainer<int32_t>   intData;
+  DataContainer<ZString>   strData;
   int32_t                  classOffset=0;
   uint32_t                 address=0;
 
@@ -267,7 +323,7 @@ struct PARSymbol {
   float&       getFloat(size_t idx = 0, void* baseAddr = nullptr);
 
   template <typename T>
-  std::vector<T>& getDataContainer();
+  DataContainer<T>& getDataContainer();
 
   template <class T>
   T& getValue(size_t idx = 0, void* baseAddr = nullptr) {
@@ -289,7 +345,7 @@ struct PARSymbol {
         }
       }
 
-    std::vector<T>& data = getDataContainer<T>();
+    auto& data = getDataContainer<T>();
     // read from symbol's data if not isClassVar or the above failed. (the latter should not happen)
     if(data.size()<=idx) {
       if(!isClassVar)  // only print error message if we did not fall through from above
@@ -312,11 +368,6 @@ struct PARSymbol {
       default:
         assert(false);
       }
-    }
-
-  bool isDataSame(const PARSymbol& other) const
-    {
-    return intData == other.intData && floatData == other.floatData && strData == other.strData;
     }
   };
 
