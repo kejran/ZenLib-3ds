@@ -212,7 +212,8 @@ class DataContainer final {
       }
 
     size_t   size() const { return sz; }
-    T&       operator[](size_t i) { return sz<=1 ? val0 : val[i]; }
+    T&       operator[](size_t i)       { return sz<=1 ? val0 : val[i]; }
+    const T& operator[](size_t i) const { return sz<=1 ? val0 : val[i]; }
 
     T*       data()       { return sz<=1 ? &val0 : val.get(); }
     const T* data() const { return sz<=1 ? &val0 : val.get(); }
