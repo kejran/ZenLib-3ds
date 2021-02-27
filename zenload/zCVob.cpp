@@ -308,11 +308,10 @@ static void read_zCVob_oCMOB_oCMobInter_oCMobDoor(zCVobData &info, ZenParser &pa
 static void read_zCVob_oCMOB_oCMobInter_oCMobFire(zCVobData &info, ZenParser &parser, WorldVersion version) {
   read_zCVob_oCMOB_oCMobInter(info,parser,version);
 
-  std::string s0,s1;
   auto& rd = *parser.getImpl();
   info.vobType = zCVobData::VT_oCMobFire;
-  rd.readEntry("fireSlot", &s0);
-  rd.readEntry("fireVobtreeName", &s1);
+  rd.readEntry("fireSlot",        &info.oCMobFire.fireSlot);
+  rd.readEntry("fireVobtreeName", &info.oCMobFire.fireVobtreeName);
   }
 
 static void read_zCVob_oCMOB_oCMobInter_oCMobLadder(zCVobData &info, ZenParser &parser, WorldVersion version) {

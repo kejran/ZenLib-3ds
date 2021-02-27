@@ -305,6 +305,12 @@ namespace ZenLoad
 
         struct
         {
+            std::string fireSlot;
+            std::string fireVobtreeName;
+        } oCMobFire;
+
+        struct
+        {
             bool locked;
             std::string keyInstance;
             std::string pickLockStr;
