@@ -1,7 +1,6 @@
 #pragma once
 #include "zTypes.h"
 #include "zenParser.h"
-#include "zenParserPropRead.h"
 #include "utils/logger.h"
 
 namespace ZenLoad

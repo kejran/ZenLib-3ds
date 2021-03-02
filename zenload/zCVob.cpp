@@ -1,5 +1,8 @@
 #include "zCVob.h"
 
+#include "zenParserPropRead.h"
+#include "parserImpl.h"
+
 using namespace ZenLoad;
 
 #pragma pack(push, 1)
@@ -143,11 +146,29 @@ static void read_zCVob(zCVobData &info, ZenParser &parser, WorldVersion version)
                            Prop("visualAniMode", info.visualAniMode));  // TODO: References!
       }
 
-    // Skip visual-chunk
+    // Visual-chunk
     {
-    // Skip ai-chunk
-    ZenParser::ChunkHeader tmph;
-    parser.readChunkStart(tmph);
+    ZenParser::ChunkHeader visChunk;
+    parser.readChunkStart(visChunk);
+    ReadObjectProperties(parser, info.properties,
+                         Prop("name",             info.visualChunk.zCDecal.name),
+                         Prop("decalDim",         info.visualChunk.zCDecal.decalDim),
+                         Prop("decalOffset",      info.visualChunk.zCDecal.decalOffset),
+                         Prop("decal2Sided",      info.visualChunk.zCDecal.decal2Sided),
+                         Prop("decalAlphaFunc",   info.visualChunk.zCDecal.decalAlphaFunc),
+                         Prop("decalTexAniFPS",   info.visualChunk.zCDecal.decalTexAniFPS),
+                         Prop("decalAlphaWeight", info.visualChunk.zCDecal.decalAlphaWeight),
+                         Prop("ignoreDayLight",   info.visualChunk.zCDecal.ignoreDayLight));
+    ReadObjectProperties(parser,{
+                           prop("name",             info.visualChunk.zCDecal.name),
+                           prop("decalDim",         info.visualChunk.zCDecal.decalDim),
+                           prop("decalOffset",      info.visualChunk.zCDecal.decalOffset),
+                           prop("decal2Sided",      info.visualChunk.zCDecal.decal2Sided),
+                           prop("decalAlphaFunc",   info.visualChunk.zCDecal.decalAlphaFunc),
+                           prop("decalTexAniFPS",   info.visualChunk.zCDecal.decalTexAniFPS),
+                           prop("decalAlphaWeight", info.visualChunk.zCDecal.decalAlphaWeight),
+                           prop("ignoreDayLight",   info.visualChunk.zCDecal.ignoreDayLight),
+                         });
     parser.skipChunk();
     }
 

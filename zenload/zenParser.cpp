@@ -188,30 +188,9 @@ void ZenParser::readWorldMesh(oCWorldData& info)
 {
     LogInfo() << "ZEN: Reading mesh...";
     m_pWorldMesh = new zCMesh;
+    info.bspTree = zCBspTree::readObjectData(*this, m_pWorldMesh);
 
-    // Read worldmesh, if needed
-    if (m_pWorldMesh)
-    {
-        /*size_t totalStart = m_Seek;
-        readBinaryDWord();
-        size_t size = readBinaryDWord();
-        size_t start = m_Seek;
-        m_pWorldMesh->readObjectData(*this);
-
-        m_Seek = start + size;
-
-        m_Seek = totalStart;*/
-        info.bspTree = zCBspTree::readObjectData(*this, m_pWorldMesh);
-
-        //m_pWorldMesh->readObjectData(*this);
-    }
-    else
-    {
-        // Skip
-        readBinaryDWord();  // Version
-        m_Seek += readBinaryDWord();
-    }
-
+      //m_pWorldMesh->readObjectData(*this);
     LogInfo() << "ZEN: Done reading mesh!";
 }
 

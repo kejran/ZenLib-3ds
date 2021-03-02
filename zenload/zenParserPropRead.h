@@ -1,9 +1,63 @@
 #pragma once
+
 #include "parserImpl.h"
 #include "zenParser.h"
 
 namespace ZenLoad
 {
+    struct PropertyDecl {
+      const char*               name      = "";
+      ParserImpl::EZenValueType type      = ParserImpl::EZenValueType::ZVT_0;
+      size_t                    valueSize = 0;
+      void*                     value     = nullptr;
+      };
+
+    static PropertyDecl prop(const char* name, float& v) {
+      PropertyDecl p;
+      p.name = name;
+      p.type = ParserImpl::ZVT_FLOAT;
+      p.value = &v;
+      return p;
+      }
+
+    static PropertyDecl prop(const char* name, ZMath::float2& v) {
+      PropertyDecl p;
+      p.name      = name;
+      p.type      = ParserImpl::ZVT_RAW_FLOAT;
+      p.valueSize = sizeof(v);
+      p.value     = &v;
+      return p;
+      }
+
+    static PropertyDecl prop(const char* name, std::string& v) {
+      PropertyDecl p;
+      p.name = name;
+      p.type = ParserImpl::ZVT_STRING;
+      p.value = &v;
+      return p;
+      }
+
+    static PropertyDecl prop(const char* name, bool& v) {
+      PropertyDecl p;
+      p.name = name;
+      p.type = ParserImpl::ZVT_BOOL;
+      p.value = &v;
+      return p;
+      }
+
+    static PropertyDecl prop(const char* name, uint8_t& v) {
+      PropertyDecl p;
+      p.name = name;
+      p.type = ParserImpl::ZVT_BYTE;
+      p.value = &v;
+      return p;
+      }
+
+    template <typename... T>
+    static void ReadObjectProperties(ZenParser& ZenParser, const std::initializer_list<PropertyDecl>& decl) {
+
+      }
+
     /**
       * @brief Templated function-calls to read the right type of data
       *		  and convert it to a string for the given type
@@ -50,30 +104,19 @@ namespace ZenLoad
     template <>
     inline void read<ZMath::float2>(ZenParser& p, ZMath::float2& outData, const char* exName)
     {
-        p.getImpl()->readEntry(exName, &outData.x, sizeof(float), ParserImpl::ZVT_FLOAT);
-        p.getImpl()->readEntry(exName, &outData.y, sizeof(float), ParserImpl::ZVT_FLOAT);
+        p.getImpl()->readEntry(exName, &outData, sizeof(float)*2, ParserImpl::ZVT_RAW_FLOAT);
     }
 
     template <>
     inline void read<ZMath::float3>(ZenParser& p, ZMath::float3& outData, const char* exName)
     {
         p.getImpl()->readEntry(exName, &outData, sizeof(float) * 3, ParserImpl::ZVT_VEC3);
-        /*outStr = "[" + std::to_string(outData.x) 
-			+ ", " + std::to_string(outData.y)
-			+ ", " + std::to_string(outData.z) + "]";*/
     }
 
     template <>
     inline void read<ZMath::float4>(ZenParser& p, ZMath::float4& outData, const char* exName)
     {
-        p.getImpl()->readEntry(exName, &outData.x, sizeof(float), ParserImpl::ZVT_FLOAT);
-        p.getImpl()->readEntry(exName, &outData.y, sizeof(float), ParserImpl::ZVT_FLOAT);
-        p.getImpl()->readEntry(exName, &outData.z, sizeof(float), ParserImpl::ZVT_FLOAT);
-        p.getImpl()->readEntry(exName, &outData.w, sizeof(float), ParserImpl::ZVT_FLOAT);
-        /*outStr = "[" + std::to_string(outData.x) 
-			+ ", " + std::to_string(outData.y)
-			+ ", " + std::to_string(outData.z)
-			+ ", " + std::to_string(outData.w) + "]";*/
+        p.getImpl()->readEntry(exName, &outData, sizeof(float)*4, ParserImpl::ZVT_RAW_FLOAT);
     }
 
     template <>
@@ -82,17 +125,6 @@ namespace ZenLoad
         float m[16];
         p.getImpl()->readEntry(exName, m, sizeof(float) * 16, ParserImpl::ZVT_RAW_FLOAT);
         outData = m;
-
-        /*outStr = "[";
-		for(size_t i = 0; i < 16; i++)
-		{
-			outStr += std::to_string(m[i]);
-
-			// Only add "," when not at the last value
-			if(i != 15)
-				outStr += ", ";
-		}
-		outStr += "]";*/
     }
 
     template <>
@@ -116,6 +148,9 @@ namespace ZenLoad
             // Read the given datatype from the file
             read<typename std::remove_pointer<decltype(pair.second)>::type>(ZenParser, *pair.second, pair.first);
         };
+
+        auto ref = {(d.first)...};
+        (void)ref;
 
         auto x = {(fn(d), 0)...};
         (void)x;
