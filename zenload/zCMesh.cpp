@@ -1,12 +1,15 @@
 #include "zCMesh.h"
+
 #include <map>
 #include <string>
+
 #include "zCMaterial.h"
 #include "zTypes.h"
 #include "zenParser.h"
 #include "utils/logger.h"
 #include "vdfs/fileIndex.h"
-#include <utils/alignment.h>
+#include "parserImpl.h"
+#include "utils/alignment.h"
 
 using namespace ZenLoad;
 

@@ -21,8 +21,8 @@ namespace ZenLoad
         /**
 		 * @brief Loads the file from the given VDF-Archive
 		 */
+        zCCSLib() = default;
         zCCSLib(const std::string& fileName, const VDFS::FileIndex& fileIndex);
-        zCCSLib(const std::string& file);
         zCCSLib(ZenParser &parser);
 
         /**

@@ -4,11 +4,11 @@
 #include <string>
 #include <vector>
 #include <daedalus/DaedalusStdlib.h>
-#include <zenload/zenParser.h>
 #include <utils/logger.h>
 #include <cassert>
 #include <cstddef>
 #include <algorithm>
+#include <unordered_map>
 
 #include "ZString.h"
 

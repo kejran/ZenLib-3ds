@@ -11,18 +11,9 @@ using namespace ZenLoad;
 
 zCCSLib::zCCSLib(const std::string& fileName, const VDFS::FileIndex& fileIndex)
 {
-    std::vector<uint8_t> data;
-    fileIndex.getFileData(fileName, data);
-
-    if (data.empty())
-        return;  // TODO: Throw an exception or something
-
     try
     {
-        // Create parser from memory
-        // FIXME: There is an internal copy of the data here. Optimize!
-        ZenLoad::ZenParser parser(data.data(), data.size());
-
+        ZenLoad::ZenParser parser(fileName,fileIndex);
         readObjectData(parser);
     }
     catch (std::exception& e)
@@ -31,23 +22,6 @@ zCCSLib::zCCSLib(const std::string& fileName, const VDFS::FileIndex& fileIndex)
         return;
     }
 }
-
-zCCSLib::zCCSLib(const std::string& file)
-{
-    try
-    {
-        // Create parser from memory
-        // FIXME: There is an internal copy of the data here. Optimize!
-        ZenLoad::ZenParser parser(file);
-
-        readObjectData(parser);
-    }
-    catch (std::exception& e)
-    {
-        LogError() << e.what();
-        return;
-    }
-  }
 
 zCCSLib::zCCSLib(ZenParser &parser)
 {
@@ -71,7 +45,7 @@ void zCCSLib::readObjectData(ZenParser& parser)
     ZenParser::ChunkHeader libHeader;
     parser.readChunkStart(libHeader);
 
-    assert(libHeader.classname == "zCCSLib");
+    assert(libHeader.classId == ZenParser::zCCSLib);
 
     uint32_t numItems;
     parser.getImpl()->readEntry("NumOfItems", &numItems, sizeof(numItems), ParserImpl::ZVT_INT);
@@ -86,7 +60,7 @@ void zCCSLib::readObjectData(ZenParser& parser)
         zCCSBlockData blk;
         uint32_t numBlocks;
         float subBlock0;
-        ReadObjectProperties(parser, blk.properties,
+        ReadObjectProperties(parser,
                              Prop("blockName", blk.blockName),
                              Prop("numOfBlocks", numBlocks),
                              Prop("subBlock0", subBlock0));
@@ -110,7 +84,7 @@ void zCCSLib::readObjectData(ZenParser& parser)
 				parser.getImpl()->readEntry("text", &blk.atomicBlockData.command.text, 0, ZenLoad::ParserImpl::ZVT_STRING);
 				parser.getImpl()->readEntry("name", &blk.atomicBlockData.command.name, 0, ZenLoad::ParserImpl::ZVT_STRING);*/
 
-                ReadObjectProperties(parser, blk.atomicBlockData.properties,
+                ReadObjectProperties(parser,
                                      Prop("subType", blk.atomicBlockData.command.subType),
                                      Prop("text", blk.atomicBlockData.command.text),
                                      Prop("name", blk.atomicBlockData.command.name));

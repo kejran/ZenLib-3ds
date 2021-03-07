@@ -14,23 +14,18 @@ ParserImplBinary::ParserImplBinary(ZenParser* parser)
 bool ParserImplBinary::readChunkStart(ZenParser::ChunkHeader& header)
 {
     // Skip chunk headers - we know these are zCMaterial
-    uint32_t chunksize = m_pParser->readBinaryDWord();
-    uint16_t version = m_pParser->readBinaryWord();
+    uint32_t chunksize   = m_pParser->readBinaryDWord();
+    uint16_t version     = m_pParser->readBinaryWord();
     uint32_t objectIndex = m_pParser->readBinaryDWord();
 
     m_pParser->skipSpaces();
 
     // Skip chunk-header
-    std::string name = m_pParser->readLine();
-    std::string classname = m_pParser->readLine();
-
-    header.classname = classname;
-    header.createObject = true;  // TODO: References shouldn't be used in binary zens...
-    header.name = name;
-    header.objectID = objectIndex;
-    header.size = chunksize;
-    header.version = version;
-
+    header.name      = m_pParser->readLine();
+    m_pParser->readLine(); // classname
+    header.objectID  = objectIndex;
+    header.size      = chunksize;
+    header.version   = version;
     return true;
 }
 
@@ -65,6 +60,11 @@ std::string ParserImplBinary::readString()
 {
     std::string ret = m_pParser->readLine();
     return ret;
+}
+
+bool ParserImplBinary::readString(char* buf, size_t size)
+{
+  return m_pParser->readLine(buf,size);
 }
 
 /**

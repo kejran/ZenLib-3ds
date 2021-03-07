@@ -3,6 +3,8 @@
 //
 
 #include "DATFile.h"
+#include "zenload/zenParser.h"
+
 #include <algorithm>
 #include <map>
 #include <cctype>

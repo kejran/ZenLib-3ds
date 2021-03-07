@@ -135,8 +135,6 @@ namespace ZenLoad
 	 */
     struct ParsedZenObject
     {
-        std::unordered_map<std::string, std::string> properties;
-        std::string objectClass;
     };
 
     /**
@@ -196,7 +194,8 @@ namespace ZenLoad
     {
         enum EVobType
         {
-            VT_zCVob,
+            VT_Unknown  = -1,
+            VT_zCVob    = 0,
             VT_zCVobLevelCompo,
             VT_oCItem,
             VT_oCMOB,
@@ -225,6 +224,7 @@ namespace ZenLoad
             VT_zCVobSpot,
             VT_zCPFXControler,
             VT_oCTouchDamage,
+            VT_zCTriggerUntouch,
         };
 
         EVobType vobType;
@@ -404,6 +404,11 @@ namespace ZenLoad
             float       damageThreshold  =0;
             float       fireDelaySec     =0;
         } zCTrigger;
+
+        struct
+        {
+          std::string triggerTarget;
+        } zCTriggerUntouch;
 
         struct
         {

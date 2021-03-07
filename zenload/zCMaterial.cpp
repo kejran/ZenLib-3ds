@@ -1,6 +1,7 @@
 #include "zCMaterial.h"
 
 #include "zenParserPropRead.h"
+#include "zenParser.h"
 
 using namespace ZenLoad;
 
@@ -8,10 +9,8 @@ zCMaterialData zCMaterial::readObjectData(ZenParser& parser, uint16_t version) {
   // Read everything the material has to offer
   zCMaterialData materialInfo;
 
-  materialInfo.objectClass = "zCMaterial";
-
   if(version != 39939) { // Gothic 1
-    ReadObjectProperties(parser, materialInfo.properties,
+    ReadObjectProperties(parser,
                          Prop("MaterialName", materialInfo.matName),
                          Prop("MaterialGroup", materialInfo.matGroup),
                          Prop("Color", materialInfo.color),
@@ -27,7 +26,7 @@ zCMaterialData zCMaterial::readObjectData(ZenParser& parser, uint16_t version) {
                          Prop("DetailObject", materialInfo.detailObject),
                          Prop("DefaultMapping", materialInfo.defaultMapping));
     } else {
-    ReadObjectProperties(parser, materialInfo.properties,
+    ReadObjectProperties(parser,
                          Prop("MaterialName", materialInfo.matName),
                          Prop("MaterialGroup", materialInfo.matGroup),
                          Prop("Color", materialInfo.color),

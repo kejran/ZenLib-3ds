@@ -1,11 +1,14 @@
+#include "zCVob.h"
 #include "zenParser.h"
+
 #include <algorithm>
 #include <cctype>
 #include <fstream>
-#include "oCWorld.h"
+
 #include "parserImplASCII.h"
 #include "parserImplBinSafe.h"
 #include "parserImplBinary.h"
+#include "zenParserPropRead.h"
 #include "zCBspTree.h"
 #include "zCMesh.h"
 #include "utils/logger.h"
@@ -19,16 +22,6 @@ static void THROW(const char* msg) {
 #else
   throw std::runtime_error(msg);
 #endif
-  }
-
-/**
- * @brief reads a zen from a file
- */
-ZenParser::ZenParser(const std::string& file) {
-  // Get data from zenfile
-  readFile(file, m_DataStorage);
-  m_Data     = m_DataStorage.data();
-  m_DataSize = m_DataStorage.size();
   }
 
 /**
@@ -49,32 +42,7 @@ ZenParser::ZenParser(const uint8_t* data, size_t size) {
   }
 
 ZenParser::~ZenParser() {
-  delete m_pWorldMesh;
   }
-
-/**
-* @brief Read the given file and places the data in the given vector
-*/
-bool ZenParser::readFile(const std::string& fileName, std::vector<uint8_t>& data)
-{
-    std::ifstream file(fileName, std::ios::in | std::ios::ate | std::ios::binary);
-    size_t size = file.tellg();
-    file.seekg(0, std::ios::beg);
-
-    if (!file.good())
-    {
-        THROW("File does not exist");
-        THROW(strerror(errno));
-    }
-    LogInfo() << "Zen-File found! Size: " << size;
-
-    data.resize(size);
-
-    LogInfo() << "Reading...";
-    file.read(reinterpret_cast<char*>(data.data()), size);
-
-    return true;
-}
 
 /**
 * @brief returns whether the given string is a number
@@ -107,141 +75,69 @@ void ZenParser::skipHeader()
 /**
 * @brief Skipts the ZEN-Header
 */
-void ZenParser::readHeader(ZenHeader& header, ParserImpl*& impl)
-{
-    if (!skipString("ZenGin Archive"))
-        THROW("Not a valid format");
+void ZenParser::readHeader(ZenHeader& header, ParserImpl*& impl) {
+  if(!skipString("ZenGin Archive"))
+    THROW("Not a valid format");
 
-    if (!skipString("ver"))
-        THROW("Not a valid header");
+  if(!skipString("ver"))
+    THROW("Not a valid header");
 
-    // Version should be always 1...
-    header.version = readIntASCII();
+  // Version should be always 1...
+  header.version = readIntASCII();
 
-    // Skip archiver type
-    skipString();
+  // Skip archiver type
+  skipString();
 
-    // Read file-type, to create the right archiver implementation
-    std::string fileType = readLine();
-    if (fileType == "ASCII")
-    {
-        header.fileType = FT_ASCII;
-        impl = new ParserImplASCII(this);
-    }
-    else if (fileType == "BINARY")
-    {
-        header.fileType = FT_BINARY;
-        impl = new ParserImplBinary(this);
-    }
-    else if (fileType == "BIN_SAFE")
-    {
-        header.fileType = FT_BINSAFE;
-        impl = new ParserImplBinSafe(this);
-    }
-    else
-        THROW("Unsupported file format");
+  // Read file-type, to create the right archiver implementation
+  std::string fileType = readLine();
 
-    // Read string of the format "savegame b", where b is 0 or 1
-    if (!skipString("saveGame"))
-        THROW("Unsupported file format");
+  // Read string of the format "savegame b", where b is 0 or 1
+  if(!skipString("saveGame"))
+    THROW("Unsupported file format");
+  header.saveGame = readBoolASCII();
 
-    header.saveGame = readBoolASCII();
-
-    // Read possible date
-    if (skipString("date"))
-    {
-        header.date = readString() + " ";
-        header.date += readString();
+  // Read possible date
+  if(skipString("date")) {
+    header.date = readString() + " ";
+    header.date += readString();
     }
 
-    // Skip possible user
-    if (skipString("user"))
-        header.user = readLine();
+  // Skip possible user
+  if(skipString("user"))
+    header.user = readLine();
 
-    // Reached the end of the main header
-    if (!skipString("END"))
-        THROW("No END in header(1)");
+  // Reached the end of the main header
+  if(!skipString("END"))
+    THROW("No END in header(1)");
 
-    // Continue with the implementationspecific header
-    skipSpaces();
+  // Continue with the implementationspecific header
+  skipSpaces();
 
-    impl->readImplHeader();
-}
+  if(fileType == "ASCII") {
+    header.fileType = FT_ASCII;
+    impl = new ParserImplASCII(this);
+    }
+  else if (fileType == "BINARY") {
+    header.fileType = FT_BINARY;
+    impl = new ParserImplBinary(this);
+    }
+  else if (fileType == "BIN_SAFE") {
+    header.fileType = FT_BINSAFE;
+    impl = new ParserImplBinSafe(this);
+    }
+  else {
+    THROW("Unsupported file format");
+    }
 
-/**
-* @brief reads the main oCWorld-Object, found in the level-zens
-*/
-void ZenParser::readWorld(oCWorldData& info, bool forceG2)
-{
-    LogInfo() << "ZEN: Reading world...";
-
-    ChunkHeader header;
-    readChunkStart(header);
-
-    if (header.classname != "oCWorld:zCWorld")
-        THROW("Expected oCWorld:zCWorld-Chunk not found!");
-
-    oCWorld::readObjectData(info, *this, header.version, forceG2);
-}
+  impl->readImplHeader();
+  }
 
 void ZenParser::readWorldMesh(oCWorldData& info)
 {
     LogInfo() << "ZEN: Reading mesh...";
-    m_pWorldMesh = new zCMesh;
-    info.bspTree = zCBspTree::readObjectData(*this, m_pWorldMesh);
-
-      //m_pWorldMesh->readObjectData(*this);
+    m_pWorldMesh.reset(new ZenLoad::zCMesh());
+    info.bspTree = zCBspTree::readObjectData(*this, m_pWorldMesh.get());
     LogInfo() << "ZEN: Done reading mesh!";
-}
-
-/**
-* @brief reads a full chunk (TESTING ONLY)
-*/
-void ZenParser::readChunkTest()
-{
-    /*ChunkHeader header;
-	m_pParserImpl->readChunkStart(header);
-
-	if(header.name == "MeshAndBsp")
-	{
-		readWorldMesh();
-		return;
-	}
-
-	if(header.classname != "oCWorld:zCWorld")
-		return;
-
-	std::string str;
-	do
-	{
-		size_t ts = m_Seek;
-		ParserImpl::EZenValueType type;
-		size_t size;
-		
-
-		m_pParserImpl->readEntryType(type, size);
-
-		if(type != ParserImpl::ZVT_STRING)
-		{
-			m_Seek = ts;
-			std::vector<uint8_t> data(size);
-			m_pParserImpl->readEntry("", data.data(), size, ParserImpl::ZVT_0);
-		}
-
-		if(type == ParserImpl::ZVT_STRING)
-		{
-			m_Seek = ts;
-			std::string str; str.resize(size);
-			m_pParserImpl->readEntry("", &str, size, ParserImpl::ZVT_STRING);
-
-			if(str.front() == '[' && str.size() > 2)
-			{
-				m_Seek = ts;
-				readChunkTest();
-				return;
-			}
-		}
-	}while(str != "[]");*/
 }
 
 /**
@@ -324,10 +220,9 @@ int32_t ZenParser::readIntASCII() {
 bool ZenParser::readBoolASCII()
 {
     skipSpaces();
-    bool retVal;
+    bool retVal = false;
     if (m_Data[m_Seek] != '0' && m_Data[m_Seek] != '1')
-        THROW("Value is not a bool");
-    else
+        THROW("Value is not a bool"); else
         retVal = m_Data[m_Seek] == '0' ? false : true;
 
     ++m_Seek;
@@ -417,15 +312,6 @@ void ZenParser::skipNewLines()
 }
 
 /**
-* @brief Throws an exception if the current seek is behind the file-size
-*/
-void ZenParser::checkArraySize()
-{
-    if (m_Seek >= m_DataSize)
-        throw std::logic_error("Out of range");
-}
-
-/**
 * @brief Reads the given type as binary data and returns it
 */
 uint32_t ZenParser::readBinaryDWord()
@@ -486,8 +372,7 @@ std::string ZenParser::readLine(bool skip)
 {
     const char* at = reinterpret_cast<const char*>(m_Data+m_Seek);
     size_t      sz = 0;
-    while(m_Data[m_Seek]!='\r' && m_Data[m_Seek]!='\n' && m_Data[m_Seek]!='\0'){
-      checkArraySize();
+    while(m_Seek<m_DataSize && m_Data[m_Seek]!='\r' && m_Data[m_Seek]!='\n' && m_Data[m_Seek]!='\0') {
       sz++;
       m_Seek++;
       }
@@ -501,3 +386,181 @@ std::string ZenParser::readLine(bool skip)
       skipSpaces();
     return retVal;
 }
+
+bool ZenParser::readLine(char* buf, size_t size, bool skip)
+{
+  auto seek0 = m_Seek;
+
+  const char* at = reinterpret_cast<const char*>(m_Data+m_Seek);
+  size_t      sz = 0;
+  while(m_Seek<m_DataSize && m_Data[m_Seek]!='\r' && m_Data[m_Seek]!='\n' && m_Data[m_Seek]!='\0') {
+    sz++;
+    m_Seek++;
+    }
+
+  if(sz>=size) {
+    m_Seek = seek0;
+    return false;
+    }
+  std::memcpy(buf,at,sz);
+  buf[sz] = '\0';
+
+  m_Seek++;
+
+  if(skip)
+    skipSpaces();
+  return true;
+}
+
+/**
+* @brief reads the main oCWorld-Object, found in the level-zens
+*/
+void ZenParser::readWorld(oCWorldData& info, bool forceG2) {
+  LogInfo() << "ZEN: Reading world...";
+
+  ChunkHeader header;
+  readChunkStart(header);
+
+  if(header.classId!=ZenParser::zCWorld)
+    THROW("Expected oCWorld:zCWorld-Chunk not found!");
+
+  uint16_t     versionInternal = header.version;
+  WorldVersion version;
+  if(versionInternal == static_cast<uint32_t>(WorldVersionInternal::VERSION_G1_08k) && !forceG2)
+    version = WorldVersion::VERSION_G1_08k; else
+    version = WorldVersion::VERSION_G26fix;
+
+  while(!readChunkEnd()) {
+    ZenParser::ChunkHeader header;
+    readChunkStart(header);
+
+    LogInfo() << "oCWorld reading chunk: " << header.name;
+
+    if(header.name == "MeshAndBsp") {
+      readWorldMesh(info);
+      readChunkEnd();
+      }
+    else if(header.name == "VobTree") {
+      // Read how many vobs this one has as child
+      uint32_t numChildren = 0;
+      getImpl()->readEntry("", &numChildren, sizeof(numChildren), ZenLoad::ParserImpl::ZVT_INT);
+      info.rootVobs.reserve(numChildren);
+
+      // Read children
+      info.numVobsTotal = 0;
+      info.rootVobs.resize(numChildren);
+      for(uint32_t i=0; i<numChildren; i++) {
+        info.numVobsTotal += readVobTree(info.rootVobs[i], version);
+        }
+
+      readChunkEnd();
+      }
+    else if (header.name == "WayNet") {
+      readWayNetData(info.waynet);
+      }
+    else {
+      skipChunk();
+      }
+    }
+  }
+
+size_t ZenParser::readVobTree(zCVobData& vob, WorldVersion worldVersion) {
+  ZenParser::ChunkHeader header = {};
+  readChunkStart(header);
+
+  vob.vobName     = std::move(header.name);
+  vob.vobType     = zCVobData::VT_Unknown;
+  zCVob::readObjectData(vob, *this, header, worldVersion); //TODO: use header version
+
+  // Read how many vobs this one has as child
+  uint32_t numChildren = 0;
+  getImpl()->readEntry("", &numChildren, sizeof(numChildren), ZenLoad::ParserImpl::ZVT_INT);
+  vob.childVobs.resize(numChildren);
+
+  size_t num = 0;
+  for(uint32_t i=0; i<numChildren; i++) {
+    num += readVobTree(vob.childVobs[i], worldVersion);
+    }
+  return numChildren+1;
+  }
+
+void ZenParser::readWayNetData(zCWayNetData& info) {
+  ZenParser::ChunkHeader waynetHeader;
+  readChunkStart(waynetHeader);
+
+  ReadObjectProperties(*this,
+                       Prop("waynetVersion", info.waynetVersion));
+
+  if(info.waynetVersion == 0) {
+    // TODO: Implement old waynet format
+    LogWarn() << "Old waynet-format not yet supported!";
+    return;
+    }
+
+  // First, read the waypoints array
+  uint32_t numWaypoints;
+  getImpl()->readEntry("numWaypoints", &numWaypoints, sizeof(numWaypoints), ParserImpl::ZVT_INT);
+
+  LogInfo() << "Loading " << numWaypoints << " freepoints";
+
+  std::unordered_map<uint32_t, size_t> wpRefMap;
+  for(uint32_t i = 0; i < numWaypoints; i++) {
+    ZenParser::ChunkHeader wph;
+    // These are always new ones
+    readChunkStart(wph);
+    zCWaypointData w = readWaypoint();
+    info.waypoints.push_back(w);
+    readChunkEnd();
+
+    // Save for later access
+    wpRefMap[wph.objectID] = info.waypoints.size() - 1;
+    }
+
+  // Then, the edges (ways)
+  uint32_t numWays;
+  getImpl()->readEntry("numWays", &numWays, sizeof(numWays), ParserImpl::ZVT_INT);
+
+  LogInfo() << "Loading " << numWays << " edges";
+
+  for(uint32_t i = 0; i < numWays; i++) {
+    size_t wp1, wp2;
+
+    size_t* tgt = &wp1;
+    for(int r = 0; r < 2; r++) {
+      ZenParser::ChunkHeader wph;
+      // References might occur here
+      readChunkStart(wph);
+
+      // Loading a reference?
+      if(wph.classId==zReference) {
+        *tgt = wpRefMap[wph.objectID];
+        } else
+      if(wph.classId==zCWaypoint) {
+        // Create new waypoint
+        zCWaypointData w = readWaypoint();
+        info.waypoints.push_back(w);
+
+        // Save for later access
+        wpRefMap[wph.objectID] = info.waypoints.size() - 1;
+        *tgt = info.waypoints.size() - 1;
+        }
+
+      readChunkEnd();
+      tgt = &wp2;
+      }
+    info.edges.push_back(std::make_pair(wp1, wp2));
+    }
+
+  LogInfo() << "Done loading edges!";
+  readChunkEnd();
+  }
+
+zCWaypointData ZenParser::readWaypoint() {
+  zCWaypointData info;
+  getImpl()->readEntry("wpName", &info.wpName);
+  getImpl()->readEntry("waterDepth", &info.waterDepth);
+  getImpl()->readEntry("underWater", &info.underWater);
+  getImpl()->readEntry("position", &info.position);
+  getImpl()->readEntry("direction", &info.direction);
+  return info;
+  }

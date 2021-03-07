@@ -31,6 +31,7 @@ namespace ZenLoad
 		 * @brief Reads a string
 		 */
         std::string readString() override;
+        bool        readString(char* buf, size_t size) override;
 
         /**
 		 * @brief Reads data of the expected type. Throws if the read type is not the same as specified and not 0

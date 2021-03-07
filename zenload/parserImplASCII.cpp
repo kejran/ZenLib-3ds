@@ -14,127 +14,43 @@ ParserImplASCII::ParserImplASCII(ZenParser* parser)
  */
 bool ParserImplASCII::readChunkStart(ZenParser::ChunkHeader& header)
 {
+    size_t seek = m_pParser->getSeek();
+    // Check chunk-header
     m_pParser->skipSpaces();
 
-    size_t seek = m_pParser->getSeek();
-    try
+    // Early exit if this is a chunk-end or not a chunk header
+    if(m_pParser->m_Data[m_pParser->m_Seek] != '[' || m_pParser->m_Data[m_pParser->m_Seek + 1] == ']')
     {
-        // Check chunk-header
-        m_pParser->skipSpaces();
-
-        // Early exit if this is a chunk-end or not a chunk header
-        if (m_pParser->m_Data[m_pParser->m_Seek] != '[' || m_pParser->m_Data[m_pParser->m_Seek + 1] == ']')
-        {
-            m_pParser->setSeek(seek);
-            return false;
-        }
-
-        //if(m_pParser->m_Data[m_pParser->m_Seek] != '[')
-        //	throw std::runtime_error("Invalid format");
-
-        m_pParser->m_Seek++;
-
-        size_t tmpSeek = m_pParser->m_Seek;
-        while (m_pParser->m_Data[tmpSeek] != ']')
-        {
-            if (m_pParser->m_Data[tmpSeek] == '\r' || m_pParser->m_Data[tmpSeek] == '\n')
-                throw std::runtime_error("Invalid vob descriptor");
-
-            ++tmpSeek;
-        }
-
-        // Save chunks starting-position (right after chunk-header)
-        header.startPosition = uint32_t(m_pParser->m_Seek);
-
-        // Parse chunk-header
-        std::string vobDescriptor(reinterpret_cast<const char*>(&m_pParser->m_Data[m_pParser->m_Seek]), tmpSeek - m_pParser->m_Seek);
-        std::vector<std::string> vec = Utils::split(vobDescriptor, ' ');
-        m_pParser->m_Seek = tmpSeek + 1;
-
-        std::string name;
-        std::string className;
-        int classVersion = 0;
-        int objectID = 0;
-        bool createObject = false;
-        enum State
-        {
-            S_OBJECT_NAME,
-            S_REFERENCE,
-            S_CLASS_NAME,
-            S_CLASS_VERSION,
-            S_OBJECT_ID,
-            S_FINISHED
-        } state = S_OBJECT_NAME;
-
-        for (auto& arg : vec)
-        {
-            switch (state)
-            {
-                case S_OBJECT_NAME:
-                    if (arg != "%")
-                    {
-                        name = arg;
-                        state = S_REFERENCE;
-                        break;
-                    }
-                    //@fallthrough@
-                case S_REFERENCE:
-                    if (arg == "%")
-                    {
-                        createObject = true;
-                        state = S_CLASS_NAME;
-                        break;
-                    }
-                    else if (arg == "\xA7")
-                    {
-                        createObject = false;
-                        state = S_CLASS_NAME;
-                        break;
-                    }
-                    else
-                        createObject = true;
-                    //@fallthrough@
-                case S_CLASS_NAME:
-                    if (!m_pParser->isNumber(arg))
-                    {
-                        className = arg;
-                        state = S_CLASS_VERSION;
-                        break;
-                    }
-                    //@fallthrough@
-                case S_CLASS_VERSION:
-                    classVersion = std::atoi(arg.c_str());
-                    state = S_OBJECT_ID;
-                    break;
-                case S_OBJECT_ID:
-                    objectID = std::atoi(arg.c_str());
-                    state = S_FINISHED;
-                    break;
-                default:
-                    throw std::runtime_error("Strange parser state");
-            }
-        }
-
-        if (state != S_FINISHED)
-            throw std::runtime_error("Parser did not finish");
-
-        header.classname = className;
-        header.createObject = createObject;
-        header.name = name;
-        header.objectID = objectID;
-        header.size = 0;  // Doesn't matter in ASCII
-        header.version = classVersion;
-
-        // Skip the last newline
-        m_pParser->skipSpaces();
-    }
-    catch (std::runtime_error e)
-    {
-        m_pParser->setSeek(seek);
-        return false;
+      m_pParser->setSeek(seek);
+      return false;
     }
 
-    return true;
+    size_t tmpSeek = m_pParser->m_Seek;
+    while (m_pParser->m_Data[tmpSeek] != ']')
+    {
+        if (m_pParser->m_Data[tmpSeek] == '\r' || m_pParser->m_Data[tmpSeek] == '\n')
+            throw std::runtime_error("Invalid vob descriptor");
+
+        ++tmpSeek;
+    }
+
+    // Parse chunk-header
+    char        vobDescStk[256] = {};
+    std::string vobDescHeap;
+    const char* vobDesc = vobDescStk;
+
+    if(!readString(vobDescStk,sizeof(vobDescStk))) {
+      vobDescHeap = readString();
+      vobDesc     = vobDescHeap.c_str();
+      }
+
+    if(parseHeader(header,vobDesc,std::strlen(vobDesc))) {
+      // Skip the last newline
+      m_pParser->skipSpaces();
+      return true;
+      }
+    m_pParser->setSeek(seek);
+    return false;
 }
 
 /**
@@ -145,16 +61,13 @@ bool ParserImplASCII::readChunkEnd()
     size_t seek = m_pParser->getSeek();
 
     m_pParser->skipSpaces();
-    std::string l = readString();
-
-    if (l != "[]")
-    {
-        m_pParser->setSeek(seek);  // Next property isn't a string or the end
-        return false;
-    }
+    char l[3] = {};
+    if(!readString(l,3) || l[0]!='[' || l[1]!=']') {
+      m_pParser->setSeek(seek);  // Next property isn't a string or the end
+      return false;
+      }
 
     m_pParser->skipSpaces();
-
     return true;
 }
 
@@ -179,128 +92,134 @@ void ParserImplASCII::readImplHeader()
  */
 std::string ParserImplASCII::readString()
 {
-    return m_pParser->readLine();
+  return m_pParser->readLine();
+}
+
+bool ParserImplASCII::readString(char* buf, size_t size)
+{
+  return m_pParser->readLine(buf,size);
 }
 
 /**
  * @brief Reads data of the expected type. Throws if the read type is not the same as specified and not 0
  */
-void ParserImplASCII::readEntry(const char* _expectedName, void* target, size_t targetSize, EZenValueType expectedType)
+void ParserImplASCII::readEntry(const char* expectedName, void* target, size_t targetSize, EZenValueType expectedType)
 {
-    // Some tools write
-    std::string expectedName = _expectedName==nullptr ? "" : _expectedName;
-    std::transform(expectedName.begin(), expectedName.end(), expectedName.begin(), ::toupper);
-
     m_pParser->skipSpaces();
-    std::string line = m_pParser->readLine();
 
-    // Special cases for chunk starts/ends
-    if (line == "[]" || (line.front() == '[' && line.back() == ']'))
+    std::string lineHeap;
+    char        lineStk[256] = {};
+    char*       line = lineStk;
+    if(!readString(lineStk,sizeof(lineStk)))
     {
-        if(expectedType==ZVT_STRING)
-          *reinterpret_cast<std::string*>(target) = line;
+      lineHeap = m_pParser->readLine();
+      line     = lineHeap.size()>0 ? &lineHeap[0] : lineStk;
+    }
+
+    size_t lnSize = std::strlen(line);
+    if(lnSize>=1) {
+      // FIXME?
+      if(line[0]=='[')
         return;
-    }
+      }
+    /* Examples:
+     * childs0=int:1
+     *
+     * Syntax:
+     * <name>=<type>:<value>
+     * */
 
-    // Split at =, then at :
-    // parts should then have 3 elements, name, type and value
-    auto parts = Utils::split(line, "=:");
+    const char* name  = line;
+    const char* type  = "";
+    const char* value = "";
 
-    if (parts.size() < 2)
-        throw std::runtime_error("Failed to parse property: " + expectedName);
-
-    std::string valueName = parts[0];
-    std::transform(valueName.begin(), valueName.end(), valueName.begin(), ::toupper);
-
-    //const std::string& valueName = parts[0];
-    const std::string& type = parts[1];
-    const std::string& value = parts.size() > 2 ? parts[2] : "";
-
-    // Split value as well, if possible
-    auto vparts = Utils::split(value, ' ');
-
-    if (!expectedName.empty() && valueName != expectedName)
-        throw std::runtime_error("Value name does not match expected name. Value:" + valueName + " Expected: " + expectedName);
-
-    switch (expectedType)
-    {
-        case ZVT_0:
-            break;
-        case ZVT_STRING:
-            *reinterpret_cast<std::string*>(target) = value;
-            break;
-        case ZVT_INT:
-            *reinterpret_cast<int32_t*>(target) = std::stoi(value);
-            break;
-        case ZVT_FLOAT:
-            *reinterpret_cast<float*>(target) = std::stof(value);
-            break;
-        case ZVT_BYTE:
-            *reinterpret_cast<uint8_t*>(target) = static_cast<uint8_t>(std::stoi(value));
-            break;
-        case ZVT_WORD:
-            *reinterpret_cast<int16_t*>(target) = static_cast<int16_t>(std::stoi(value));
-            break;
-        case ZVT_BOOL:
-            *reinterpret_cast<bool*>(target) = std::stoi(value) != 0;
-            break;
-        case ZVT_VEC3:
-            *reinterpret_cast<ZMath::float3*>(target) = ZMath::float3(std::stof(vparts[0]), std::stof(vparts[1]), std::stof(vparts[2]));
-            break;
-
-        case ZVT_COLOR:
-            reinterpret_cast<uint8_t*>(target)[0] = std::stoi(vparts[0]);  // FIXME: These are may ordered wrong
-            reinterpret_cast<uint8_t*>(target)[1] = std::stoi(vparts[1]);
-            reinterpret_cast<uint8_t*>(target)[2] = std::stoi(vparts[2]);
-            reinterpret_cast<uint8_t*>(target)[3] = std::stoi(vparts[3]);
-            break;
-
-        case ZVT_RAW_FLOAT:
-        {
-            size_t i = 0;
-            for (auto& v : vparts)
-            {
-                float* data = reinterpret_cast<float*>(target);
-                data[i] = std::stof(v);
-                i++;
-            }
-        }
+    size_t i=0;
+    for(; i<lnSize; ++i) {
+      if(line[i]=='=') {
+        line[i] = '\0';
+        if(i+1<lnSize)
+          type = line+i+1;
         break;
-        case ZVT_RAW:
-        {
-            uint8_t* data = reinterpret_cast<uint8_t*>(target);
-            char c[3];
-            c[2] = 0;
-
-            for (size_t i = 0; i < targetSize; i++)
-            {
-                if (value.size() < i * 2 + 1)
-                    throw std::runtime_error("Invalid raw dataset");
-
-                c[0] = value[i * 2];
-                c[1] = value[i * 2 + 1];
-                data[i] = static_cast<uint8_t>(std::stoi(std::string(c), 0, 16));
-            }
         }
+      }
+
+    for(; i<lnSize; ++i) {
+      if(line[i]==':') {
+        line[i] = '\0';
+        if(i+1<lnSize)
+          value = line+i+1;
         break;
-        case ZVT_10:
-            break;
-        case ZVT_11:
-            break;
-        case ZVT_12:
-            break;
-        case ZVT_13:
-            break;
-        case ZVT_14:
-            break;
-        case ZVT_15:
-            break;
-        case ZVT_ENUM:
-            *reinterpret_cast<uint8_t*>(target) = std::stoi(value);
-            break;
-        case ZVT_HASH:
-            break;
-    }
+        }
+      }
+
+    if(expectedName!=nullptr && expectedName[0]!='\0') {
+      for(size_t i=0; ; ++i) {
+        char e = expectedName[i];
+        char n = name[i];
+        if('A'<=e && e<='Z')
+          e = char(e-'A'+'a');
+        if('A'<=n && n<='Z')
+          n = char(n-'A'+'a');
+        if(e!=n) {
+          throw std::runtime_error(std::string("Value name does not match expected name. Value:") + name + " Expected: " + expectedName);
+          }
+        if(expectedName[i]=='\0')
+          break;
+        }
+      }
+
+    (void)type;
+    switch(expectedType) {
+      case ZVT_0:
+        break;
+      case ZVT_STRING:
+        *reinterpret_cast<std::string*>(target) = value;
+        break;
+      case ZVT_INT:
+        *reinterpret_cast<int32_t*>(target) = std::stoi(value);
+        break;
+      case ZVT_FLOAT:
+        *reinterpret_cast<float*>(target) = std::stof(value);
+        break;
+      case ZVT_BYTE:
+        *reinterpret_cast<uint8_t*>(target) = static_cast<uint8_t>(std::stoi(value));
+        break;
+      case ZVT_WORD:
+        *reinterpret_cast<int16_t*>(target) = static_cast<int16_t>(std::stoi(value));
+        break;
+      case ZVT_BOOL:
+        *reinterpret_cast<bool*>(target) = std::stoi(value) != 0;
+        break;
+      case ZVT_VEC3:
+        *reinterpret_cast<ZMath::float3*>(target) = parseVec3(value);
+        break;
+      case ZVT_COLOR:
+        parseU8Vec(value,reinterpret_cast<uint8_t*>(target),targetSize);
+        break;
+      case ZVT_RAW_FLOAT:
+        parseFloatVec(value,reinterpret_cast<float*>(target),targetSize);
+        break;
+      case ZVT_RAW:
+        parseRawVec(value,reinterpret_cast<uint8_t*>(target),targetSize);
+        break;
+      case ZVT_10:
+        break;
+      case ZVT_11:
+        break;
+      case ZVT_12:
+        break;
+      case ZVT_13:
+        break;
+      case ZVT_14:
+        break;
+      case ZVT_15:
+        break;
+      case ZVT_ENUM:
+        *reinterpret_cast<uint8_t*>(target) = std::stoi(value);
+        break;
+      case ZVT_HASH:
+        break;
+      }
 }
 
 /**
@@ -385,5 +304,60 @@ void ParserImplASCII::readEntryType(EZenValueType& outtype, size_t& size)
         size = 0;
     }
     else
-        throw std::runtime_error("Unknown type");
+      throw std::runtime_error("Unknown type");
 }
+
+ZMath::float3 ParserImplASCII::parseVec3(const char* line) const
+{
+  //*reinterpret_cast<ZMath::float3*>(target) = ZMath::float3(std::stof(vparts[0]), std::stof(vparts[1]), std::stof(vparts[2]));
+  float ret[3] = {};
+  parseFloatVec(line,ret,sizeof(ret));
+  return ZMath::float3(ret[0],ret[1],ret[2]);
+}
+
+void ParserImplASCII::parseFloatVec(const char* line, float* target, size_t targetSize) const
+{
+  targetSize /= sizeof(float);
+  for(size_t i=0; i<targetSize; ++i) {
+    if(*line=='\0')
+      break;
+    while(std::isspace(*line))
+      ++line;
+    size_t pos = 0;
+    target[i] = std::stof(line,&pos);
+    line+=pos;
+    }
+}
+
+void ParserImplASCII::parseU8Vec(const char* line, uint8_t* target, size_t targetSize) const
+{
+  for(size_t i=0; i<targetSize; ++i) {
+    if(*line=='\0')
+      break;
+    while(std::isspace(*line))
+      ++line;
+    size_t pos = 0;
+    target[i] = std::stoi(line,&pos);
+    line+=pos;
+    }
+}
+
+void ParserImplASCII::parseRawVec(const char* line, uint8_t* target, size_t targetSize) const
+{
+  for(size_t i=0; i<targetSize; ++i)
+  {
+    if(line[0]=='\0' || line[1]=='\0')
+      break;
+    int c[2] = {};
+    for(int r=0; r<2; ++r) {
+      if('0'<=line[r] && line[r]<='9')
+        c[r] = line[r]-'0';
+      else if('a'<=line[r] && line[r]<='f')
+        c[r] = line[r]-'a'+10;
+      else if('A'<=line[r] && line[r]<='F')
+        c[r] = line[r]-'a'+10;
+      }
+    target[i] = c[0]*16+c[1];
+  }
+}
+

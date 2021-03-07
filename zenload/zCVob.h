@@ -16,7 +16,6 @@ class zCVob {
     /**
       * Reads this object from an internal zen
       */
-    static void readObjectData(zCVobData& info, ZenParser& parser, WorldVersion version,
-                               const ZenParser::ChunkHeader& header);
+    static void readObjectData(zCVobData& info, ZenParser& parser, const ZenParser::ChunkHeader& header, WorldVersion version);
   };
 }  // namespace ZenLoad

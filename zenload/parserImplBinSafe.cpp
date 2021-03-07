@@ -14,178 +14,53 @@ ZenLoad::ParserImplBinSafe::ParserImplBinSafe(ZenParser* parser)
 bool ParserImplBinSafe::readChunkStart(ZenParser::ChunkHeader& header)
 {
     size_t seek = m_pParser->getSeek();
-    try
-    {
-        EZenValueType type;
-        size_t size;
+    EZenValueType type;
+    size_t size;
 
-        // Check if this actually will be a string
-        readTypeAndSizeBinSafe(type, size);
-        m_pParser->setSeek(seek);
+    // Check if this actually will be a string
+    readTypeAndSizeBinSafe(type, size);
+    m_pParser->setSeek(seek);
 
-        if (type != ZVT_STRING)
-            return false;  // Next property isn't a string or the end
+    if(type != ZVT_STRING)
+      return false;  // Next property isn't a string or the end
 
-        // Read chunk-header
-        std::string vobDescriptor = readString();
+    // Read chunk-header
+    char        vobDescStk[256] = {};
+    std::string vobDescHeap;
+    const char* vobDesc = vobDescStk;
 
-        // Early exit if this is a chunk-end or not a chunk header
-        if (vobDescriptor.size()<=2 || (vobDescriptor.front() != '[' && vobDescriptor.back() != ']'))
-        {
-            m_pParser->setSeek(seek);
-            return false;
-        }
-
-
-        // Special case for camera keyframes
-        if (vobDescriptor.find('%') != std::string::npos && vobDescriptor.find('\xA7') != std::string::npos)
-        {
-            vobDescriptor = vobDescriptor.substr(1, vobDescriptor.size() - 2);
-            // Make a header with createObject = true and ref as classname
-            auto parts = Utils::split(vobDescriptor, ' ');
-            header.createObject = true;
-            header.classname = "\xA7";
-            header.name = "%";
-            header.size = 0;
-            header.version = 0;
-            header.objectID = std::stoi(parts.back());
-            return true;
-        }
-
-        // Save chunks starting-position (right after chunk-header)
-        header.startPosition = uint32_t(m_pParser->m_Seek);
-
-        std::string name;
-        std::string className;
-        int classVersion = 0;
-        int objectID = 0;
-        bool createObject = false;
-        enum State {
-          S_OBJECT_NAME,
-          S_REFERENCE,
-          S_CLASS_NAME,
-          S_CLASS_VERSION,
-          S_OBJECT_ID,
-          S_FINISHED
-          } state = S_OBJECT_NAME;
-
-        vobDescriptor[0]     = ' ';
-        vobDescriptor.back() = ' ';
-
-        // Parse chunk-header
-        const char* parg=vobDescriptor.c_str();
-        for(char& c:vobDescriptor) {
-          const char* arg=parg;
-          if(c==' ') { // split by words
-            c = '\0';
-            if(*parg!='\0'){
-              arg=parg;
-              parg = &c+1;
-              } else {
-              parg = &c+1;
-              continue;
-              }
-            } else {
-            continue;
-            }
-
-          switch(state) {
-            case S_OBJECT_NAME:
-              if(std::strcmp(arg,"%")!=0) {
-                name = arg;
-                state = S_REFERENCE;
-                break;
-                }
-              //@fallthrough@
-            case S_REFERENCE:
-              if(std::strcmp(arg,"%")==0) {
-                createObject = true;
-                state = S_CLASS_NAME;
-                break;
-                }
-              else if (std::strcmp(arg,"\xA7")==0)
-                {
-                createObject = false;
-                state = S_CLASS_NAME;
-                break;
-                }
-              else
-                createObject = true;
-              //@fallthrough@
-            case S_CLASS_NAME:
-              if (!m_pParser->isNumber(arg))
-                {
-                className = arg;
-                state = S_CLASS_VERSION;
-                break;
-                }
-              //@fallthrough@
-            case S_CLASS_VERSION:
-              classVersion = std::atoi(arg);
-              state = S_OBJECT_ID;
-              break;
-            case S_OBJECT_ID:
-              objectID = std::atoi(arg);
-              state = S_FINISHED;
-              break;
-            default:
-              throw std::runtime_error("Strange parser state");
-            }
-          }
-
-        if (state != S_FINISHED)
-            throw std::runtime_error("Parser did not finish");
-
-        header.classname = className;
-        header.createObject = createObject;
-        header.name = name;
-        header.objectID = objectID;
-        header.size = 0;  // Doesn't matter in ASCII
-        header.version = classVersion;
-    }
-    catch (std::runtime_error e)
-    {
-        m_pParser->setSeek(seek);
-        return false;
-    }
-
-    return true;
+    if(!readString(vobDescStk,sizeof(vobDescStk))) {
+      vobDescHeap = readString();
+      vobDesc     = vobDescHeap.c_str();
+      }
+    if(parseHeader(header,vobDesc,std::strlen(vobDesc)))
+      return true;
+    m_pParser->setSeek(seek);
+    return false;
 }
 
 /**
 * @brief Read the end of a chunk. []
 */
-bool ParserImplBinSafe::readChunkEnd()
-{
-    size_t seek = m_pParser->getSeek();
-    try
-    {
-        EZenValueType type;
-        size_t size;
+bool ParserImplBinSafe::readChunkEnd() {
+  size_t seek = m_pParser->getSeek();
+  EZenValueType type;
+  size_t size;
 
-        // Check if this actually will be a string
-        readTypeAndSizeBinSafe(type, size);
-        m_pParser->setSeek(seek);
+  // Check if this actually will be a string
+  readTypeAndSizeBinSafe(type, size);
+  m_pParser->setSeek(seek);
 
-        if (type != ZVT_STRING)
-            return false;  // Next property isn't a string or the end
+  if(type != ZVT_STRING)
+    return false;  // Next property isn't a string or the end
 
-        std::string l = readString();
-
-        if (l != "[]")
-        {
-            m_pParser->setSeek(seek);
-            return false;
-        }
+  char l[3] = {};
+  if(!readString(l,3) || l[0]!='[' || l[1]!=']') {
+    m_pParser->setSeek(seek);  // Next property isn't a string or the end
+    return false;
     }
-    catch (std::runtime_error e)
-    {
-        m_pParser->setSeek(seek);
-        return false;  // Next property isn't a string or the end
-    }
-
-    return true;
-}
+  return true;
+  }
 
 /**
 * @brief Read the implementation specific header and stores it in the parsers main-header struct
@@ -258,6 +133,32 @@ std::string ParserImplBinSafe::readString()
         m_pParser->m_Seek += sizeof(uint32_t);
 
     return str;
+  }
+
+bool ParserImplBinSafe::readString(char* buf, size_t bufSize)
+{
+  EZenValueType type;
+  size_t size;
+
+  // These values start with a small header
+  readTypeAndSizeBinSafe(type, size);
+
+  if(type!=ZVT_STRING)
+    throw std::runtime_error("Expected string-type");
+
+  if(size>=bufSize)
+    return false;
+
+  m_pParser->readBinaryRaw(buf, size);
+  buf[size] = '\0';
+
+  // Skip potential hash-value at the end of the string
+  EZenValueType t = static_cast<EZenValueType>(m_pParser->readBinaryByte());
+  if (t != ZVT_HASH)
+      m_pParser->m_Seek -= sizeof(uint8_t);
+  else
+      m_pParser->m_Seek += sizeof(uint32_t);
+  return true;
 }
 
 /**

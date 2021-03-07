@@ -5,59 +5,6 @@
 
 namespace ZenLoad
 {
-    struct PropertyDecl {
-      const char*               name      = "";
-      ParserImpl::EZenValueType type      = ParserImpl::EZenValueType::ZVT_0;
-      size_t                    valueSize = 0;
-      void*                     value     = nullptr;
-      };
-
-    static PropertyDecl prop(const char* name, float& v) {
-      PropertyDecl p;
-      p.name = name;
-      p.type = ParserImpl::ZVT_FLOAT;
-      p.value = &v;
-      return p;
-      }
-
-    static PropertyDecl prop(const char* name, ZMath::float2& v) {
-      PropertyDecl p;
-      p.name      = name;
-      p.type      = ParserImpl::ZVT_RAW_FLOAT;
-      p.valueSize = sizeof(v);
-      p.value     = &v;
-      return p;
-      }
-
-    static PropertyDecl prop(const char* name, std::string& v) {
-      PropertyDecl p;
-      p.name = name;
-      p.type = ParserImpl::ZVT_STRING;
-      p.value = &v;
-      return p;
-      }
-
-    static PropertyDecl prop(const char* name, bool& v) {
-      PropertyDecl p;
-      p.name = name;
-      p.type = ParserImpl::ZVT_BOOL;
-      p.value = &v;
-      return p;
-      }
-
-    static PropertyDecl prop(const char* name, uint8_t& v) {
-      PropertyDecl p;
-      p.name = name;
-      p.type = ParserImpl::ZVT_BYTE;
-      p.value = &v;
-      return p;
-      }
-
-    template <typename... T>
-    static void ReadObjectProperties(ZenParser& ZenParser, const std::initializer_list<PropertyDecl>& decl) {
-
-      }
-
     /**
       * @brief Templated function-calls to read the right type of data
       *		  and convert it to a string for the given type
@@ -98,7 +45,7 @@ namespace ZenLoad
     template <>
     inline void read<uint8_t>(ZenParser& p, uint8_t& outData, const char* exName)
     {
-        p.getImpl()->readEntry(exName, &outData, sizeof(uint16_t), ParserImpl::ZVT_BYTE);
+        p.getImpl()->readEntry(exName, &outData, sizeof(uint8_t), ParserImpl::ZVT_BYTE);
     }
 
     template <>
@@ -142,15 +89,12 @@ namespace ZenLoad
     }
 
     template <typename... T>
-    static void ReadObjectProperties(ZenParser& ZenParser, std::unordered_map<std::string, std::string>& rval, std::pair<const char*, T*>... d)
+    static void ReadObjectProperties(ZenParser& ZenParser, std::pair<const char*, T*>... d)
     {
         auto fn = [&ZenParser](auto pair) {
             // Read the given datatype from the file
             read<typename std::remove_pointer<decltype(pair.second)>::type>(ZenParser, *pair.second, pair.first);
         };
-
-        auto ref = {(d.first)...};
-        (void)ref;
 
         auto x = {(fn(d), 0)...};
         (void)x;
