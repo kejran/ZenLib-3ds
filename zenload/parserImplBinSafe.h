@@ -36,7 +36,7 @@ namespace ZenLoad
         /**
 		* @brief Reads data of the expected type. Throws if the read type is not the same as specified and not 0
 		*/
-        void readEntry(const char* name, void* target, size_t targetSize, EZenValueType expectedType = ZVT_0) override;
+        void readEntryImpl(const char* name, void* target, size_t targetSize, EZenValueType expectedType = ZVT_0) override;
 
         /**
 		* @brief Reads the type of a single entry

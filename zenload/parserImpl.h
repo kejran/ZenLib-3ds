@@ -57,19 +57,21 @@ class ParserImpl {
     virtual std::string readString() = 0;
     virtual bool        readString(char* buf, size_t size) = 0;
 
-    /**
-       * @brief Reads data of the expected type. Throws if the read type is not the same as specified and not 0
-       */
-    virtual void readEntry(const char* name, void* target, size_t targetSize, EZenValueType expectedType = ZVT_0) = 0;
+    void readEntry(const char* name, std::string&   target) { readEntryImpl(name, &target,              0, ZVT_STRING   ); }
+    void readEntry(const char* name, uint8_t&       target) { readEntryImpl(name, &target, sizeof(target), ZVT_BYTE     ); }
+    void readEntry(const char* name, bool&          target) { readEntryImpl(name, &target, sizeof(target), ZVT_BOOL     ); }
+    void readEntry(const char* name, uint16_t&      target) { readEntryImpl(name, &target, sizeof(target), ZVT_WORD     ); }
+    void readEntry(const char* name, int16_t&       target) { readEntryImpl(name, &target, sizeof(target), ZVT_WORD     ); }
+    void readEntry(const char* name, uint32_t&      target) { readEntryImpl(name, &target, sizeof(target), ZVT_INT      ); }
+    void readColor(const char* name, uint32_t&      target) { readEntryImpl(name, &target, sizeof(target), ZVT_COLOR    ); }
+    void readEntry(const char* name, int32_t&       target) { readEntryImpl(name, &target, sizeof(target), ZVT_INT      ); }
+    void readEntry(const char* name, float&         target) { readEntryImpl(name, &target, sizeof(target), ZVT_FLOAT    ); }
+    void readEntry(const char* name, ZMath::float2& target) { readEntryImpl(name, &target, sizeof(target), ZVT_RAW_FLOAT); }
+    void readEntry(const char* name, ZMath::float3& target) { readEntryImpl(name, &target, sizeof(target), ZVT_VEC3     ); }
+    void readEntry(const char* name, ZMath::float4& target) { readEntryImpl(name, &target, sizeof(target), ZVT_RAW_FLOAT); }
+    void readEntry(const char* name, ZMath::Matrix& target) { readEntryImpl(name, &target, sizeof(target), ZVT_RAW_FLOAT); }
 
-    void readEntry(const char* name, std::string* target)   { readEntry(name, target, 0, ZVT_STRING); }
-    void readEntry(const char* name, int32_t* target)       { readEntry(name, target, sizeof(*target), ZVT_INT); }
-    void readEntry(const char* name, uint8_t* target)       { readEntry(name, target, sizeof(*target), ZVT_BYTE); }
-    void readEntry(const char* name, bool* target)          { readEntry(name, target, sizeof(*target), ZVT_BOOL); }
-    void readEntry(const char* name, uint32_t* target)      { readEntry(name, target, sizeof(*target), ZVT_INT); }
-    void readEntry(const char* name, float* target)         { readEntry(name, target, sizeof(*target), ZVT_FLOAT); }
-    void readEntry(const char* name, ZMath::float3* target) { readEntry(name, target, sizeof(*target), ZVT_VEC3); }
-    void readEntry(const char* name, ZMath::Matrix* target) { readEntry(name, target, sizeof(*target), ZVT_RAW_FLOAT); }
+    void readEntry(const char* name, void* target, size_t size) { readEntryImpl(name, target, size, ZVT_RAW); }
 
     /**
        * @brief Reads the type of a single entry
@@ -77,8 +79,14 @@ class ParserImpl {
     virtual void readEntryType(EZenValueType& type, size_t& size) = 0;
 
   protected:
+    /**
+       * @brief Reads data of the expected type. Throws if the read type is not the same as specified and not 0
+       */
+    virtual void        readEntryImpl(const char* name, void* target, size_t targetSize, EZenValueType expectedType) = 0;
+
     bool                parseHeader(ZenParser::ChunkHeader& header, const char* vobDescriptor, size_t vobDescriptorLen);
     ZenParser::ZenClass parseClassName(const char* name, size_t len);
+    static size_t       valueTypeSize(EZenValueType t);
 
     /**
        * @brief Parser-Object this operates on

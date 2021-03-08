@@ -70,48 +70,20 @@ bool ParserImplBinary::readString(char* buf, size_t size)
 /**
  * @brief Reads data of the expected type. Throws if the read type is not the same as specified and not 0
  */
-void ParserImplBinary::readEntry(const char* /*expectedName*/, void* target, size_t targetSize, EZenValueType expectedType)
-{
-    // Special case for strings, they're read until 0-bytes
-    if (expectedType == ZVT_STRING)
-    {
-        *reinterpret_cast<std::string*>(target) = readString();
-        return;
+void ParserImplBinary::readEntryImpl(const char* /*expectedName*/, void* target, size_t targetSize, EZenValueType expectedType) {
+  // Special case for strings, they're read until 0-bytes
+  if(expectedType == ZVT_STRING) {
+    *reinterpret_cast<std::string*>(target) = readString();
+    return;
     }
 
-    size_t size = 0;
-    switch (expectedType)
-    {
-        // 32-bit
-        case ZVT_INT:
-        case ZVT_FLOAT:
-        case ZVT_VEC3:
-        case ZVT_COLOR:
-            size = sizeof(uint32_t);
-            break;
-        case ZVT_WORD:
-            size = sizeof(int16_t);
-            break;
+  size_t size = 0;
+  if(expectedType==ZVT_RAW || expectedType==ZVT_RAW_FLOAT)
+    size = targetSize; else
+    size = ParserImpl::valueTypeSize(expectedType);
 
-        // Raw
-        case ZVT_RAW_FLOAT:
-        case ZVT_RAW:
-            size = targetSize;
-            break;
-
-        // Byte sized
-        case ZVT_BOOL:
-        case ZVT_BYTE:
-        case ZVT_ENUM:
-            size = sizeof(uint8_t);
-            break;
-
-        default:
-            break;
-    }
-
-    m_pParser->readBinaryRaw(target, size);
-}
+  m_pParser->readBinaryRaw(target, size);
+  }
 
 /**
 * @brief Reads the type of a single entry

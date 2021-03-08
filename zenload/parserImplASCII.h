@@ -33,10 +33,11 @@ public:
   std::string readString() override;
   bool        readString(char* buf, size_t size) override;
 
+protected:
   /**
      * @brief Reads data of the expected type. Throws if the read type is not the same as specified and not 0
      */
-  void readEntry(const char* name, void* target, size_t targetSize, EZenValueType expectedType = ZVT_0) override;
+  void readEntryImpl(const char* name, void* target, size_t targetSize, EZenValueType expectedType = ZVT_0) override;
 
   /**
     * @brief Reads the type of a single entry
@@ -44,9 +45,10 @@ public:
   void readEntryType(EZenValueType& type, size_t& size) override;
 
 private:
+  EZenValueType parseType(const char* type) const;
   ZMath::float3 parseVec3(const char* line) const;
   void          parseFloatVec(const char* line, float* target, size_t targetSize) const;
-  void          parseU8Vec(const char* line, std::uint8_t* target, size_t targetSize) const;
+  void          parseColor(const char* line, std::uint8_t* target, size_t targetSize) const;
   void          parseRawVec(const char* line, std::uint8_t* target, size_t targetSize) const;
   };
 }  // namespace ZenLoad

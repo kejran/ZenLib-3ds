@@ -103,10 +103,9 @@ bool ParserImplASCII::readString(char* buf, size_t size)
 /**
  * @brief Reads data of the expected type. Throws if the read type is not the same as specified and not 0
  */
-void ParserImplASCII::readEntry(const char* expectedName, void* target, size_t targetSize, EZenValueType expectedType)
+void ParserImplASCII::readEntryImpl(const char* expectedName, void* target, size_t targetSize, EZenValueType expectedType)
 {
     m_pParser->skipSpaces();
-
     std::string lineHeap;
     char        lineStk[256] = {};
     char*       line = lineStk;
@@ -122,13 +121,13 @@ void ParserImplASCII::readEntry(const char* expectedName, void* target, size_t t
       if(line[0]=='[')
         return;
       }
+
     /* Examples:
      * childs0=int:1
      *
      * Syntax:
      * <name>=<type>:<value>
      * */
-
     const char* name  = line;
     const char* type  = "";
     const char* value = "";
@@ -168,8 +167,32 @@ void ParserImplASCII::readEntry(const char* expectedName, void* target, size_t t
         }
       }
 
-    (void)type;
-    switch(expectedType) {
+    auto realType = parseType(type);
+    if(realType==ZVT_ENUM) {
+      switch(targetSize) {
+        case 1:
+          realType = ZVT_BYTE;
+          break;
+        case 2:
+          realType = ZVT_WORD;
+          break;
+        case 4:
+          realType = ZVT_INT;
+          break;
+        }
+      }
+
+    if(realType==ZVT_RAW_FLOAT && expectedType==ZVT_RAW)
+      expectedType = ZVT_RAW_FLOAT;
+    else if(realType==ZVT_INT && expectedType==ZVT_BYTE)
+      realType = ZVT_BYTE;
+    else if(realType==ZVT_INT && expectedType==ZVT_WORD)
+      realType = ZVT_WORD;
+
+    if(expectedType!=realType && realType!=ZVT_0)
+      throw std::runtime_error(std::string("Valuetype name does not match expected type. Value:") + expectedName);
+
+    switch(realType) {
       case ZVT_0:
         break;
       case ZVT_STRING:
@@ -194,7 +217,7 @@ void ParserImplASCII::readEntry(const char* expectedName, void* target, size_t t
         *reinterpret_cast<ZMath::float3*>(target) = parseVec3(value);
         break;
       case ZVT_COLOR:
-        parseU8Vec(value,reinterpret_cast<uint8_t*>(target),targetSize);
+        parseColor(value,reinterpret_cast<uint8_t*>(target),targetSize);
         break;
       case ZVT_RAW_FLOAT:
         parseFloatVec(value,reinterpret_cast<float*>(target),targetSize);
@@ -227,89 +250,83 @@ void ParserImplASCII::readEntry(const char* expectedName, void* target, size_t t
 */
 void ParserImplASCII::readEntryType(EZenValueType& outtype, size_t& size)
 {
-    m_pParser->skipSpaces();
-    std::string line = m_pParser->readLine();
+  m_pParser->skipSpaces();
+  std::string lineHeap;
+  char        lineStk[256] = {};
+  char*       line = lineStk;
+  if(!readString(lineStk,sizeof(lineStk)))
+  {
+    lineHeap = m_pParser->readLine();
+    line     = lineHeap.size()>0 ? &lineHeap[0] : lineStk;
+  }
 
-    // Special cases for chunk starts/ends
-    if (line == "[]" || (line.front() == '[' && line.back() == ']'))
-    {
-        outtype = ZVT_STRING;
-        size = 0;
-        return;
+  size_t lnSize = std::strlen(line);
+  if(lnSize>=1) {
+    // FIXME?
+    if(line[0]=='[')
+      return;
     }
 
-    // Split at =, then at :
-    // parts should then have 3 elements, name, type and value
-    auto parts = Utils::split(line, "=:");
+  /* Examples:
+   * childs0=int:1
+   *
+   * Syntax:
+   * <name>=<type>:<value>
+   * */
+  const char* name  = line;
+  const char* type  = "";
 
-    if (parts.size() < 2)  // Need at least name and type
-        throw std::runtime_error("Failed to read property type");
+  size_t i=0;
+  for(; i<lnSize; ++i) {
+    if(line[i]=='=') {
+      line[i] = '\0';
+      if(i+1<lnSize)
+        type = line+i+1;
+      break;
+      }
+    }
 
-    const std::string& type = parts[1];
-    size_t cLoc = line.find_first_of(':') == std::string::npos ? 0 : line.find_first_of(':');
+  for(; i<lnSize; ++i) {
+    if(line[i]==':') {
+      line[i] = '\0';
+      break;
+      }
+    }
 
-    if (type == "string")
-    {
-        outtype = ZVT_STRING;
-        size = 0;
-    }
-    else if (type == "int")
-    {
-        outtype = ZVT_INT;
-        size = 0;
-    }
-    else if (type == "float")
-    {
-        outtype = ZVT_FLOAT;
-        size = 0;
-    }
-    else if (type == "byte")
-    {
-        outtype = ZVT_BYTE;
-        size = 0;
-    }
-    else if (type == "word")
-    {
-        outtype = ZVT_WORD;
-        size = 0;
-    }
-    else if (type == "bool")
-    {
-        outtype = ZVT_BOOL;
-        size = 0;
-    }
-    else if (type == "vec3")
-    {
-        outtype = ZVT_VEC3;
-        size = 0;
-    }
-    else if (type == "color")
-    {
-        outtype = ZVT_COLOR;
-        size = 0;
-    }
-    else if (type == "rawFloat")
-    {
-        outtype = ZVT_RAW_FLOAT;
-        size = 0;
-    }
-    else if (type == "raw")
-    {
-        outtype = ZVT_RAW;
-        size = 0;
-    }
-    else if (type == "enum")
-    {
-        outtype = ZVT_ENUM;
-        size = 0;
-    }
-    else
-      throw std::runtime_error("Unknown type");
+  (void)name;
+  outtype = parseType(type);
+  size    = 0;
+  }
+
+ParserImpl::EZenValueType ParserImplASCII::parseType(const char* type) const
+{
+  if(std::strcmp(type,"int")==0)
+    return ZVT_INT;
+  if(std::strcmp(type,"float")==0)
+    return ZVT_FLOAT;
+  if(std::strcmp(type,"string")==0)
+    return ZVT_STRING;
+  if(std::strcmp(type,"byte")==0)
+    return ZVT_BYTE;
+  if(std::strcmp(type,"word")==0)
+    return ZVT_WORD;
+  if(std::strcmp(type,"bool")==0)
+    return ZVT_BOOL;
+  if(std::strcmp(type,"vec3")==0)
+    return ZVT_VEC3;
+  if(std::strcmp(type,"color")==0)
+    return ZVT_COLOR;
+  if(std::strcmp(type,"rawFloat")==0)
+    return ZVT_RAW_FLOAT;
+  if(std::strcmp(type,"raw")==0)
+    return ZVT_RAW;
+  if(std::strcmp(type,"enum")==0)
+    return ZVT_ENUM;
+  throw std::runtime_error("Unknown type");
 }
 
 ZMath::float3 ParserImplASCII::parseVec3(const char* line) const
 {
-  //*reinterpret_cast<ZMath::float3*>(target) = ZMath::float3(std::stof(vparts[0]), std::stof(vparts[1]), std::stof(vparts[2]));
   float ret[3] = {};
   parseFloatVec(line,ret,sizeof(ret));
   return ZMath::float3(ret[0],ret[1],ret[2]);
@@ -329,7 +346,7 @@ void ParserImplASCII::parseFloatVec(const char* line, float* target, size_t targ
     }
 }
 
-void ParserImplASCII::parseU8Vec(const char* line, uint8_t* target, size_t targetSize) const
+void ParserImplASCII::parseColor(const char* line, uint8_t* target, size_t targetSize) const
 {
   for(size_t i=0; i<targetSize; ++i) {
     if(*line=='\0')
@@ -357,6 +374,7 @@ void ParserImplASCII::parseRawVec(const char* line, uint8_t* target, size_t targ
       else if('A'<=line[r] && line[r]<='F')
         c[r] = line[r]-'a'+10;
       }
+    line+=2;
     target[i] = c[0]*16+c[1];
   }
 }

@@ -415,20 +415,14 @@ bool ZenParser::readLine(char* buf, size_t size, bool skip)
 /**
 * @brief reads the main oCWorld-Object, found in the level-zens
 */
-void ZenParser::readWorld(oCWorldData& info, bool forceG2) {
+void ZenParser::readWorld(oCWorldData& info, FileVersion version) {
   LogInfo() << "ZEN: Reading world...";
 
-  ChunkHeader header;
-  readChunkStart(header);
+  ChunkHeader worldHeader;
+  readChunkStart(worldHeader);
 
-  if(header.classId!=ZenParser::zCWorld)
+  if(worldHeader.classId!=ZenParser::zCWorld)
     THROW("Expected oCWorld:zCWorld-Chunk not found!");
-
-  uint16_t     versionInternal = header.version;
-  WorldVersion version;
-  if(versionInternal == static_cast<uint32_t>(WorldVersionInternal::VERSION_G1_08k) && !forceG2)
-    version = WorldVersion::VERSION_G1_08k; else
-    version = WorldVersion::VERSION_G26fix;
 
   while(!readChunkEnd()) {
     ZenParser::ChunkHeader header;
@@ -443,14 +437,14 @@ void ZenParser::readWorld(oCWorldData& info, bool forceG2) {
     else if(header.name == "VobTree") {
       // Read how many vobs this one has as child
       uint32_t numChildren = 0;
-      getImpl()->readEntry("", &numChildren, sizeof(numChildren), ZenLoad::ParserImpl::ZVT_INT);
+      getImpl()->readEntry("", numChildren);
       info.rootVobs.reserve(numChildren);
 
       // Read children
       info.numVobsTotal = 0;
       info.rootVobs.resize(numChildren);
       for(uint32_t i=0; i<numChildren; i++) {
-        info.numVobsTotal += readVobTree(info.rootVobs[i], version);
+        info.numVobsTotal += readVobTree(info.rootVobs[i],version);
         }
 
       readChunkEnd();
@@ -464,22 +458,22 @@ void ZenParser::readWorld(oCWorldData& info, bool forceG2) {
     }
   }
 
-size_t ZenParser::readVobTree(zCVobData& vob, WorldVersion worldVersion) {
+size_t ZenParser::readVobTree(zCVobData& vob, FileVersion version) {
   ZenParser::ChunkHeader header = {};
   readChunkStart(header);
 
   vob.vobName     = std::move(header.name);
   vob.vobType     = zCVobData::VT_Unknown;
-  zCVob::readObjectData(vob, *this, header, worldVersion); //TODO: use header version
+  zCVob::readObjectData(vob, *this, header, version);
 
   // Read how many vobs this one has as child
   uint32_t numChildren = 0;
-  getImpl()->readEntry("", &numChildren, sizeof(numChildren), ZenLoad::ParserImpl::ZVT_INT);
+  getImpl()->readEntry("", numChildren);
   vob.childVobs.resize(numChildren);
 
   size_t num = 0;
   for(uint32_t i=0; i<numChildren; i++) {
-    num += readVobTree(vob.childVobs[i], worldVersion);
+    num += readVobTree(vob.childVobs[i],version);
     }
   return numChildren+1;
   }
@@ -498,8 +492,8 @@ void ZenParser::readWayNetData(zCWayNetData& info) {
     }
 
   // First, read the waypoints array
-  uint32_t numWaypoints;
-  getImpl()->readEntry("numWaypoints", &numWaypoints, sizeof(numWaypoints), ParserImpl::ZVT_INT);
+  uint32_t numWaypoints = 0;
+  getImpl()->readEntry("numWaypoints", numWaypoints);
 
   LogInfo() << "Loading " << numWaypoints << " freepoints";
 
@@ -517,8 +511,8 @@ void ZenParser::readWayNetData(zCWayNetData& info) {
     }
 
   // Then, the edges (ways)
-  uint32_t numWays;
-  getImpl()->readEntry("numWays", &numWays, sizeof(numWays), ParserImpl::ZVT_INT);
+  uint32_t numWays = 0;
+  getImpl()->readEntry("numWays", numWays);
 
   LogInfo() << "Loading " << numWays << " edges";
 
@@ -557,10 +551,10 @@ void ZenParser::readWayNetData(zCWayNetData& info) {
 
 zCWaypointData ZenParser::readWaypoint() {
   zCWaypointData info;
-  getImpl()->readEntry("wpName", &info.wpName);
-  getImpl()->readEntry("waterDepth", &info.waterDepth);
-  getImpl()->readEntry("underWater", &info.underWater);
-  getImpl()->readEntry("position", &info.position);
-  getImpl()->readEntry("direction", &info.direction);
+  getImpl()->readEntry("wpName",     info.wpName);
+  getImpl()->readEntry("waterDepth", info.waterDepth);
+  getImpl()->readEntry("underWater", info.underWater);
+  getImpl()->readEntry("position",   info.position);
+  getImpl()->readEntry("direction",  info.direction);
   return info;
   }

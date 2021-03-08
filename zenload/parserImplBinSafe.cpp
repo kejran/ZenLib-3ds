@@ -167,136 +167,113 @@ bool ParserImplBinSafe::readString(char* buf, size_t bufSize)
 void ParserImplBinSafe::readTypeAndSizeBinSafe(EZenValueType& type, size_t& size)
 {
     type = static_cast<EZenValueType>(m_pParser->readBinaryByte());
-    size = 0;
-
-    switch (type)
-    {
-        case ZVT_VEC3:
-            size = sizeof(float) * 3;
-            break;
-
-        case ZVT_BYTE:
-            size = sizeof(uint8_t);
-            break;
-
-        case ZVT_WORD:
-            size = sizeof(uint16_t);
-            break;
-
-        case ZVT_RAW:
-        case ZVT_RAW_FLOAT:
-        case ZVT_STRING:
-            size = m_pParser->readBinaryWord();
-            break;
-
-        case ZVT_INT:
-        case ZVT_ENUM:
-        case ZVT_BOOL:
-        case ZVT_HASH:
-        case ZVT_FLOAT:
-        case ZVT_COLOR:
-            size = sizeof(uint32_t);  // FIXME: Bool might be only 8 bytes
-            break;
-
-        default:
-            throw std::runtime_error(std::string("BinSafe: Datatype not implemented"));
-    }
+    if(type==ZVT_RAW || type==ZVT_RAW_FLOAT || type==ZVT_STRING)
+      size = m_pParser->readBinaryWord(); else
+      size = valueTypeSize(type);
 }
 
 /**
 * @brief Reads data of the expected type. Throws if the read type is not the same as specified and not 0
 */
-void ParserImplBinSafe::readEntry(const char *expectedName, void* target, size_t targetSize, EZenValueType expectedType)
+void ParserImplBinSafe::readEntryImpl(const char *expectedName, void* target, size_t targetSize, EZenValueType expectedType)
 {
-    EZenValueType type;
-    size_t size;
+    EZenValueType realType;
+    size_t        size;
 
     // Read type and size of the entry
-    readTypeAndSizeBinSafe(type, size);
+    readTypeAndSizeBinSafe(realType, size);
 
-    // These are the same in size
-    if (expectedType == ZVT_INT)
-    {
-        if (type == ZVT_COLOR)
-            type = ZVT_INT;
-
-        if (type == ZVT_ENUM && size == sizeof(uint32_t))
-            type = ZVT_INT;  // Enum seems the be there in both 1 and 4 byte?
-    }
-
-    if (expectedType != ZVT_BYTE || type != ZVT_ENUM)  // International CSLibs have this
-        if (expectedType != ZVT_0 && type != expectedType)
-            throw std::runtime_error("Valuetype name does not match expected type. Value:" + std::string(expectedName));
-
-    switch (type)
-    {
-        case ZVT_0:
-            break;
-        case ZVT_STRING:
-        {
-            std::string str;
-            str.resize(size);
-            m_pParser->readBinaryRaw(&str[0], size);
-            *reinterpret_cast<std::string*>(target) = str;
+    if(realType==ZVT_ENUM) {
+      switch(targetSize) {
+        case 1:
+          realType = ZVT_BYTE;
+          size     = 1;
+          break;
+        case 2:
+          realType = ZVT_WORD;
+          size     = 2;
+          break;
+        case 4:
+          realType = ZVT_INT;
+          size     = 4;
+          break;
         }
+      }
+
+    if(expectedType!=realType && realType!=ZVT_0)
+      throw std::runtime_error(std::string("Valuetype name does not match expected type. Value:") + expectedName);
+
+    if(expectedType!=ZVT_RAW && expectedType!=ZVT_RAW_FLOAT && expectedType!=ZVT_STRING && realType!=ZVT_0) {
+      if(size!=targetSize)
+        throw std::runtime_error(std::string("Valuetype size does not match expected size. Value:") + expectedName);
+      }
+
+    switch(realType) {
+      case ZVT_0:
+        break;
+      case ZVT_STRING: {
+        std::string str;
+        str.resize(size);
+        m_pParser->readBinaryRaw(&str[0], size);
+        *reinterpret_cast<std::string*>(target) = str;
+        break;
+        }
+      case ZVT_HASH:
+      case ZVT_INT:
+        *reinterpret_cast<uint32_t*>(target) = m_pParser->readBinaryDWord();
+        break;
+      case ZVT_FLOAT:
+        *reinterpret_cast<float*>(target) = m_pParser->readBinaryFloat();
+        break;
+      case ZVT_BYTE:
+        *reinterpret_cast<uint8_t*>(target) = m_pParser->readBinaryByte();
+        break;
+      case ZVT_WORD:
+        *reinterpret_cast<int16_t*>(target) = m_pParser->readBinaryWord();
+        break;
+      case ZVT_BOOL:
+        *reinterpret_cast<bool*>(target) = m_pParser->readBinaryDWord() != 0;
+        break;
+      case ZVT_VEC3:
+        reinterpret_cast<ZMath::float3*>(target)->x = m_pParser->readBinaryFloat();
+        reinterpret_cast<ZMath::float3*>(target)->y = m_pParser->readBinaryFloat();
+        reinterpret_cast<ZMath::float3*>(target)->z = m_pParser->readBinaryFloat();
         break;
 
-        case ZVT_HASH:
-        case ZVT_INT:
-            *reinterpret_cast<uint32_t*>(target) = m_pParser->readBinaryDWord();
-            break;
-        case ZVT_FLOAT:
-            *reinterpret_cast<float*>(target) = m_pParser->readBinaryFloat();
-            break;
-        case ZVT_BYTE:
-            *reinterpret_cast<uint8_t*>(target) = m_pParser->readBinaryByte();
-            break;
-        case ZVT_WORD:
-            *reinterpret_cast<int16_t*>(target) = m_pParser->readBinaryWord();
-            break;
-        case ZVT_BOOL:
-            *reinterpret_cast<bool*>(target) = m_pParser->readBinaryDWord() != 0;
-            break;
-        case ZVT_VEC3:
-            reinterpret_cast<ZMath::float3*>(target)->x = m_pParser->readBinaryFloat();
-            reinterpret_cast<ZMath::float3*>(target)->y = m_pParser->readBinaryFloat();
-            reinterpret_cast<ZMath::float3*>(target)->z = m_pParser->readBinaryFloat();
-            break;
+      case ZVT_COLOR:
+        reinterpret_cast<uint8_t*>(target)[2] = m_pParser->readBinaryByte();  // FIXME: These are may ordered wrong
+        reinterpret_cast<uint8_t*>(target)[1] = m_pParser->readBinaryByte();
+        reinterpret_cast<uint8_t*>(target)[0] = m_pParser->readBinaryByte();
+        reinterpret_cast<uint8_t*>(target)[3] = m_pParser->readBinaryByte();
+        break;
 
-        case ZVT_COLOR:
-            reinterpret_cast<uint8_t*>(target)[0] = m_pParser->readBinaryByte();  // FIXME: These are may ordered wrong
-            reinterpret_cast<uint8_t*>(target)[1] = m_pParser->readBinaryByte();
-            reinterpret_cast<uint8_t*>(target)[2] = m_pParser->readBinaryByte();
-            reinterpret_cast<uint8_t*>(target)[3] = m_pParser->readBinaryByte();
-            break;
-
-        case ZVT_RAW_FLOAT:
-        case ZVT_RAW:
-            m_pParser->readBinaryRaw(target, size);
-            break;
-        case ZVT_10:
-            break;
-        case ZVT_11:
-            break;
-        case ZVT_12:
-            break;
-        case ZVT_13:
-            break;
-        case ZVT_14:
-            break;
-        case ZVT_15:
-            break;
-        case ZVT_ENUM:
-            *reinterpret_cast<uint8_t*>(target) = m_pParser->readBinaryDWord();
-            break;
-    }
+      case ZVT_RAW_FLOAT:
+      case ZVT_RAW:
+        m_pParser->readBinaryRaw(target, size);
+        break;
+      case ZVT_10:
+        break;
+      case ZVT_11:
+        break;
+      case ZVT_12:
+        break;
+      case ZVT_13:
+        break;
+      case ZVT_14:
+        break;
+      case ZVT_15:
+        break;
+      case ZVT_ENUM:
+        *reinterpret_cast<uint8_t*>(target) = m_pParser->readBinaryDWord();
+        break;
+      }
 
     // Skip potential hash-value at the end of the entry
     EZenValueType t = static_cast<EZenValueType>(m_pParser->readBinaryByte());
-    if (t != ZVT_HASH)
-        m_pParser->m_Seek -= sizeof(uint8_t);
+    if(t != ZVT_HASH)
+      m_pParser->m_Seek -= sizeof(uint8_t);
     else
-        m_pParser->m_Seek += sizeof(uint32_t);
+      m_pParser->m_Seek += sizeof(uint32_t);
 }
 
 /**

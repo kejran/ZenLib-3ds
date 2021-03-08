@@ -39,6 +39,12 @@ public:
     FT_BINSAFE
     };
 
+  enum class FileVersion
+    {
+    Gothic1,
+    Gothic2,
+    };
+
   enum ZenClass
     {
     zUnknown = 0,
@@ -46,6 +52,10 @@ public:
     zCCSLib,
     zCCSBlock,
     zCCSAtomicBlock,
+    oCCSTrigger,
+    zCAICamera,
+    zCMoverControler,
+    zCVobScreenFX,
     oCMsgConversation,
     zCDecal,
     zCProgMeshProto,
@@ -58,6 +68,7 @@ public:
     zCWaypoint,
     zCVob,
     zCVobLevelCompo,
+    zCVobStair,
     oCItem,
     zCTrigger,
     oCMOB,
@@ -148,7 +159,7 @@ public:
   /**
    * @brief reads the main oCWorld-Object, found in the level-zens
    */
-  void readWorld(oCWorldData& info, bool forceG2);
+  void readWorld(oCWorldData& info, FileVersion version);
 
   /**
    * @brief Returns the file-header
@@ -288,11 +299,6 @@ public:
   void skipEntry();
 
 private:
-  enum class WorldVersionInternal {
-    VERSION_G1_08k = 64513,
-    VERSION_G26fix = 0
-    };
-
   /**
    * @brief Skips the main header
    */
@@ -302,7 +308,7 @@ private:
     * @brief reads the worldmesh-chunk
     */
   void           readWorldMesh (oCWorldData& info);
-  size_t         readVobTree   (zCVobData& vob, WorldVersion worldVersion);
+  size_t         readVobTree   (zCVobData& vob, FileVersion version);
   void           readWayNetData(zCWayNetData& info);
   zCWaypointData readWaypoint  ();
 

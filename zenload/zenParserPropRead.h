@@ -15,76 +15,74 @@ namespace ZenLoad
     template <>
     inline void read<float>(ZenParser& p, float& outData, const char* exName)
     {
-        p.getImpl()->readEntry(exName, &outData, sizeof(float), ParserImpl::ZVT_FLOAT);
+        p.getImpl()->readEntry(exName, outData);
     }
 
     template <>
     inline void read<bool>(ZenParser& p, bool& outData, const char* exName)
     {
-        p.getImpl()->readEntry(exName, &outData, sizeof(bool), ParserImpl::ZVT_BOOL);
+      p.getImpl()->readEntry(exName, outData);
     }
 
     template <>
     inline void read<uint32_t>(ZenParser& p, uint32_t& outData, const char* exName)
     {
-        p.getImpl()->readEntry(exName, &outData, sizeof(uint32_t), ParserImpl::ZVT_INT);
+      p.getImpl()->readEntry(exName, outData);
     }
 
     template <>
     inline void read<int32_t>(ZenParser& p, int32_t& outData, const char* exName)
     {
-        p.getImpl()->readEntry(exName, &outData, sizeof(int32_t), ParserImpl::ZVT_INT);
+      p.getImpl()->readEntry(exName, outData);
     }
 
     template <>
     inline void read<uint16_t>(ZenParser& p, uint16_t& outData, const char* exName)
     {
-        p.getImpl()->readEntry(exName, &outData, sizeof(uint16_t), ParserImpl::ZVT_WORD);
+        p.getImpl()->readEntry(exName, outData);
     }
 
     template <>
     inline void read<uint8_t>(ZenParser& p, uint8_t& outData, const char* exName)
     {
-        p.getImpl()->readEntry(exName, &outData, sizeof(uint8_t), ParserImpl::ZVT_BYTE);
+      p.getImpl()->readEntry(exName, outData);
     }
 
     template <>
     inline void read<ZMath::float2>(ZenParser& p, ZMath::float2& outData, const char* exName)
     {
-        p.getImpl()->readEntry(exName, &outData, sizeof(float)*2, ParserImpl::ZVT_RAW_FLOAT);
+        p.getImpl()->readEntry(exName, outData);
     }
 
     template <>
     inline void read<ZMath::float3>(ZenParser& p, ZMath::float3& outData, const char* exName)
     {
-        p.getImpl()->readEntry(exName, &outData, sizeof(float) * 3, ParserImpl::ZVT_VEC3);
+        p.getImpl()->readEntry(exName, outData);
     }
 
     template <>
     inline void read<ZMath::float4>(ZenParser& p, ZMath::float4& outData, const char* exName)
     {
-        p.getImpl()->readEntry(exName, &outData, sizeof(float)*4, ParserImpl::ZVT_RAW_FLOAT);
+        p.getImpl()->readEntry(exName, outData);
     }
 
     template <>
     inline void read<ZMath::Matrix>(ZenParser& p, ZMath::Matrix& outData, const char* exName)
     {
-        float m[16];
-        p.getImpl()->readEntry(exName, m, sizeof(float) * 16, ParserImpl::ZVT_RAW_FLOAT);
-        outData = m;
+        p.getImpl()->readEntry(exName, outData);
     }
 
     template <>
     inline void read<std::string>(ZenParser& p, std::string& outData, const char* exName)
     {
-        p.getImpl()->readEntry(exName, &outData, 0, ParserImpl::ZVT_STRING);
+      p.getImpl()->readEntry(exName, outData);
     }
 
     template <>
     inline void read<Daedalus::ZString>(ZenParser& p, Daedalus::ZString& outData, const char* exName)
     {
         std::string val;
-        p.getImpl()->readEntry(exName, &val, 0, ParserImpl::ZVT_STRING);
+        p.getImpl()->readEntry(exName, val);
         outData = Daedalus::ZString(std::move(val));
     }
 

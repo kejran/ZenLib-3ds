@@ -8,16 +8,16 @@
 
 namespace ZenLoad
 {
-    enum class WorldVersion
+    enum WorldVersion : uint16_t
     {
-        VERSION_G1_08k = 1,
-        VERSION_G26fix = 2
+        VERSION_G1_08k = 0xFC01,
+        VERSION_G26fix = 0x9900
     };
 
     /**
 	 * Used by zCVobSound
 	 */
-    enum SoundMode : uint32_t
+    enum SoundMode : uint8_t
     {
         SM_LOOPING,
         SM_ONCE,
@@ -27,7 +27,7 @@ namespace ZenLoad
     /**
 	 * Used by zCVobSound
 	 */
-    enum SoundVolType
+    enum SoundVolType : uint8_t
     {
         SVT_SPHERE = 0,
         SVT_ELLIPSOID
@@ -43,7 +43,7 @@ namespace ZenLoad
         MT_TOOGLE_ENABLED
     };
 
-    enum MoverBehavior : uint8_t
+    enum MoverBehavior : uint32_t
     {
         STATE_TOGGLE,
         STATE_TRIGGER_CTRL,
@@ -227,35 +227,35 @@ namespace ZenLoad
             VT_zCTriggerUntouch,
         };
 
-        EVobType vobType;
+        EVobType      vobType = VT_zCVob;
 
-        uint32_t pack;
-        std::string presetName;
-        ZMath::float3 bbox[2];
-        ZMath::Matrix rotationMatrix;
-        zMAT3 rotationMatrix3x3;
-        ZMath::Matrix worldMatrix;
-        ZMath::float3 position;
-        std::string vobName;
-        std::string visual;
-        bool showVisual;
-        uint8_t visualCamAlign;
-        uint8_t visualAniMode;
-        float visualAniModeStrength;
-        float vobFarClipScale;
-        bool cdStatic;
-        bool cdDyn;
-        bool staticVob;
-        uint8_t dynamicShadow;
-        int32_t zBias;
-        bool isAmbient;
+        uint32_t      pack = 0;
+        std::string   presetName;
+        ZMath::float3 bbox[2] = {};
+        ZMath::Matrix rotationMatrix = {};
+        zMAT3         rotationMatrix3x3 = {};
+        ZMath::Matrix worldMatrix = {};
+        ZMath::float3 position    = {};
+        std::string   vobName;
+        std::string   visual;
+        bool          showVisual = false;
+        uint8_t       visualCamAlign = 0;
+        uint8_t       visualAniMode = 0;
+        float         visualAniModeStrength = 0;
+        float         vobFarClipScale= 0;
+        bool          cdStatic  = false;
+        bool          cdDyn     = false;
+        bool          staticVob = false;
+        uint8_t       dynamicShadow = 0;
+        int32_t       zBias = 0;
+        bool          isAmbient = false;
 
         // References
-        size_t visualReference;
-        size_t aiReference;
-        size_t eventMgrReference;
+        size_t visualReference   = 0;
+        size_t aiReference       = 0;
+        size_t eventMgrReference = 0;
 
-        bool physicsEnabled;
+        bool   physicsEnabled = false;
 
         struct
         {
@@ -265,7 +265,7 @@ namespace ZenLoad
             ZMath::float2 decalDim         = {};
             ZMath::float2 decalOffset      = {};
             bool          decal2Sided      = false;
-            uint8_t       decalAlphaFunc   = 0;
+            int32_t       decalAlphaFunc   = 0;
             float         decalTexAniFPS   = 0;
             uint8_t       decalAlphaWeight = 0;
             bool          ignoreDayLight   = 0;
@@ -281,26 +281,26 @@ namespace ZenLoad
         struct
         {
             std::string focusName;
-            int32_t hitpoints;
-            int32_t damage;
-            bool moveable;
-            bool takeable;
-            bool focusOverride;
-            uint8_t soundMaterial;
+            int32_t     hitpoints = 0;
+            int32_t     damage    = 0;
+            bool        moveable  = false;
+            bool        takeable  = false;
+            bool        focusOverride = false;
+            uint32_t    soundMaterial = 0;
             std::string visualDestroyed;
             std::string owner;
             std::string ownerGuild;
-            bool isDestroyed;
+            bool        isDestroyed = false;
         } oCMOB;
 
         struct
         {
-            int stateNum;
+            int         stateNum=0;
             std::string triggerTarget;
             std::string useWithItem;
             std::string conditionFunc;
             std::string onStateFunc;
-            bool rewind;
+            bool        rewind = false;
         } oCMobInter;
 
         struct
@@ -311,7 +311,7 @@ namespace ZenLoad
 
         struct
         {
-            bool locked;
+            bool        locked = false;
             std::string keyInstance;
             std::string pickLockStr;
             std::string contains;
@@ -325,12 +325,12 @@ namespace ZenLoad
         struct
         {
             std::string lightPresetInUse;
-            uint32_t lightType;
-            float range;
-            uint32_t color;
-            float spotConeAngle;
-            bool lightStatic;
-            uint32_t lightQuality;
+            uint32_t    lightType     = 0;
+            float       range         = 0;
+            uint32_t    color         = 0;
+            float       spotConeAngle = 0;
+            bool        lightStatic   = false;
+            uint32_t    lightQuality  = 0;
             std::string lensflareFX;
             struct {
               bool                  turnedOn = false;
@@ -339,41 +339,41 @@ namespace ZenLoad
               bool                  rangeAniSmooth = true;
               std::vector<uint32_t> colorAniList;
               float                 colorAniListFPS = true;
-              bool                  colorAniSmooth = true;
-              bool                  canMove = true;
+              bool                  colorAniSmooth  = true;
+              bool                  canMove         = true;
               } dynamic;
         } zCVobLight;
 
         struct
         {
-            float sndVolume;
-            SoundMode sndType;
-            float sndRandDelay;
-            float sndRandDelayVar;
-            bool sndStartOn;
-            bool sndAmbient3D;
-            bool sndObstruction;
-            float sndConeAngle;
-            SoundVolType sndVolType;
-            float sndRadius;
-            std::string sndName;
+            float        sndVolume       = 0;
+            SoundMode    sndType         = SM_LOOPING;
+            float        sndRandDelay    = 0;
+            float        sndRandDelayVar = 0;
+            bool         sndStartOn      = false;
+            bool         sndAmbient3D    = false;
+            bool         sndObstruction  = false;
+            float        sndConeAngle    = 0;
+            SoundVolType sndVolType      = SVT_SPHERE;
+            float        sndRadius       = 0;
+            std::string  sndName;
         } zCVobSound;
 
         struct
         {
-            float sndStartTime=0.f;
-            float sndEndTime=0.f;
+            float       sndStartTime=0.f;
+            float       sndEndTime=0.f;
             std::string sndName2;
         } zCVobSoundDaytime;
 
         struct
         {
-            bool     enabled=true;
-            uint32_t priority=0;
-            bool     ellipsoid=false;
-            float    reverbLevel=0;
-            float    volumeLevel=0;
-            bool     loop=false;
+            bool     enabled     = false;
+            uint32_t priority    = 0;
+            bool     ellipsoid   = false;
+            float    reverbLevel = 0;
+            float    volumeLevel = 0;
+            bool     loop        = false;
         } oCZoneMusic;
 
         struct
@@ -431,8 +431,8 @@ namespace ZenLoad
             bool          autoLinkEnable=false;
             bool          autoRotate=false;
             float         moveSpeed=0;
-            uint8_t       posLerpType=0;
-            uint8_t       speedType=0;
+            uint32_t      posLerpType=0;
+            uint32_t      speedType=0;
             std::vector<zCModelAniSample> keyframes;
             std::string   sfxOpenStart;
             std::string   sfxOpenEnd;
@@ -453,7 +453,7 @@ namespace ZenLoad
         struct
         {
             std::string triggerTarget;
-            bool        fireOnlyFirstTime;
+            bool        fireOnlyFirstTime=false;
         } oCTriggerWorldStart;
 
         struct

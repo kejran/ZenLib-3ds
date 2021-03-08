@@ -140,16 +140,50 @@ ZenLoad::ZenParser::ZenClass ZenLoad::ParserImpl::parseClassName(const char* nam
     {"zCCamTrj_KeyFrame:zCVob",                          ZenParser::zCCamTrj_KeyFrame       },
     {"oCTouchDamage:zCTouchDamage:zCVob",                ZenParser::oCTouchDamage           },
     {"zCEarthquake:zCVob",                               ZenParser::zCEarthquake            },
-    {"zCAICamera",                                       ZenParser::zUnknown                },
-    {"zCMoverControler:zCVob",                           ZenParser::zUnknown                },
-    {"zCVobScreenFX:zCVob",                              ZenParser::zUnknown                },
-    {"zCVobStair:zCVob",                                 ZenParser::zUnknown                },
-    {"oCCSTrigger:zCTrigger:zCVob",                      ZenParser::zUnknown                },
-   };
+    {"zCAICamera",                                       ZenParser::zCAICamera              },
+    {"zCMoverControler:zCVob",                           ZenParser::zCMoverControler        },
+    {"zCVobScreenFX:zCVob",                              ZenParser::zCVobScreenFX           },
+    {"zCVobStair:zCVob",                                 ZenParser::zCVobStair              },
+    {"oCCSTrigger:zCTrigger:zCVob",                      ZenParser::oCCSTrigger             },
+  };
 
- for(auto& i:cls) {
+  for(auto& i:cls) {
     if(std::strlen(i.first)==len && std::memcmp(i.first,name,len)==0)
       return i.second;
     }
   return ZenParser::zUnknown;
+  }
+
+size_t ZenLoad::ParserImpl::valueTypeSize(ZenLoad::ParserImpl::EZenValueType type) {
+  switch(type) {
+    // Byte sized
+    case ZVT_BOOL:
+    case ZVT_BYTE:
+    case ZVT_ENUM:
+      return sizeof(uint8_t);
+    case ZVT_WORD:
+      return sizeof(uint16_t);
+    // 32-bit
+    case ZVT_INT:
+    case ZVT_HASH:
+    case ZVT_FLOAT:
+    case ZVT_COLOR:
+      return sizeof(uint32_t);
+    case ZVT_VEC3:
+      return sizeof(float)*3;
+    // Raw
+    case ZVT_RAW_FLOAT:
+    case ZVT_RAW:
+      return 0;
+    case ZVT_STRING:
+    case ZVT_0:
+    case ZVT_10:
+    case ZVT_11:
+    case ZVT_12:
+    case ZVT_13:
+    case ZVT_14:
+    case ZVT_15:
+      return 0;
+    }
+  return 0;
   }

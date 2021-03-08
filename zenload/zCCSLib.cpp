@@ -47,8 +47,8 @@ void zCCSLib::readObjectData(ZenParser& parser)
 
     assert(libHeader.classId == ZenParser::zCCSLib);
 
-    uint32_t numItems;
-    parser.getImpl()->readEntry("NumOfItems", &numItems, sizeof(numItems), ParserImpl::ZVT_INT);
+    uint32_t numItems = 0;
+    parser.getImpl()->readEntry("NumOfItems", numItems);
 
     LogInfo() << "Reading " << numItems << " blocks";
 
@@ -57,13 +57,18 @@ void zCCSLib::readObjectData(ZenParser& parser)
         ZenParser::ChunkHeader blockHeader;
         parser.readChunkStart(blockHeader);
 
+        if(blockHeader.classId!=ZenParser::zCCSBlock)  {
+          parser.skipChunk();
+          continue;
+          }
+
         zCCSBlockData blk;
-        uint32_t numBlocks;
-        float subBlock0;
+        uint32_t      numBlocks = 1;
+        float         subBlock0;
         ReadObjectProperties(parser,
-                             Prop("blockName", blk.blockName),
+                             Prop("blockName",   blk.blockName),
                              Prop("numOfBlocks", numBlocks),
-                             Prop("subBlock0", subBlock0));
+                             Prop("subBlock0",   subBlock0));
 
         // Haven't seen different values for these
         assert(numBlocks == 1);
@@ -71,36 +76,27 @@ void zCCSLib::readObjectData(ZenParser& parser)
 
         // Read the single atomic block
         {
-            ZenParser::ChunkHeader atomicHeader;
+        ZenParser::ChunkHeader atomicHeader;
+        parser.readChunkStart(atomicHeader);
+        // Read event-message of atomic block
+        {
+        ZenParser::ChunkHeader messageHeader;
+        parser.readChunkStart(messageHeader);
+        ReadObjectProperties(parser,
+                             Prop("subType", blk.atomicBlockData.command.subType),
+                             Prop("text", blk.atomicBlockData.command.text),
+                             Prop("name", blk.atomicBlockData.command.name));
 
-            parser.readChunkStart(atomicHeader);
-
-            // Read event-message of atomic block
-            {
-                ZenParser::ChunkHeader messageHeader;
-                parser.readChunkStart(messageHeader);
-
-                /*parser.getImpl()->readEntry("subtype", &blk.atomicBlockData.command.subType, 1, ZenLoad::ParserImpl::ZVT_ENUM);
-				parser.getImpl()->readEntry("text", &blk.atomicBlockData.command.text, 0, ZenLoad::ParserImpl::ZVT_STRING);
-				parser.getImpl()->readEntry("name", &blk.atomicBlockData.command.name, 0, ZenLoad::ParserImpl::ZVT_STRING);*/
-
-                ReadObjectProperties(parser,
-                                     Prop("subType", blk.atomicBlockData.command.subType),
-                                     Prop("text", blk.atomicBlockData.command.text),
-                                     Prop("name", blk.atomicBlockData.command.name));
-
-                //LogInfo() << "Read message: " << blk.atomicBlockData.command.name;
-
-                parser.readChunkEnd();
-                //parser.skipChunk();
-            }
-
-            parser.readChunkEnd();
-            //parser.skipChunk();
+        //LogInfo() << "Read message: " << blk.atomicBlockData.command.name;
+        if(!parser.readChunkEnd())
+          parser.skipChunk();
         }
-        //parser.skipChunk();
 
-        parser.readChunkEnd();
+        if(!parser.readChunkEnd())
+          parser.skipChunk();
+        }
+        if(!parser.readChunkEnd())
+          parser.skipChunk();
 
         info.blocks.push_back(blk.atomicBlockData);
 
