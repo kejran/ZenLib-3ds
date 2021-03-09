@@ -1,5 +1,7 @@
 #include "parserImpl.h"
 
+#include <cctype>
+
 ZenLoad::ParserImpl::ParserImpl(ZenParser* parser)
     : m_pParser(parser)
   {
@@ -42,11 +44,11 @@ bool ZenLoad::ParserImpl::parseHeader(ZenLoad::ZenParser::ChunkHeader& header, c
 
   Token tokType = T_Name;
   for(size_t i=0; i<vobDescriptorLen; ++i) {
-    if(std::isspace(vobDescriptor[i]))
+    if(vobDescriptor[i]==' ' || vobDescriptor[i]=='\t')
       continue;
     const char* tok = &vobDescriptor[i];
     size_t      len = 0;
-    while(i<vobDescriptorLen && !std::isspace(vobDescriptor[i])) {
+    while(i<vobDescriptorLen && !(vobDescriptor[i]==' ' || vobDescriptor[i]=='\t')) {
       ++i;
       ++len;
       }

@@ -1,5 +1,7 @@
 #include "parserImplASCII.h"
+
 #include <algorithm>
+#include <cctype>
 #include "utils/logger.h"
 
 using namespace ZenLoad;
@@ -338,7 +340,7 @@ void ParserImplASCII::parseFloatVec(const char* line, float* target, size_t targ
   for(size_t i=0; i<targetSize; ++i) {
     if(*line=='\0')
       break;
-    while(std::isspace(*line))
+    while(*line==' ' || *line=='\t')
       ++line;
     size_t pos = 0;
     target[i] = std::stof(line,&pos);
@@ -351,7 +353,7 @@ void ParserImplASCII::parseColor(const char* line, uint8_t* target, size_t targe
   for(size_t i=0; i<targetSize; ++i) {
     if(*line=='\0')
       break;
-    while(std::isspace(*line))
+    while(*line==' ' || *line=='\t')
       ++line;
     size_t pos = 0;
     target[i] = std::stoi(line,&pos);
