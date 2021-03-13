@@ -577,7 +577,7 @@ namespace ZenLoad
 
     struct oCMsgConversationData : public ParsedZenObject
     {
-        uint8_t           subType;
+        uint32_t          subType = 0;
         Daedalus::ZString text;
         Daedalus::ZString name;
     };
