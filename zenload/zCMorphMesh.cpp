@@ -27,19 +27,8 @@ zCMorphMesh::zCMorphMesh(const std::string& fileName, const VDFS::FileIndex& fil
     if (data.empty())
         return;  // TODO: Throw an exception or something
 
-    try
-    {
-        // Create parser from memory
-        // FIXME: There is an internal copy of the data here. Optimize!
-        ZenLoad::ZenParser parser(data.data(), data.size());
-
-        readObjectData(parser);
-    }
-    catch (std::exception& e)
-    {
-        LogError() << e.what();
-        return;
-    }
+    ZenLoad::ZenParser parser(data.data(), data.size());
+    readObjectData(parser);
 }
 
 /**
