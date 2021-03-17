@@ -840,16 +840,17 @@ namespace ZenLoad
     {
         struct SubMesh
         {
-            zCMaterialData material;
+            zCMaterialData        material;
             std::vector<uint32_t> indices;
-            std::vector<int16_t> triangleLightmapIndices;  // Index values to the texture found in zCMesh
+            std::vector<int16_t>  triangleLightmapIndices;  // Index values to the texture found in zCMesh
         };
 
         std::vector<WorldTriangle> triangles;  // Use index / 3 to access these
-        std::vector<WorldVertex> vertices;
-        std::vector<SubMesh> subMeshes;
-        ZMath::float3 bbox[2];
-        bool          isUsingAlphaTest = false;
+        std::vector<WorldVertex>   vertices;
+        std::vector<uint32_t>      verticesId; // only for morph meshes
+        std::vector<SubMesh>       subMeshes;
+        ZMath::float3              bbox[2];
+        bool                       isUsingAlphaTest = false;
     };
 
     struct PackedSkeletalMesh

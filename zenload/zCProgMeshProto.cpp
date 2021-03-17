@@ -247,7 +247,7 @@ void ZenLoad::zCProgMeshProto::packVertices(std::vector<WorldVertex>& vxs, std::
 
             WorldVertex v;
             v.Position = m_Vertices[wedge.m_VertexIndex] * scale;
-            v.Normal = wedge.m_Normal;
+            v.Normal   = wedge.m_Normal;
             v.TexCoord = wedge.m_Texcoord;
             //v.TexCoord2 = float2(0,0);
             v.Color = 0xFFFFFFFF;  // TODO: Apply color from material!
@@ -274,33 +274,55 @@ void ZenLoad::zCProgMeshProto::packVertices(std::vector<WorldVertex>& vxs, std::
 /**
 * @brief Creates packed submesh-data
 */
-void zCProgMeshProto::packMesh(PackedMesh& mesh, float scale) const
-{
-    std::vector<uint32_t> submeshIndexStarts;
-    std::vector<uint32_t> indices;
-    packVertices(mesh.vertices, indices, 0, submeshIndexStarts, scale);
+void zCProgMeshProto::packMesh(PackedMesh& mesh, bool noVertexId) const {
+  // Put in all materials. There could be more than there are submeshes for animated textures or headmeshes
+  mesh.subMeshes.resize(std::max(m_Materials.size(), m_SubMeshes.size()));
+  mesh.bbox[0]          = m_BBMin;
+  mesh.bbox[1]          = m_BBMax;
+  mesh.isUsingAlphaTest = m_IsUsingAlphaTest;
 
-    // Put in all materials. There could be more than there are submeshes for animated textures or headmeshes
-    mesh.subMeshes.resize(std::max(m_Materials.size(), m_SubMeshes.size()));
-    for (size_t i = 0; i < m_SubMeshes.size(); i++)
-    {
-        auto& sm = mesh.subMeshes[i];
-        sm.material = m_SubMeshes[i].m_Material;
-    }
+  size_t vboSize = 0;
+  for(auto& sm:m_SubMeshes)
+    vboSize += sm.m_WedgeList.size();
 
-    // Create objects for all submeshes
-    for (size_t i = 0; i < m_SubMeshes.size(); i++)
-    {
-        auto& sm = mesh.subMeshes[i];
+  mesh.vertices.resize(vboSize);
+  if(!noVertexId)
+    mesh.verticesId.resize(vboSize);
 
-        // Get indices
-        for (size_t j = submeshIndexStarts[i]; j < submeshIndexStarts[i] + m_SubMeshes[i].m_TriangleList.size() * 3; j++)
-        {
-            sm.indices.push_back(indices[j]);
+  auto* vbo = mesh.vertices.data();
+  auto* vId = mesh.verticesId.data();
+
+  uint32_t meshVxStart = 0;
+  for(size_t smI=0; smI<m_SubMeshes.size(); ++smI) {
+    const auto& sm   = m_SubMeshes[smI];
+    auto&       pack = mesh.subMeshes[smI];
+
+    pack.material = sm.m_Material;
+
+    for(size_t i=0; i<sm.m_WedgeList.size(); ++i) {
+      const zWedge& wedge = sm.m_WedgeList[i];
+
+      vbo->Position = m_Vertices[wedge.m_VertexIndex];
+      vbo->Normal   = wedge.m_Normal;
+      vbo->TexCoord = wedge.m_Texcoord;
+      vbo->Color    = 0xFFFFFFFF;  // TODO: Apply color from material!
+      ++vbo;
+
+      if(!noVertexId) {
+        *vId = wedge.m_VertexIndex;
+        ++vId;
         }
-    }
+      }
 
-    mesh.bbox[0] = m_BBMin * scale;
-    mesh.bbox[1] = m_BBMax * scale;
-    mesh.isUsingAlphaTest = m_IsUsingAlphaTest;
-}
+    // And get the indices
+    pack.indices.resize(3*sm.m_TriangleList.size());
+    for(size_t i=0; i<sm.m_TriangleList.size(); ++i) {
+      for(int j=0; j<3; ++j) {
+        pack.indices[i*3+j] = (sm.m_TriangleList[i].m_Wedges[j]  // Take wedge-index of submesh
+                               + meshVxStart);                   // And add the starting location of the vertices for this submesh
+        }
+      }
+
+    meshVxStart += uint32_t(sm.m_WedgeList.size());
+    }
+  }

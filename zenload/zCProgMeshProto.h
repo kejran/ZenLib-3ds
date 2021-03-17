@@ -78,7 +78,7 @@ namespace ZenLoad
         /**
 		* @brief Creates packed submesh-data
 		*/
-        void packMesh(PackedMesh& mesh, float scale = 1.0f) const;
+        void packMesh(PackedMesh& mesh, bool noVertexId = true) const;
 
         /**
 		* @brief Packs vertices only

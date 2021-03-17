@@ -16,6 +16,7 @@ class zCMorphMesh {
   public:
     struct Animation {
       std::string                name;
+      int32_t                    layer=0;
       std::vector<uint32_t>      vertexIndex;
       std::vector<ZMath::float3> samples;
       uint32_t                   numFrames=0;
