@@ -242,12 +242,10 @@ void zCModelMeshLib::loadMDL(ZenParser& parser, float scale)
 /**
 * @brief Creates packed submesh-data
 */
-void zCModelMeshLib::packMesh(PackedSkeletalMesh& mesh, float scale) const
+void zCModelMeshLib::packMesh(PackedSkeletalMesh& mesh) const
 {
     for (const auto& m : m_Meshes)
-    {
-        m.packMesh(mesh, scale);
-    }
+        m.packMesh(mesh);
 
     mesh.bbox[0] = {FLT_MAX, FLT_MAX, FLT_MAX};
     mesh.bbox[1] = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
@@ -257,9 +255,6 @@ void zCModelMeshLib::packMesh(PackedSkeletalMesh& mesh, float scale) const
     {
         ZMath::float3 min, max;
         m.getAABBTotal(min, max);
-
-        min *= scale;
-        max *= scale;
 
         mesh.bbox[0].x = std::min(mesh.bbox[0].x, min.x);
         mesh.bbox[0].y = std::min(mesh.bbox[0].y, min.y);

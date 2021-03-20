@@ -81,11 +81,6 @@ namespace ZenLoad
             max = m_BBMax;
         }
 
-        /**
-		 * @brief Creates packed submesh-data
-		 */
-        void packMesh(PackedMesh& mesh, float scale = 1.0f, bool removeDoubles = true);
-
     private:
         /**
 		 * @brief vector of vertex-positions for this mesh

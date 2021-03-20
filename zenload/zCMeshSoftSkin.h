@@ -43,7 +43,7 @@ namespace ZenLoad
         /**
 		 * @brief Creates packed submesh-data
 		 */
-        void packMesh(PackedSkeletalMesh& mesh, float scale = 1.0f) const;
+        void packMesh(PackedSkeletalMesh& mesh) const;
 
         /**
 		 * @param min Output of min-part of the AABB surrounding this mesh

@@ -282,17 +282,23 @@ void zCProgMeshProto::packMesh(PackedMesh& mesh, bool noVertexId) const {
   mesh.isUsingAlphaTest = m_IsUsingAlphaTest;
 
   size_t vboSize = 0;
-  for(auto& sm:m_SubMeshes)
+  size_t iboSize = 0;
+  for(auto& sm:m_SubMeshes) {
     vboSize += sm.m_WedgeList.size();
+    iboSize += sm.m_TriangleList.size()*3;
+    }
 
   mesh.vertices.resize(vboSize);
+  mesh.indices .resize(iboSize);
   if(!noVertexId)
     mesh.verticesId.resize(vboSize);
 
   auto* vbo = mesh.vertices.data();
+  auto* ibo = mesh.indices.data();
   auto* vId = mesh.verticesId.data();
 
   uint32_t meshVxStart = 0;
+  uint32_t meshIxStart = 0;
   for(size_t smI=0; smI<m_SubMeshes.size(); ++smI) {
     const auto& sm   = m_SubMeshes[smI];
     auto&       pack = mesh.subMeshes[smI];
@@ -314,12 +320,19 @@ void zCProgMeshProto::packMesh(PackedMesh& mesh, bool noVertexId) const {
         }
       }
 
+    pack.indexOffset = meshIxStart;
+    pack.indexSize   = sm.m_TriangleList.size()*3;
+    meshIxStart += sm.m_TriangleList.size()*3;
+
     // And get the indices
-    pack.indices.resize(3*sm.m_TriangleList.size());
+    // pack.indices.resize(3*sm.m_TriangleList.size());
     for(size_t i=0; i<sm.m_TriangleList.size(); ++i) {
       for(int j=0; j<3; ++j) {
-        pack.indices[i*3+j] = (sm.m_TriangleList[i].m_Wedges[j]  // Take wedge-index of submesh
-                               + meshVxStart);                   // And add the starting location of the vertices for this submesh
+        uint32_t id = sm.m_TriangleList[i].m_Wedges[j] // Take wedge-index of submesh
+                      + meshVxStart;                   // And add the starting location of the vertices for this submesh
+        *ibo = id;
+        ++ibo;
+        //pack.indices[i*3+j] = id;
         }
       }
 

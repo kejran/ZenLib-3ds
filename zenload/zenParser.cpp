@@ -234,15 +234,21 @@ bool ZenParser::readBoolASCII()
  */
 std::string ZenParser::readString(bool skip)
 {
-    if (skip)
-        skipSpaces();
+    if(skip)
+      skipSpaces();
 
-    std::string str;
-    while (m_Data[m_Seek] != '\r' && m_Data[m_Seek] != '\n' && m_Data[m_Seek] != ' ')
-    {
-        str += m_Data[m_Seek];
+    const char* begin = reinterpret_cast<const char*>(m_Data+m_Seek);
+    size_t      size  = 0;
+    while(m_Seek<m_DataSize) {
+      if(m_Data[m_Seek]=='\n' || m_Data[m_Seek]=='\r' || m_Data[m_Seek]==' ') {
         ++m_Seek;
-    }
+        break;
+        }
+      ++size;
+      ++m_Seek;
+      }
+
+    std::string str(begin,size);
     return str;
 }
 

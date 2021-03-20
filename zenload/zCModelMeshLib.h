@@ -56,7 +56,7 @@ namespace ZenLoad
         /**
          * @brief Creates packed submesh-data
          */
-        void packMesh(PackedSkeletalMesh& mesh, float scale = 1.0f) const;
+        void packMesh(PackedSkeletalMesh& mesh) const;
 
         /**
          * @return List of meshes registered in this library

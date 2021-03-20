@@ -132,101 +132,83 @@ void zCMeshSoftSkin::readObjectData(ZenParser& parser) {
 /**
 * @brief Creates packed submesh-data
 */
-void zCMeshSoftSkin::packMesh(PackedSkeletalMesh& mesh, float scale) const
+void zCMeshSoftSkin::packMesh(PackedSkeletalMesh& mesh) const
 {
-    std::vector<uint32_t> submeshIndexStarts;
-    std::vector<uint32_t> indices;
     std::vector<SkeletalVertex> vertices(m_Mesh.getVertices().size());
+    mesh.bbox[0] = m_BBoxTotal[0];
+    mesh.bbox[1] = m_BBoxTotal[1];
 
     // Extract weights and local positions
     const uint8_t* stream = m_VertexWeightStream.data();
     //LogInfo() << "Stream size: " << m_VertexWeightStream.size();
 
-    for (size_t i = 0, end = m_Mesh.getVertices().size(); i < end; i++)
-    {
-        // Layout:
-        //	uint32_t: numWeights
-        //	numWeights* zTWeightEntry: weights
+    for(size_t i=0; i<vertices.size(); ++i) {
+      // Layout:
+      //	uint32_t: numWeights
+      //	numWeights* zTWeightEntry: weights
+      uint32_t numWeights = 0;
+      std::memcpy(&numWeights,stream,sizeof(numWeights)); stream+=sizeof(numWeights);
 
-        uint32_t numWeights;
-        Utils::getUnaligned(&numWeights, stream);
-        stream += sizeof(uint32_t);
+      for(size_t j=0; j<numWeights; j++) {
+        float weight;
+        std::memcpy(&weight,stream,sizeof(weight)); stream+=sizeof(weight);
 
-        for (size_t j = 0; j < numWeights; j++)
-        {
-            // Note: Using zTWeightEntry here causes a SIGBUS on ARM because of packing!
-            float weight;
-            Utils::getUnaligned(&weight, stream);
-            stream += sizeof(float);
+        ZMath::float3 localVertexPosition;
+        std::memcpy(&localVertexPosition,stream,sizeof(localVertexPosition)); stream+=sizeof(localVertexPosition);
 
-            ZMath::float3 localVertexPosition;
-            Utils::getUnaligned(&localVertexPosition.x, stream);
-            stream += sizeof(float);
-            Utils::getUnaligned(&localVertexPosition.y, stream);
-            stream += sizeof(float);
-            Utils::getUnaligned(&localVertexPosition.z, stream);
-            stream += sizeof(float);
+        uint8_t nodeIndex = 0;
+        std::memcpy(&nodeIndex,stream,sizeof(nodeIndex)); stream+=sizeof(nodeIndex);
 
-            unsigned char nodeIndex;
-            Utils::getUnaligned(&nodeIndex, stream);
-            stream += sizeof(uint8_t);
-
-            // Move data to our structure
-            vertices[i].BoneIndices[j] = nodeIndex;
-            vertices[i].LocalPositions[j] = localVertexPosition * scale;
-            vertices[i].Weights[j] = weight;
+        vertices[i].BoneIndices[j]    = nodeIndex;
+        vertices[i].LocalPositions[j] = localVertexPosition;
+        vertices[i].Weights[j]        = weight;
         }
-    }
+      }
 
-    for (size_t s = 0; s < m_Mesh.getNumSubmeshes(); s++)
-    {
-        const zCProgMeshProto::SubMesh& sm = m_Mesh.getSubmesh(s);
+    size_t vboSize = 0;
+    size_t iboSize = 0;
+    for(size_t s=0; s<m_Mesh.getNumSubmeshes(); s++) {
+      const zCProgMeshProto::SubMesh& sm = m_Mesh.getSubmesh(s);
+      vboSize += sm.m_WedgeList.size();
+      iboSize += sm.m_TriangleList.size()*3;
+      }
 
-        uint32_t meshVxStart = uint32_t(mesh.vertices.size());
+    mesh.vertices.resize(vboSize);
+    mesh.indices .resize(iboSize);
+    mesh.subMeshes.resize(m_Mesh.getNumSubmeshes());
+    auto* vbo = mesh.vertices.data();
+    auto* ibo = mesh.indices.data();
 
-        // Get data
-        for (size_t i = 0; i < sm.m_WedgeList.size(); i++)
-        {
-            const zWedge& wedge = sm.m_WedgeList[i];
+    uint32_t meshVxStart = 0, iboStart = 0;
+    for(size_t s=0; s<m_Mesh.getNumSubmeshes(); s++) {
+      const zCProgMeshProto::SubMesh& sm = m_Mesh.getSubmesh(s);
+      // Get data
+      for(size_t i=0; i<sm.m_WedgeList.size(); ++i) {
+        const zWedge&  wedge = sm.m_WedgeList[i];
+        SkeletalVertex v     = vertices[wedge.m_VertexIndex];
 
-            SkeletalVertex v = vertices[wedge.m_VertexIndex];
-
-            v.Normal = wedge.m_Normal;
-            v.TexCoord = wedge.m_Texcoord;
-            v.Color = 0xFFFFFFFF;  // TODO: Apply color from material!
-            mesh.vertices.push_back(v);
+        v.Normal   = wedge.m_Normal;
+        v.TexCoord = wedge.m_Texcoord;
+        v.Color    = 0xFFFFFFFF;  // TODO: Apply color from material!
+        *vbo = v;
+        ++vbo;
         }
 
-        // Mark when the submesh starts
-        submeshIndexStarts.push_back(uint32_t(indices.size()));
-
-        // And get the indices
-        for (size_t i = 0; i < sm.m_TriangleList.size(); i++)
-        {
-            //for(int j=2;j>=0;j--)
-            for (int j = 0; j < 3; j++)
-            {
-                indices.push_back((sm.m_TriangleList[i].m_Wedges[j])  // Take wedge-index of submesh
-                                  + meshVxStart);                     // And add the starting location of the vertices for this submesh
-            }
+      // And get the indices
+      for(size_t i=0; i<sm.m_TriangleList.size(); ++i) {
+        for(int j=0; j<3; j++) {
+          *ibo = sm.m_TriangleList[i].m_Wedges[j] + meshVxStart;
+          ++ibo;
+          }
         }
-    }
 
-    // Create objects for all submeshes
-    for (size_t i = 0; i < m_Mesh.getNumSubmeshes(); i++)
-    {
-        mesh.subMeshes.emplace_back();
-        mesh.subMeshes.back().material = m_Mesh.getSubmesh(i).m_Material;
-
-        // Get indices
-        for (size_t j = submeshIndexStarts[i]; j < submeshIndexStarts[i] + m_Mesh.getSubmesh(i).m_TriangleList.size() * 3; j++)
-        {
-            mesh.subMeshes.back().indices.push_back(indices[j]);
-        }
-    }
-
-    mesh.bbox[0] = m_BBoxTotal[0] * scale;
-    mesh.bbox[1] = m_BBoxTotal[1] * scale;
+      auto& pack = mesh.subMeshes[s];
+      pack.indexOffset = iboStart;
+      pack.indexSize   = sm.m_TriangleList.size()*3;
+      pack.material    = sm.m_Material;
+      meshVxStart += uint32_t(sm.m_WedgeList.size());
+      iboStart    += uint32_t(sm.m_TriangleList.size()*3);
+      }
 }
 
 void zCMeshSoftSkin::updateBboxTotal()

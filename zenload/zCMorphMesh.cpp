@@ -60,7 +60,7 @@ void zCMorphMesh::readObjectData(ZenParser& parser) {
 
         // TODO: use these
         std::vector<ZMath::float3> morphPositions(m_Mesh.getVertices().size());
-        parser.readBinaryRaw(morphPositions.data(), sizeof(ZMath::float3) * m_Mesh.getVertices().size());
+        parser.readBinaryRaw(morphPositions.data(), sizeof(ZMath::float3) * morphPositions.size());
         break;
         }
 
@@ -70,16 +70,16 @@ void zCMorphMesh::readObjectData(ZenParser& parser) {
         parser.readBinaryRaw(&aniTotal,2);
         aniList.resize(aniTotal);
         for(auto& i:aniList) {
-          float   unknown0[4] = {};
-          float   unknown1 = 0;
           uint8_t flag0 = 0;
 
           i.name = parser.readString(false);
-          parser.setSeek(parser.getSeek()+1);
+          // parser.setSeek(parser.getSeek()+1);
+          parser.readBinaryRaw(&i.blendIn, 4);
+          parser.readBinaryRaw(&i.blendOut,4);
+          parser.readBinaryRaw(&i.duration,4);
+          parser.readBinaryRaw(&i.layer,   4);
+          parser.readBinaryRaw(&i.speed,   4);
 
-          parser.readBinaryRaw(unknown0,4*3);
-          parser.readBinaryRaw(&i.layer,4);
-          parser.readBinaryRaw(&unknown1,4);
           parser.readBinaryRaw(&flag0,1);
 
           uint32_t indexSz=parser.readBinaryDWord();
