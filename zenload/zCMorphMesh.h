@@ -21,6 +21,7 @@ class zCMorphMesh {
       float                      blendOut = 0;
       float                      duration = 0;
       float                      speed    = 0;
+      uint8_t                    flags    = 0;
 
       std::vector<uint32_t>      vertexIndex;
       std::vector<ZMath::float3> samples;

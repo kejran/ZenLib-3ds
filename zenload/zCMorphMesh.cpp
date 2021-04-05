@@ -70,17 +70,14 @@ void zCMorphMesh::readObjectData(ZenParser& parser) {
         parser.readBinaryRaw(&aniTotal,2);
         aniList.resize(aniTotal);
         for(auto& i:aniList) {
-          uint8_t flag0 = 0;
-
           i.name = parser.readString(false);
-          // parser.setSeek(parser.getSeek()+1);
           parser.readBinaryRaw(&i.blendIn, 4);
           parser.readBinaryRaw(&i.blendOut,4);
           parser.readBinaryRaw(&i.duration,4);
           parser.readBinaryRaw(&i.layer,   4);
-          parser.readBinaryRaw(&i.speed,   4);
 
-          parser.readBinaryRaw(&flag0,1);
+          parser.readBinaryRaw(&i.speed, 4);
+          parser.readBinaryRaw(&i.flags, 1);
 
           uint32_t indexSz=parser.readBinaryDWord();
           i.numFrames = parser.readBinaryDWord();
