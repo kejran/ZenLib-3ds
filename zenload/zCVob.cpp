@@ -224,8 +224,17 @@ static void read_zCVob_zCTrigger_zCTriggerUntouch(zCVobData &info, ZenParser &pa
 
   auto& rd = *parser.getImpl();
   info.vobType = zCVobData::VT_zCTriggerUntouch;
-  info.vobType = zCVobData::VT_zCVob; // TODO
   rd.readEntry("triggerTarget", info.zCTriggerUntouch.triggerTarget);
+  }
+
+static void read_zCVob_zCTrigger_zCMoverControler(zCVobData &info, ZenParser &parser, ZenParser::FileVersion version) {
+  read_zCVob(info,parser,version);
+
+  auto& rd = *parser.getImpl();
+  info.vobType = zCVobData::VT_zCMoverControler;
+  rd.readEntry("triggerTarget", info.zCMoverControler.triggerTarget);
+  rd.readEntry("moverMessage",  reinterpret_cast<uint8_t&>(info.zCMoverControler.moverMessage));
+  rd.readEntry("gotoFixedKey",  info.zCMoverControler.gotoFixedKey);
   }
 
 static void read_zCVob_zCTrigger_zCTriggerList(zCVobData &info, ZenParser &parser, ZenParser::FileVersion version) {
@@ -556,6 +565,7 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
     case ZenParser::zCCSAtomicBlock:
     case ZenParser::oCMsgConversation:
       return;
+    case ZenParser::zCVobStair:
     case ZenParser::zCVob:
       return read_zCVob(info,parser,version);
     case ZenParser::zCVobLevelCompo:
@@ -620,6 +630,7 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
       return read_zCCodeMaster(info,parser,version);
 
     case ZenParser::zCTrigger:
+    case ZenParser::oCCSTrigger:
       return read_zCVob_zCTrigger(info,parser,version);
     case ZenParser::zCTriggerList:
       return read_zCVob_zCTrigger_zCTriggerList(info,parser,version);
@@ -632,9 +643,12 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
     case ZenParser::zCTriggerWorldStart:
       return read_zCVob_zCTrigger_zCTriggerWorldStart(info,parser,version);
     case ZenParser::zCTriggerUntouch:
-      return read_zCVob_zCTrigger_zCTriggerUntouch(info,parser,version); // TODO
+      return read_zCVob_zCTrigger_zCTriggerUntouch(info,parser,version);
+    case ZenParser::zCMoverControler:
+      return read_zCVob_zCTrigger_zCMoverControler(info,parser,version);
 
     case ZenParser::zCCSCamera:
+      return read_zCVob(info,parser,version);
     case ZenParser::zCCamTrj_KeyFrame:
       return read_zCVob(info,parser,version);
     case ZenParser::oCTouchDamage:
@@ -642,10 +656,7 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
     case ZenParser::zCEarthquake:
       return read_zCVob(info,parser,version);
 
-    case ZenParser::oCCSTrigger:
-    case ZenParser::zCMoverControler:
     case ZenParser::zCVobScreenFX:
-    case ZenParser::zCVobStair:
       break;
     }
 

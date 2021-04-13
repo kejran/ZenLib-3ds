@@ -52,6 +52,14 @@ namespace ZenLoad
         NSTATE_SINGLE_KEYS,
     };
 
+    enum MoverMessage : uint8_t
+    {
+        GOTO_KEY_FIXED_DIRECTLY = 0,
+        GOTO_KEY_FIXED_ORDER,
+        GOTO_KEY_NEXT,
+        GOTO_KEY_PREV,
+    };
+
     using SectorIndex = uint32_t;
     enum : uint32_t { SECTOR_INDEX_INVALID = uint32_t(-1) };
 
@@ -225,6 +233,7 @@ namespace ZenLoad
             VT_zCPFXControler,
             VT_oCTouchDamage,
             VT_zCTriggerUntouch,
+            VT_zCMoverControler,
         };
 
         EVobType      vobType = VT_zCVob;
@@ -409,6 +418,13 @@ namespace ZenLoad
         {
           std::string triggerTarget;
         } zCTriggerUntouch;
+
+        struct
+        {
+          std::string  triggerTarget;
+          MoverMessage moverMessage = GOTO_KEY_FIXED_DIRECTLY;
+          int32_t      gotoFixedKey = 0;
+        } zCMoverControler;
 
         struct
         {
