@@ -657,10 +657,10 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
       return read_zCVob(info,parser,version);
 
     case ZenParser::zCVobScreenFX:
-      break;
+      return read_zCVob(info,parser,version);
     }
 
-  LogInfo() << "skip: \"" << header.classId << "\"";
+  LogInfo() << "skip zCVob, classId = \"" << header.classId << "\"";
   }
 
 void zCVob::readObjectData(zCVobData &info, ZenParser &parser,
