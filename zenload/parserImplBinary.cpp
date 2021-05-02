@@ -18,11 +18,12 @@ bool ParserImplBinary::readChunkStart(ZenParser::ChunkHeader& header)
     uint16_t version     = m_pParser->readBinaryWord();
     uint32_t objectIndex = m_pParser->readBinaryDWord();
 
-    m_pParser->skipSpaces();
+    // m_pParser->skipSpaces();
 
     // Skip chunk-header
-    header.name      = m_pParser->readLine();
-    m_pParser->readLine(); // classname
+    header.name      = m_pParser->readLine(false);
+    auto cls = m_pParser->readLine(false); // classname
+    header.classId   = parseClassName(cls.data(),cls.size());
     header.objectID  = objectIndex;
     header.size      = chunksize;
     header.version   = version;
@@ -73,7 +74,7 @@ bool ParserImplBinary::readString(char* buf, size_t size)
 void ParserImplBinary::readEntryImpl(const char* /*expectedName*/, void* target, size_t targetSize, EZenValueType expectedType) {
   // Special case for strings, they're read until 0-bytes
   if(expectedType == ZVT_STRING) {
-    *reinterpret_cast<std::string*>(target) = readString();
+    *reinterpret_cast<std::string*>(target) = m_pParser->readLine(false);
     return;
     }
 

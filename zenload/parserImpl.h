@@ -70,6 +70,7 @@ class ParserImpl {
     void readEntry(const char* name, ZMath::float3& target) { readEntryImpl(name, &target, sizeof(target), ZVT_VEC3     ); }
     void readEntry(const char* name, ZMath::float4& target) { readEntryImpl(name, &target, sizeof(target), ZVT_RAW_FLOAT); }
     void readEntry(const char* name, ZMath::Matrix& target) { readEntryImpl(name, &target, sizeof(target), ZVT_RAW_FLOAT); }
+    void readEntry(const char* name, Daedalus::ZString& tg) { std::string s; this->readEntry(name,s); tg = Daedalus::ZString(std::move(s)); }
 
     void readEntry(const char* name, void* target, size_t size) { readEntryImpl(name, target, size, ZVT_RAW); }
 

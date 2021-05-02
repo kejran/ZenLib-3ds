@@ -26,15 +26,7 @@ zCCSLib::zCCSLib(const std::string& fileName, const VDFS::FileIndex& fileIndex)
 
 zCCSLib::zCCSLib(ZenParser &parser)
 {
-  try
-  {
-      readObjectData(parser);
-  }
-  catch (std::exception& e)
-  {
-      LogError() << e.what();
-      return;
-  }
+  readObjectData(parser);
 }
 
 void zCCSLib::readObjectData(ZenParser& parser)
@@ -55,8 +47,10 @@ void zCCSLib::readObjectData(ZenParser& parser)
 
     for (uint32_t i = 0; i < numItems; i++)
     {
+        size_t chEnd = parser.getSeek();
         ZenParser::ChunkHeader blockHeader;
         parser.readChunkStart(blockHeader);
+        chEnd += blockHeader.size;
 
         if(blockHeader.classId!=ZenParser::zCCSBlock)  {
           parser.skipChunk();
@@ -65,7 +59,7 @@ void zCCSLib::readObjectData(ZenParser& parser)
 
         zCCSBlockData blk;
         uint32_t      numBlocks = 1;
-        float         subBlock0;
+        float         subBlock0 = 0;
         ReadObjectProperties(parser,
                              Prop("blockName",   blk.blockName),
                              Prop("numOfBlocks", numBlocks),
@@ -73,7 +67,7 @@ void zCCSLib::readObjectData(ZenParser& parser)
 
         // Haven't seen different values for these
         assert(numBlocks == 1);
-        assert(subBlock0 == 0.0f);
+        assert(subBlock0 == 0.f);
 
         // Read the single atomic block
         {
@@ -98,6 +92,9 @@ void zCCSLib::readObjectData(ZenParser& parser)
         }
         if(!parser.readChunkEnd())
           parser.skipChunk();
+
+        if(blockHeader.size!=0)
+          parser.setSeek(chEnd);
 
         info.blocks.push_back(blk.atomicBlockData);
 
