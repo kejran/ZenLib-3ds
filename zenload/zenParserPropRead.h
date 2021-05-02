@@ -81,9 +81,7 @@ namespace ZenLoad
     template <>
     inline void read<Daedalus::ZString>(ZenParser& p, Daedalus::ZString& outData, const char* exName)
     {
-        std::string val;
-        p.getImpl()->readEntry(exName, val);
-        outData = Daedalus::ZString(std::move(val));
+      p.getImpl()->readEntry(exName, outData);
     }
 
     template <typename... T>
