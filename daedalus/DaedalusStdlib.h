@@ -693,7 +693,7 @@ namespace Daedalus
             }
             void removeChoice(std::size_t index)
             {
-                subChoices.erase(subChoices.begin() + index);
+                subChoices.erase(subChoices.begin() + int(index));
             }
         };
 

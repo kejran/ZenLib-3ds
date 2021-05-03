@@ -361,7 +361,7 @@ struct PARSymbol {
     switch (properties.elemProps.type)
       {
       case EParType_Func:
-        address = v;
+        address = uint32_t(v);
 
         if (baseAddr && classMemberOffset != -1)
           *reinterpret_cast<int32_t*>(reinterpret_cast<char*>(baseAddr) + classMemberOffset + (sizeof(int32_t) * idx)) = v;
