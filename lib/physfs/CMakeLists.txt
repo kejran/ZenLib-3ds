@@ -11,7 +11,12 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
-project(PhysicsFS LANGUAGES C CXX OBJCXX)
+if(APPLE)
+  project(PhysicsFS LANGUAGES C CXX OBJCXX)
+else()
+  project(PhysicsFS LANGUAGES C CXX)
+endif()
+
 set(PHYSFS_VERSION 3.1.0)
 
 # Increment this if/when we break backwards compatibility.
