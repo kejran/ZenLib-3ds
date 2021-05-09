@@ -56,6 +56,7 @@ namespace ZenLoad {
       virtual Chunk parse();
 
       std::vector<std::string>                  meshesASC;
+      zCModelScriptMeshAndThree                 meshAndThree;
       zCModelScriptAni                          ani;
       zCModelScriptAniAlias                     alias;
       zCModelScriptAniCombine                   comb;

@@ -35,7 +35,7 @@ namespace ZenLoad
         /**
          * @brief Loads the mesh from the given VDF-Archive
          */
-        zCModelMeshLib(const std::string& fileName, const VDFS::FileIndex& fileIndex, float scale = 1.0f);
+        zCModelMeshLib(const std::string& fileName, const VDFS::FileIndex& fileIndex);
 
         /**
          * @brief Reads the mesh-object from the given binary stream
@@ -46,12 +46,12 @@ namespace ZenLoad
         /**
          * @brief Reads the model hierachy from a file (MDH-File)
          */
-        void loadMDH(ZenParser& parser, float scale = 1.0f);
+        void loadMDH(ZenParser& parser);
 
         /**
          * @brief reads this lib as MDL
          */
-        void loadMDL(ZenParser& parser, float scale = 1.0f);
+        void loadMDL(ZenParser& parser);
 
         /**
          * @brief Creates packed submesh-data

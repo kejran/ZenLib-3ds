@@ -96,6 +96,13 @@ namespace ZenLoad
         float m_ColVolScale = 1.0f;
     };
 
+    struct zCModelScriptMeshAndThree
+    {
+        /// Add + ".MAN" for the animation data
+        std::string m_Name;
+        bool        m_Disabled = false;
+    };
+
     struct zCModelScriptAniAlias
     {
         /// Add + ".MAN" for the animation data

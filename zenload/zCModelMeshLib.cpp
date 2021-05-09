@@ -30,37 +30,23 @@ const uint16_t MLID_MDH_END = 0xD120;
 /**
 * @brief Loads the lib from the given VDF-Archive
 */
-zCModelMeshLib::zCModelMeshLib(const std::string& fileName, const VDFS::FileIndex& fileIndex, float scale)
+zCModelMeshLib::zCModelMeshLib(const std::string& fileName, const VDFS::FileIndex& fileIndex)
 {
-    memset(m_BBox, 0, sizeof(m_BBox));
-    memset(m_BBoxCollision, 0, sizeof(m_BBoxCollision));
-
     std::vector<uint8_t> data;
     fileIndex.getFileData(fileName, data);
 
-    if (data.empty())
-    {
-        return;  // TODO: Throw an exception or something
-    }
+    if(data.empty())
+      return;  // TODO: Throw an exception or something
 
-    try
-    {
-        // Create parser from memory
+    // Create parser from memory
+    ZenLoad::ZenParser parser(data.data(), data.size());
 
-        ZenLoad::ZenParser parser(data.data(), data.size());
-
-        if (fileName.find(".MDM") != std::string::npos)
-            loadMDM(parser);
-        else if (fileName.find(".MDH") != std::string::npos)
-            loadMDH(parser, scale);
-        else if (fileName.find(".MDL") != std::string::npos)
-            loadMDL(parser, scale);
-    }
-    catch (std::exception& e)
-    {
-        LogError() << e.what();
-        return;
-    }
+    if (fileName.find(".MDM") != std::string::npos)
+        loadMDM(parser);
+    else if (fileName.find(".MDH") != std::string::npos)
+        loadMDH(parser);
+    else if (fileName.find(".MDL") != std::string::npos)
+        loadMDL(parser);
 }
 
 /**
@@ -141,7 +127,7 @@ void zCModelMeshLib::loadMDM(ZenParser& parser)
 /**
 * @brief Reads the model hierachy from a file (MDH-File)
 */
-void zCModelMeshLib::loadMDH(ZenParser& parser, float scale)
+void zCModelMeshLib::loadMDH(ZenParser& parser)
 {
     // Information about the whole file we are reading here
     // BinaryFileInfo fileInfo;
@@ -193,20 +179,13 @@ void zCModelMeshLib::loadMDH(ZenParser& parser, float scale)
                     m_Nodes[i].transformLocal.Transpose();
 
                     ZMath::float3 t = m_Nodes[i].transformLocal.Translation();
-                    m_Nodes[i].transformLocal.Translation(ZMath::float3(t.x * scale, t.y * scale, t.z * scale));
+                    m_Nodes[i].transformLocal.Translation(t);
                 }
 
                 parser.readBinaryRaw(m_BBox, sizeof(m_BBox));
                 parser.readBinaryRaw(m_BBoxCollision, sizeof(m_BBoxCollision));
 
-                m_BBox[0] *= scale;
-                m_BBox[1] *= scale;
-                m_BBoxCollision[0] *= scale;
-                m_BBoxCollision[1] *= scale;
-
                 parser.readBinaryRaw(&m_RootNodeTranslation, sizeof(m_RootNodeTranslation));
-
-                m_RootNodeTranslation *= scale;
 
                 m_NodeChecksum = parser.readBinaryDWord();
 
@@ -233,9 +212,9 @@ void zCModelMeshLib::loadMDH(ZenParser& parser, float scale)
 /**
 * @brief reads this lib as MDL
 */
-void zCModelMeshLib::loadMDL(ZenParser& parser, float scale)
+void zCModelMeshLib::loadMDL(ZenParser& parser)
 {
-    loadMDH(parser, scale);
+    loadMDH(parser);
     loadMDM(parser);
 }
 

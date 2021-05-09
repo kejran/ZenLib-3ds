@@ -179,8 +179,9 @@ float MdsParserTxt::readFloat() {
 void MdsParserTxt::readMeshAndTree() {
   std::string mesh = readStr();
   std::string hint = readKeyword();
-  if(hint!="DONT_USE_MESH")
-    meshesASC.emplace_back(std::move(mesh));
+
+  meshAndThree.m_Name     = mesh;
+  meshAndThree.m_Disabled = (hint=="DONT_USE_MESH");
   }
 
 
@@ -225,10 +226,8 @@ float MdsParserBin::readFloat() {
 void MdsParserBin::readMeshAndTree() {
   const bool dontUseMesh = readDWord()!=0;
 
-  if(!dontUseMesh) {
-    std::string mesh = readStr();
-    meshesASC.emplace_back(std::move(mesh));
-    }
+  meshAndThree.m_Name     = readStr();
+  meshAndThree.m_Disabled = dontUseMesh;
   }
 
 
