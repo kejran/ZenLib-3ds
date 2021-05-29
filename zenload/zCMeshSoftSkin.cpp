@@ -105,7 +105,7 @@ void zCMeshSoftSkin::readObjectData(ZenParser& parser) {
         std::vector<int32_t> nodeList(numNodes);
         parser.readBinaryRaw(nodeList.data(), numNodes * sizeof(int32_t));
 
-        m_BBoxesByNodes.reserve(numNodes);
+        m_BBoxesByNodes.resize(numNodes);
         for(auto& i:m_BBoxesByNodes)
           i.load(parser);
 
