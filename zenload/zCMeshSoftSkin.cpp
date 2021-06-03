@@ -213,8 +213,21 @@ void zCMeshSoftSkin::packMesh(PackedSkeletalMesh& mesh) const
 
 void zCMeshSoftSkin::updateBboxTotal()
 {
-    m_BBoxTotal[0] = {FLT_MAX, FLT_MAX, FLT_MAX};
+    m_BBoxTotal[0] = { FLT_MAX,  FLT_MAX,  FLT_MAX};
     m_BBoxTotal[1] = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
+
+    {
+      ZMath::float3 min, max;
+      m_Mesh.getBoundingBox(min,max);
+
+      m_BBoxTotal[0].x = std::min(m_BBoxTotal[0].x, min.x);
+      m_BBoxTotal[0].y = std::min(m_BBoxTotal[0].y, min.y);
+      m_BBoxTotal[0].z = std::min(m_BBoxTotal[0].z, min.z);
+
+      m_BBoxTotal[1].x = std::max(m_BBoxTotal[1].x, max.x);
+      m_BBoxTotal[1].y = std::max(m_BBoxTotal[1].y, max.y);
+      m_BBoxTotal[1].z = std::max(m_BBoxTotal[1].z, max.z);
+    }
 
     for (const oBBox3d& bb : m_BBoxesByNodes)
     {
@@ -229,9 +242,6 @@ void zCMeshSoftSkin::updateBboxTotal()
         m_BBoxTotal[1].y = std::max(m_BBoxTotal[1].y, max.y);
         m_BBoxTotal[1].z = std::max(m_BBoxTotal[1].z, max.z);
     }
-
-    if(m_BBoxesByNodes.size()==0)
-      m_Mesh.getBoundingBox(m_BBoxTotal[0],m_BBoxTotal[1]);
 }
 
 void zCMeshSoftSkin::getAABBTotal(ZMath::float3& min, ZMath::float3& max) const
