@@ -208,7 +208,7 @@ namespace Daedalus
             // 6) Partikel: Visualisierung
             ZString visName_S;         //	"NAME_V0_A0.TGA/.3DS"	(Variation, Animation)
             ZString visOrientation_S;  //	"NONE, VELO"
-            int32_t visTexIsQuadPoly=0;      //	0=triMesh, 1=quadMesh
+            int32_t visTexIsQuadPoly=1;      //	0=triMesh, 1=quadMesh
             float   visTexAniFPS=0.f;
             int32_t visTexAniIsLooping=0;  //	0=oneShot, 1=looping
             // color		(nur Tex, lifeSpan-Sync)
