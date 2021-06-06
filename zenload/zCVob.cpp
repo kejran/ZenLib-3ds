@@ -344,12 +344,10 @@ static void read_zCVob_oCMOB_oCMobInter_oCMobContainer(zCVobData &info, ZenParse
   rd.readEntry("contains",    info.oCMobContainer.contains);
   }
 
-static void read_zCVob_zCVobLight(zCVobData &info, ZenParser &parser, ZenParser::FileVersion version) {
-  read_zCVob(info,parser,version);
-
-  auto&  rd = *parser.getImpl();
-  info.vobType = zCVobData::VT_zCVobLight;
-  rd.readEntry("lightPresetInUse", info.zCVobLight.lightPresetInUse);
+static void read_LightData(zCVobData &info, ZenParser &parser, ZenParser::FileVersion version) {
+  auto& rd = *parser.getImpl();
+  // lightPresetInUse or presetName
+  rd.readEntry("",                 info.zCVobLight.lightPresetInUse);
   rd.readEntry("lightType",        info.zCVobLight.lightType);
   rd.readEntry("range",            info.zCVobLight.range);
   rd.readColor("color",            info.zCVobLight.color);
@@ -415,6 +413,17 @@ static void read_zCVob_zCVobLight(zCVobData &info, ZenParser &parser, ZenParser:
     info.zCVobLight.dynamic.rangeAniScale.push_back(f);
     str = next;
     }
+  }
+
+static void read_zCVob_zCVobLight(zCVobData &info, ZenParser &parser, ZenParser::FileVersion version) {
+  read_zCVob(info,parser,version);
+  info.vobType = zCVobData::VT_zCVobLight;
+  read_LightData(info,parser,version);
+  }
+
+static void read_zCVob_zCVobLightPreset(zCVobData &info, ZenParser &parser, ZenParser::FileVersion version) {
+  info.vobType = zCVobData::VT_zCVobLightPreset;
+  read_LightData(info,parser,version);
   }
 
 static void read_zCVob_zCVobSound(zCVobData &info, ZenParser &parser, ZenParser::FileVersion version) {
@@ -602,6 +611,8 @@ static void readObjectData(zCVobData &info, ZenParser &parser,
       return read_zCVob(info,parser,version);
     case ZenParser::zCVobLight:
       return read_zCVob_zCVobLight(info,parser,version);
+    case ZenParser::zCVobLightPreset:
+      return read_zCVob_zCVobLightPreset(info,parser,version);
 
     case ZenParser::zCVobSpot:
       return read_zCVob_zCVobSpot(info,parser,version);

@@ -234,6 +234,7 @@ namespace ZenLoad
             VT_oCTouchDamage,
             VT_zCTriggerUntouch,
             VT_zCMoverControler,
+            VT_zCVobLightPreset,
         };
 
         EVobType      vobType = VT_zCVob;

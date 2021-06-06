@@ -464,6 +464,30 @@ void ZenParser::readWorld(oCWorldData& info, FileVersion version) {
     }
   }
 
+void ZenParser::readPresets(std::vector<zCVobData>& vobs, ZenParser::FileVersion version) {
+  LogInfo() << "ZEN: Reading presets...";
+
+  int numVobLightPresets = 0;
+  getImpl()->readEntry("numVobLightPresets",numVobLightPresets);
+  if(numVobLightPresets<0)
+    return;
+
+  for(int i=0; i<numVobLightPresets; ++i) {
+    ChunkHeader header;
+    if(!readChunkStart(header))
+      break;
+
+    if(header.classId==ZenClass::zCVobLightPreset) {
+      zCVobData vob;
+      zCVob::readObjectData(vob, *this, header, version);
+      vobs.emplace_back(std::move(vob));
+      readChunkEnd();
+      } else {
+      skipChunk();
+      }
+    }
+  }
+
 size_t ZenParser::readVobTree(zCVobData& vob, FileVersion version) {
   ZenParser::ChunkHeader header = {};
   readChunkStart(header);

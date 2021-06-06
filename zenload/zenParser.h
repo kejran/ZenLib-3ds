@@ -84,6 +84,7 @@ public:
     zCVobAnimate,
     zCVobLensFlare,
     zCVobLight,
+    zCVobLightPreset,
     zCVobSpot,
     zCVobStartpoint,
     zCVobSound,
@@ -160,6 +161,8 @@ public:
    * @brief reads the main oCWorld-Object, found in the level-zens
    */
   void readWorld(oCWorldData& info, FileVersion version);
+
+  void readPresets(std::vector<zCVobData>& vobs, FileVersion version);
 
   /**
    * @brief Returns the file-header

@@ -119,6 +119,7 @@ ZenLoad::ZenParser::ZenClass ZenLoad::ParserImpl::parseClassName(const char* nam
     {"zCVobAnimate:zCVob",                               ZenParser::zCVobAnimate            },
     {"zCVobLensFlare:zCVob",                             ZenParser::zCVobLensFlare          },
     {"zCVobLight:zCVob",                                 ZenParser::zCVobLight              },
+    {"zCVobLightPreset",                                 ZenParser::zCVobLightPreset        },
     {"zCVobSpot:zCVob",                                  ZenParser::zCVobSpot               },
     {"zCVobStartpoint:zCVob",                            ZenParser::zCVobStartpoint         },
     {"zCVobSound:zCVob",                                 ZenParser::zCVobSound              },
