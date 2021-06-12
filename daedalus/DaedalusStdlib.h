@@ -642,9 +642,6 @@ namespace Daedalus
             int32_t inv_roty=0;     // wieviel grad um die y achse ist das item im inv gedreht
             int32_t inv_rotz=0;     // wieviel grad um die z achse ist das item im inv gedreht
             int32_t inv_animate=0;  // soll das item in inv rotiert werden
-
-            // REGoth member, number of items
-            uint32_t amount=0;
         };
 
         struct C_Focus : Instance
