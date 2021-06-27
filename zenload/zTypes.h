@@ -391,7 +391,7 @@ namespace ZenLoad
             std::string              triggerTarget;
             bool                     orderRelevant=false;
             bool                     firstFalseIsFailure=false;
-            bool                     untriggeredCancels=false;
+            bool                     untriggerCancels=false;
             std::string              triggerTargetFailure;
             std::vector<std::string> slaveVobName;
         } zCCodeMaster;

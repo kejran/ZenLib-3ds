@@ -197,11 +197,14 @@ static void read_zCCodeMaster(zCVobData &info, ZenParser &parser, ZenParser::Fil
   rd.readEntry("orderRelevant",        info.zCCodeMaster.orderRelevant);
   rd.readEntry("firstFalseIsFailure",  info.zCCodeMaster.firstFalseIsFailure);
   rd.readEntry("triggerTargetFailure", info.zCCodeMaster.triggerTargetFailure);
-  rd.readEntry("untriggeredCancels",   info.zCCodeMaster.untriggeredCancels);
+  rd.readEntry("untriggerCancels",     info.zCCodeMaster.untriggerCancels);
   rd.readEntry("", count);
   info.zCCodeMaster.slaveVobName.resize(count);
-  for(auto& i:info.zCCodeMaster.slaveVobName)
-    rd.readEntry("slaveVobName", i);
+  for(size_t i=0; i<info.zCCodeMaster.slaveVobName.size(); ++i) {
+    char slaveVobName[64]={};
+    std::snprintf(slaveVobName,sizeof(slaveVobName),"slaveVobName%d", int(i));
+    rd.readEntry(slaveVobName, info.zCCodeMaster.slaveVobName[i]);
+    }
   }
 
 static void read_zCVob_zCTrigger(zCVobData &info, ZenParser &parser, ZenParser::FileVersion version) {
@@ -251,7 +254,7 @@ static void read_zCVob_zCTrigger_zCTriggerList(zCVobData &info, ZenParser &parse
     char triggerTarget[64]={};
     char fireDelay    [64]={};
 
-    if(version==ZenParser::FileVersion::Gothic1)
+    if(parser.getZenHeader().fileType==ZenLoad::ZenParser::FT_ASCII)
       std::snprintf(triggerTarget,sizeof(triggerTarget),"triggerTarget%d",int(i)); else
       std::snprintf(triggerTarget,sizeof(triggerTarget),"slaveVobName%d", int(i));
 
