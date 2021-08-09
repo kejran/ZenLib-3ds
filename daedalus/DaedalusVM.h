@@ -129,6 +129,7 @@ class DaedalusVM {
     std::function<void(DaedalusVM&)>                             m_OnUnsatisfiedCall;
 
     InstancePtr                                                  m_Instance;
+    PARSymbol*                                                   m_InstanceSym = nullptr;
 
     size_t                                                       m_SelfId   = size_t(-1);
     size_t                                                       m_OtherId  = size_t(-1);

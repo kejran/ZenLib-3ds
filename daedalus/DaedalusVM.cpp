@@ -530,7 +530,8 @@ void DaedalusVM::initializeInstance(GEngineClasses::Instance &instance, size_t s
 
 void DaedalusVM::setCurrentInstance(size_t symIdx) {
   auto& sym = m_DATFile.getSymbolByIndex(symIdx);
-  m_Instance = sym.instance;
+  m_InstanceSym = &sym;
+  m_Instance    = sym.instance;
   }
 
 GEngineClasses::Instance *DaedalusVM::getCurrentInstanceDataPtr() {
