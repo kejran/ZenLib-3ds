@@ -52,6 +52,23 @@ namespace ZenLoad
         NSTATE_SINGLE_KEYS,
     };
 
+    enum PosLerpType : uint32_t
+    {
+        CURVE  = 0,
+        LINEAR = 1
+    };
+
+    enum SpeedType : uint32_t
+    {
+        SEG_CONST          = 0,
+        SLOW_START_END     = 1,
+        SLOW_START         = 2,
+        SLOW_END           = 3,
+        SEG_SLOW_START_END = 4,
+        SEG_SLOW_START     = 5,
+        SEG_SLOW_END       = 6,
+    };
+
     enum MoverMessage : uint8_t
     {
         GOTO_KEY_FIXED_DIRECTLY = 0,
@@ -455,8 +472,8 @@ namespace ZenLoad
             bool          autoLinkEnable=false;
             bool          autoRotate=false;
             float         moveSpeed=0;
-            uint32_t      posLerpType=0;
-            uint32_t      speedType=0;
+            PosLerpType   posLerpType=PosLerpType::CURVE;
+            SpeedType     speedType=SpeedType::SEG_CONST;
             std::vector<zCModelAniSample> keyframes;
             std::string   sfxOpenStart;
             std::string   sfxOpenEnd;

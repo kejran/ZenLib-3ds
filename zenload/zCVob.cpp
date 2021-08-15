@@ -491,8 +491,8 @@ static void read_zCVob_zCTrigger_zCMover(zCVobData &info, ZenParser &parser, Zen
   rd.readEntry("numKeyframes", numKeyframes);
   if(numKeyframes>0) {
     rd.readEntry("moveSpeed",     info.zCMover.moveSpeed);
-    rd.readEntry("posLerpType",   info.zCMover.posLerpType);
-    rd.readEntry("speedType",     info.zCMover.speedType);
+    rd.readEntry("posLerpType",   reinterpret_cast<uint32_t&>(info.zCMover.posLerpType));
+    rd.readEntry("speedType",     reinterpret_cast<uint32_t&>(info.zCMover.speedType));
     std::vector<zCModelAniSample> fr(numKeyframes);
     rd.readEntry("keyframes", &fr[0],sizeof(zCModelAniSample)*numKeyframes);
     info.zCMover.keyframes = std::move(fr);
