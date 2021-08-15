@@ -83,7 +83,7 @@ static void read_zCVob(zCVobData &info, ZenParser &parser, ZenParser::FileVersio
     info.staticVob             = pd.bitfield.staticVob;
     info.dynamicShadow         = pd.bitfield.dynShadow;
     info.physicsEnabled        = pd.bitfield.physicsEnabled;
-    info.visualAniMode         = pd.bitfield.visualAniMode;
+    info.visualAniMode         = AnimMode(pd.bitfield.visualAniMode);
     info.zBias                 = pd.bitfield.zbias;
     info.isAmbient             = pd.bitfield.bAmbient;
     info.visualAniModeStrength = pd.visualAniStrength;
@@ -120,7 +120,7 @@ static void read_zCVob(zCVobData &info, ZenParser &parser, ZenParser::FileVersio
       rd.readEntry("dynShadow", info.dynamicShadow);
       }
 
-    rd.readEntry("visualAniMode", info.visualAniMode);
+    rd.readEntry("visualAniMode", reinterpret_cast<uint8_t&>(info.visualAniMode));
 
     if(version==ZenParser::FileVersion::Gothic2) {
       rd.readEntry("visualAniModeStrength", info.visualAniModeStrength);

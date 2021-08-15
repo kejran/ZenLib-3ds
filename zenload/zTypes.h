@@ -60,6 +60,13 @@ namespace ZenLoad
         GOTO_KEY_PREV,
     };
 
+    enum AnimMode : uint8_t
+    {
+        NONE  = 0,
+        WIND  = 1,
+        WIND2 = 2
+    };
+
     using SectorIndex = uint32_t;
     enum : uint32_t { SECTOR_INDEX_INVALID = uint32_t(-1) };
 
@@ -250,7 +257,7 @@ namespace ZenLoad
         std::string   visual;
         bool          showVisual = false;
         uint8_t       visualCamAlign = 0;
-        uint8_t       visualAniMode = 0;
+        AnimMode      visualAniMode = AnimMode::NONE;
         float         visualAniModeStrength = 0;
         float         vobFarClipScale= 0;
         bool          cdStatic  = false;
