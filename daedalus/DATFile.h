@@ -418,7 +418,7 @@ class DATFile {
     const PARStackOpCode &getStackOpCode(size_t pc);
     size_t         addSymbol();
 
-    const PARSymTable& getSymTable() { return m_SymTable; }
+    const PARSymTable& getSymTable() const { return m_SymTable; }
 
     template<class T,class M>
     void registerMember(const char* name,T M::* field, bool checkIfExists){

@@ -52,7 +52,8 @@ class DaedalusVM {
     void initializeInstance(GEngineClasses::Instance& instance, size_t symIdx, EInstanceClass classIdx);
 
     GEngineClasses::Instance*     getCurrentInstanceDataPtr();
-    DATFile&                      getDATFile() { return m_DATFile; }
+    DATFile&                      getDATFile()       { return m_DATFile; }
+    const DATFile&                getDATFile() const { return m_DATFile; }
     std::vector<std::string>      getCallStack();
     const std::string&            currentCall();
 
