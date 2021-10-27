@@ -1,48 +1,7 @@
 #pragma once
+
 #include <functional>
 #include <string>
-#include <vector>
-#include "zTypes.h"
-#include "utils/mathlib.h"
-
-namespace VDFS
-{
-    class FileIndex;
-}
-
-namespace ZenLoad
-{
-    class ZenParser;
-
-    enum
-    {
-        ANIEVENT_MAXSTRING = 4
-    };
-
-    struct zCModelAniHeader
-    {
-        uint16_t version;
-
-        std::string aniName;
-
-        uint32_t layer;
-        uint32_t numFrames;
-        uint32_t numNodes;
-        float fpsRate;
-        float fpsRateSource;
-        float samplePosRangeMin;
-        float samplePosScaler;
-
-        ZMath::float3 aniBBox[2];
-
-        std::string nextAniName;
-
-        uint32_t nodeChecksum;
-    };
-}  // namespace ZenLoad
-
-// FIXME: COMPATIBILITY FOR MASTER - REMOVE LATER!
-
 #include <vector>
 #include "zTypes.h"
 #include "utils/mathlib.h"
@@ -73,6 +32,27 @@ namespace ZenLoad
             float prob;
 
             void load(ZenParser& parser);
+        };
+
+        struct zCModelAniHeader
+        {
+            uint16_t version = 0;
+
+            std::string aniName;
+
+            uint32_t layer = 0;
+            uint32_t numFrames = 0;
+            uint32_t numNodes = 0;
+            float fpsRate = 0;
+            float fpsRateSource = 0;
+            float samplePosRangeMin = 0;
+            float samplePosScaler = 0;
+
+            ZMath::float3 aniBBox[2] = {};
+
+            std::string nextAniName;
+
+            uint32_t nodeChecksum = 0;
         };
 
         struct ModelAniHeader
