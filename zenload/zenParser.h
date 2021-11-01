@@ -234,11 +234,6 @@ public:
   bool readBoolASCII();
 
   /**
-     * @brief returns whether the given string is a number
-     */
-  bool isNumber(const std::string& expr);
-
-  /**
      * @brief returns the current implementatio
      */
   ParserImpl* getImpl() { return m_pParserImpl; }
