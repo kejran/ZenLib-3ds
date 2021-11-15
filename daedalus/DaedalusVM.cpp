@@ -186,12 +186,20 @@ void DaedalusVM::eval(size_t PC) {
       case EParOp_Ret:
         return;
       case EParOp_Call: {
+        std::function<void(DaedalusVM&)>* f=nullptr;
+        if(size_t(op.symbol)<m_InternalsByIndex.size()){
+          f = &m_InternalsByIndex[size_t(op.address)];
+          }
+
         auto currentInstance = m_Instance;
 
-        {
-        CallStackFrame frame(*this, op.address, CallStackFrame::Address);
-        eval(size_t(op.address));
-        }
+        if(f!=nullptr && *f) {
+          CallStackFrame frame(*this, op.address, CallStackFrame::Address);
+          (*f)(*this);
+          } else {
+          CallStackFrame frame(*this, op.address, CallStackFrame::Address);
+          eval(size_t(op.address));
+          }
 
         m_Instance = currentInstance;
         break;
@@ -286,6 +294,15 @@ void DaedalusVM::registerExternalFunction(const char* symName, const std::functi
     if(m_ExternalsByIndex.size()<=s)
       m_ExternalsByIndex.resize(s+1);
     m_ExternalsByIndex[s] = fn;
+    }
+  }
+
+void DaedalusVM::registerInternalFunction(const char* symName, const std::function<void (DaedalusVM&)>& fn) {
+  if(m_DATFile.hasSymbolName(symName)) {
+    auto& s = m_DATFile.getSymbolByName(symName);
+    if(m_InternalsByIndex.size()<=s.address)
+      m_InternalsByIndex.resize(s.address+1);
+    m_InternalsByIndex[s.address] = fn;
     }
   }
 

@@ -19,6 +19,7 @@ class DaedalusVM {
     int32_t runFunctionBySymIndex(size_t symIdx);
 
     void registerExternalFunction(const char *symName, const std::function<void(DaedalusVM&)>& fn);
+    void registerInternalFunction(const char *symName, const std::function<void(DaedalusVM&)>& fn);
     void registerUnsatisfiedLink (const std::function<void(DaedalusVM&)> &fn);
 
     void pushInt(uint32_t value);
@@ -127,6 +128,7 @@ class DaedalusVM {
     // contains linked list of stack frames
     CallStackFrame*                                              m_CallStack=nullptr;
     std::vector<std::function<void(DaedalusVM&)>>                m_ExternalsByIndex;
+    std::vector<std::function<void(DaedalusVM&)>>                m_InternalsByIndex;
     std::function<void(DaedalusVM&)>                             m_OnUnsatisfiedCall;
 
     InstancePtr                                                  m_Instance;
