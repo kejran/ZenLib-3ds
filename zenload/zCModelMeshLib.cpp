@@ -54,8 +54,8 @@ zCModelMeshLib::zCModelMeshLib(const std::string& fileName, const VDFS::FileInde
 */
 void zCModelMeshLib::loadMDM(ZenParser& parser)
 {
-    // Information about the whole file we are reading here
-    // BinaryFileInfo fileInfo;
+    if(parser.getRamainBytes()==0)
+      return;
 
     // Information about a single chunk
     BinaryChunkInfo chunkInfo;
@@ -129,8 +129,8 @@ void zCModelMeshLib::loadMDM(ZenParser& parser)
 */
 void zCModelMeshLib::loadMDH(ZenParser& parser)
 {
-    // Information about the whole file we are reading here
-    // BinaryFileInfo fileInfo;
+    if(parser.getRamainBytes()==0)
+      return;
 
     // Information about a single chunk
     BinaryChunkInfo chunkInfo;
@@ -139,7 +139,7 @@ void zCModelMeshLib::loadMDH(ZenParser& parser)
     // Each chunk starts with a header (BinaryChunkInfo) which gives information
     // about what to do and how long the chunk is
     bool doneReadingChunks = false;
-    while (!doneReadingChunks)
+    while(!doneReadingChunks)
     {
         // Read chunk header and calculate position of next chunk
         parser.readStructure(chunkInfo);
