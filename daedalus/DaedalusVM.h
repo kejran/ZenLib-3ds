@@ -20,6 +20,7 @@ class DaedalusVM {
 
     void registerExternalFunction(const char *symName, const std::function<void(DaedalusVM&)>& fn);
     void registerInternalFunction(const char *symName, const std::function<void(DaedalusVM&)>& fn);
+    void registerInternalFunction(size_t addr,         const std::function<void(DaedalusVM&)>& fn);
     void registerUnsatisfiedLink (const std::function<void(DaedalusVM&)> &fn);
 
     void pushInt(uint32_t value);
@@ -62,6 +63,8 @@ class DaedalusVM {
     PARSymbol&                    globalOther();
     PARSymbol&                    globalVictim();
     PARSymbol&                    globalItem();
+
+    void                          disAsm(size_t symIdx);
 
   private:
     template <typename T = int32_t>
@@ -128,7 +131,7 @@ class DaedalusVM {
     // contains linked list of stack frames
     CallStackFrame*                                              m_CallStack=nullptr;
     std::vector<std::function<void(DaedalusVM&)>>                m_ExternalsByIndex;
-    std::vector<std::function<void(DaedalusVM&)>>                m_InternalsByIndex;
+    std::unordered_map<size_t,std::function<void(DaedalusVM&)>>  m_InternalsByIndex;
     std::function<void(DaedalusVM&)>                             m_OnUnsatisfiedCall;
 
     InstancePtr                                                  m_Instance;
