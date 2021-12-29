@@ -69,6 +69,10 @@ MdsParserTxt::TokType MdsParserTxt::nextTok(std::string& buf) {
         const char cur = zen.readChar();
         if(cur=='\"')
           break;
+        if(cur=='\r' || cur=='\n') {
+          // Invalid syntax
+          break; // G1 wolf.mds is missing closing " - need to workaround it
+          }
         buf.push_back(cur);
         }
       return TokType::TK_String;
@@ -132,6 +136,10 @@ void MdsParserTxt::endArgs() {
     const TokType tt = nextTok(buf);
     if(tt==TK_BracketR)
       return;
+    if(tt==TK_End) {
+      zen.setSeek(zen.getSeek()-1); // unget
+      break;
+      }
     }
   }
 
@@ -140,7 +148,7 @@ void MdsParserTxt::implReadItem(MdsParserTxt::TokType dest) {
     const TokType tt = nextTok(buf);
     if(tt==dest)
       return;
-    if(tt==TK_BracketR){
+    if(tt==TK_BracketR || tt==TK_End) {
       zen.setSeek(zen.getSeek()-1); // unget
       break;
       }
