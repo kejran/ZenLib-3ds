@@ -317,12 +317,7 @@ void zCMesh::readObjectData(ZenParser& parser, const std::vector<size_t>& skipPo
                     indicesSize = sizeof(polyData2<uint32_t, PolyFlags1_08k>::IndexPacked);
                 }
 
-                // Preallocate some memory for the triangles
-                // Note: There will be some more triangles, since not all polys have 3 vertices. Times 2 could be a little bit too hugh, though.
-                // m_Triangles.reserve(numPolys * 2);
-
                 // Iterate throuh every poly
-                m_Triangles.reserve(numPolys);
                 m_TriangleMaterialIndices.reserve(numPolys);
                 m_TriangleLightmapIndices.reserve(numPolys);
 
@@ -396,7 +391,7 @@ void zCMesh::readObjectData(ZenParser& parser, const std::vector<size_t>& skipPo
                                     memcpy(triangle.vertices, vx, sizeof(vx));
 
                                     // Save triangle
-                                    m_Triangles.push_back(triangle);
+                                    // m_Triangles.push_back(triangle);
                                 }
                                 else
                                 {
@@ -434,7 +429,7 @@ void zCMesh::readObjectData(ZenParser& parser, const std::vector<size_t>& skipPo
                                         }
 
                                         // Start filling in the flags
-                                        m_Triangles.push_back(triangle);
+                                        // m_Triangles.push_back(triangle);
                                     }
                                 }
                             }
