@@ -224,7 +224,29 @@ void zCModelMeshLib::loadMDL(ZenParser& parser)
 void zCModelMeshLib::packMesh(PackedSkeletalMesh& mesh) const
 {
     for (const auto& m : m_Meshes)
-        m.packMesh(mesh);
+    {
+        PackedSkeletalMesh internalMesh;
+        m.packMesh(internalMesh);
+
+        size_t vertexBase = mesh.vertices.size();
+        mesh.vertices.insert(
+            mesh.vertices.end(),
+            internalMesh.vertices.begin(),
+            internalMesh.vertices.end());
+
+        size_t indexBase = mesh.indices.size();
+        for (auto index : internalMesh.indices)
+        {
+            mesh.indices.push_back(index + vertexBase);
+        }
+
+        for (const auto& s : internalMesh.subMeshes)
+        {
+            PackedSkeletalMesh::SubMesh submesh(s);
+            submesh.indexOffset += indexBase;
+            mesh.subMeshes.push_back(submesh);
+        }
+    }
 
     mesh.bbox[0] = {FLT_MAX, FLT_MAX, FLT_MAX};
     mesh.bbox[1] = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
