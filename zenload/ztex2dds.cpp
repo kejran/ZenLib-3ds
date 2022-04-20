@@ -9,7 +9,6 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <math.h>
-#include <squish.h>
 #include <string.h>
 #include "utils/logger.h"
 
@@ -467,51 +466,6 @@ namespace ZenLoad
         memcpy(&desc, &ddsData[sizeof(uint32_t)], sizeof(DDSURFACEDESC2));
 
         return desc;
-    }
-
-    /**
-	 * @brief Convert dds to RGBA8
-	 */
-    void convertDDSToRGBA8(const std::vector<uint8_t>& ddsData, std::vector<uint8_t>& rgba8Data, int mip)
-    {
-        size_t seek = 0;
-        seek += sizeof(uint32_t);  // Skip magic number
-        const DDSURFACEDESC2* desc = reinterpret_cast<const DDSURFACEDESC2*>(&ddsData[seek]);
-        seek += sizeof(DDSURFACEDESC2);
-
-        mip = std::min((int)mip, (int)desc->dwMipMapCount);
-
-        DXTLevel dxtLevel = getDXTLevelFromDDS(ddsData);
-        int squishDxtLevel;
-        switch (dxtLevel)
-        {
-            case DXTLevel::DXT1:
-                squishDxtLevel = squish::kDxt1;
-                break;
-
-            case DXTLevel::DXT3:
-                squishDxtLevel = squish::kDxt3;
-                break;
-
-            case DXTLevel::DXT5:
-                squishDxtLevel = squish::kDxt5;
-                break;
-
-            case DXTLevel::Unknown:
-                assert(false);
-                return;
-        }
-
-        for (int i = 0; i < mip; i++)
-        {
-            seek += ComputeSizeInBytes(i, desc->dwWidth, desc->dwHeight, squishDxtLevel == squish::kDxt1);
-        }
-
-        int px = (int)std::max(1.0f, (float)floor(desc->dwWidth / pow(2.0f, mip)));
-        int py = (int)std::max(1.0f, (float)floor(desc->dwHeight / pow(2.0f, mip)));
-        rgba8Data.resize(px * py * sizeof(uint32_t));
-
-        squish::DecompressImage(rgba8Data.data(), px, py, &ddsData[seek], squishDxtLevel);
     }
 }  // namespace ZenLoad
 /* THE END */
