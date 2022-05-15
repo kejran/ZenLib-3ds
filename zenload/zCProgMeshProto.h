@@ -88,8 +88,10 @@ namespace ZenLoad
         /**
 		 * @return BBox min/max
 		 */
-        ZMath::float3 getBBoxMin() { return m_BBMin; }
-        ZMath::float3 getBBoxMax() { return m_BBMax; }
+        ZMath::float3 getBBoxMin() const { return m_BBMin; }
+        ZMath::float3 getBBoxMax() const { return m_BBMax; }
+
+        bool          isAlphaTested() const { return m_IsUsingAlphaTest!=0; }
 
     private:
         /**
