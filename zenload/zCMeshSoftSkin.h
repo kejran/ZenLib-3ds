@@ -51,6 +51,8 @@ namespace ZenLoad
 		 */
         void getAABBTotal(ZMath::float3& min, ZMath::float3& max) const;
 
+        const uint8_t* getVertexWeightStream() const { return m_VertexWeightStream.data(); }
+
     private:
         void updateBboxTotal();
 
