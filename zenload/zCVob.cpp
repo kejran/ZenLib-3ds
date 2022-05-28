@@ -441,7 +441,7 @@ static void read_zCVob_zCVobSound(zCVobData &info, ZenParser &parser, ZenParser:
   auto& rd = *parser.getImpl();
   info.vobType = zCVobData::VT_zCVobSound;
   rd.readEntry("sndVolume",       info.zCVobSound.sndVolume);
-  rd.readEntry("sndMode",         reinterpret_cast<uint32_t&>(info.zCVobSound.sndType));
+  rd.readEntry("sndMode",         reinterpret_cast<uint32_t&>(info.zCVobSound.sndMode));
   rd.readEntry("sndRandDelay",    info.zCVobSound.sndRandDelay);
   rd.readEntry("sndRandDelayVar", info.zCVobSound.sndRandDelayVar);
   rd.readEntry("sndStartOn",      info.zCVobSound.sndStartOn);
