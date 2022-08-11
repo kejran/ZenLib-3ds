@@ -3,4 +3,4 @@
 	url = https://github.com/tito/libsquish.git
 [submodule "lib/physfs"]
 	path = lib/physfs
-  url = https://github.com/physfs-mirror/PhysicsFS.git
+	url = https://github.com/kejran/physfs-3ds-light.git
